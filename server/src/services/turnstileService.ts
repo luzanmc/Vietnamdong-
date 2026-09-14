@@ -11,6 +11,6 @@ export async function verifyTurnstile(token: string | undefined, remoteIp: strin
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ secret: env.turnstile.secretKey, response: token, remoteip: remoteIp }),
   });
-  const data = await res.json();
+  const data = (await res.json()) as { success?: boolean };
   return Boolean(data.success);
 }

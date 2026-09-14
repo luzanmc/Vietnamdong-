@@ -93,13 +93,13 @@ authRouter.get('/discord/callback', async (req, res, next) => {
         redirect_uri: env.discord.redirectUri ?? '',
       }),
     });
-    const tokenData = await tokenRes.json();
+    const tokenData = (await tokenRes.json()) as { access_token?: string };
     if (!tokenData.access_token) return res.redirect(`${env.clientUrl}/login?error=oauth_failed`);
 
     const profileRes = await fetch('https://discord.com/api/users/@me', {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
-    const profile = await profileRes.json();
+    const profile = (await profileRes.json()) as { id: string; username: string; avatar: string | null };
 
     const avatarUrl = profile.avatar ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png` : null;
     const user = await upsertUserFromDiscord({ id: profile.id, username: profile.username, avatar_url: avatarUrl });

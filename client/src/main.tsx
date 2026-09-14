@@ -7,11 +7,9 @@ import './index.css';
 const rootEl = document.getElementById('root');
 if (!rootEl) throw new Error('Root element #root not found');
 
-const basename = (import.meta.env.VITE_BASE_PATH || '').replace(/\/$/, '') || undefined;
-
 ReactDOM.createRoot(rootEl).render(
   <React.StrictMode>
-    <BrowserRouter basename={basename}>
+    <BrowserRouter>
       <App />
     </BrowserRouter>
   </React.StrictMode>

@@ -1,6 +1,6 @@
 import { env } from '../config/env.js';
 import { HttpError } from '../utils/httpError.js';
-import type { Card2kBuyResult } from '../types/index.js';
+import type { Card2kBuyResult, Card2kTransactionStatus } from '../types/index.js';
 
 const BASE_URL = env.cardswap.apiBase || (env.nodeEnv === 'production' ? 'https://card2k.com' : 'https://sandbox.card2k.com');
 
@@ -15,11 +15,19 @@ export async function buyCard({ telco, denomination }: { telco: string; denomina
 
   if (!res.ok) throw new HttpError(502, 'Card2K báo lỗi, đơn sẽ chờ admin xử lý thủ công');
 
-  const data = await res.json();
+  const data = (await res.json()) as {
+    request_id?: string;
+    trans_id?: string;
+    status?: Card2kTransactionStatus;
+    card_pin?: string;
+    pin?: string;
+    card_serial?: string;
+    serial?: string;
+  };
   return {
     requestId: data.request_id,
     transId: data.trans_id,
-    status: data.status,
+    status: data.status ?? 'failed',
     cardPin: data.card_pin ?? data.pin,
     cardSerial: data.card_serial ?? data.serial,
   };
