@@ -138,6 +138,16 @@ html:not(.dark) .vnd-landing-page,
   gap: 9px;
 }
 
+.vnd-landing-page .desktop-auth {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.vnd-landing-page .mobile-menu-auth {
+  display: none;
+}
+
 .vnd-landing-page .btn {
   display: inline-flex;
   align-items: center;
@@ -1435,6 +1445,26 @@ html:not(.dark) .vnd-landing-page .qa.open .tg,
     padding: 12px 0;
     border-bottom: 1px solid var(--line);
   }
+  .vnd-landing-page .desktop-auth {
+    display: none !important;
+  }
+  .vnd-landing-page .mobile-menu-auth {
+    display: block;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+  .vnd-landing-page .mobile-auth-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .vnd-landing-page .mobile-auth-btn {
+    width: 100%;
+    min-height: 42px;
+    text-align: center;
+    justify-content: center;
+  }
   .vnd-landing-page .menu-btn {
     display: inline-flex;
   }
@@ -1480,10 +1510,15 @@ html:not(.dark) .vnd-landing-page .qa.open .tg,
   .vnd-landing-page .brand-sub {
     display: none;
   }
-  .vnd-landing-page .top-actions .btn {
-    padding: 0 13px;
-    font-size: 13px;
+  .vnd-landing-page .top-actions {
+    gap: 8px;
+  }
+  .vnd-landing-page .top-actions .theme-toggle-btn,
+  .vnd-landing-page .top-actions .menu-btn {
+    width: 38px;
+    height: 38px;
     min-height: 38px;
+    padding: 0;
   }
   .vnd-landing-page .top-actions .login {
     display: none;

@@ -183,6 +183,46 @@ export default function Landing() {
           <a href="#bang-xu" onClick={() => setMenuOpen(false)}>Bảng Xu</a>
           <a href="#danh-gia" onClick={() => setMenuOpen(false)}>Đánh giá</a>
           <a href="#faq" onClick={() => setMenuOpen(false)}>FAQ</a>
+
+          {/* Auth links inside mobile dropdown menu */}
+          <div className="mobile-menu-auth">
+            {me ? (
+              <Link
+                to={dashboardLink}
+                onClick={() => {
+                  playClickSound();
+                  setMenuOpen(false);
+                }}
+                className="btn btn-primary mobile-auth-btn"
+              >
+                <i data-lucide="layout-dashboard" />
+                <span>{me.username || 'Bảng điều khiển'}</span>
+              </Link>
+            ) : (
+              <div className="mobile-auth-grid">
+                <Link
+                  to={loginLink}
+                  onClick={() => {
+                    playClickSound();
+                    setMenuOpen(false);
+                  }}
+                  className="btn login mobile-auth-btn"
+                >
+                  Đăng nhập
+                </Link>
+                <Link
+                  to={registerLink}
+                  onClick={() => {
+                    playClickSound();
+                    setMenuOpen(false);
+                  }}
+                  className="btn btn-primary mobile-auth-btn"
+                >
+                  Đăng ký miễn phí
+                </Link>
+              </div>
+            )}
+          </div>
         </nav>
 
         <div className="top-actions">
@@ -199,21 +239,24 @@ export default function Landing() {
             <i className={`bi ${theme === 'dark' ? 'bi-sun-fill text-amber-400' : 'bi-moon-stars-fill text-indigo-400'}`} />
           </button>
 
-          {me ? (
-            <Link to={dashboardLink} onClick={playClickSound} className="btn btn-primary">
-              <i data-lucide="layout-dashboard" />
-              <span>{me.username || 'Bảng điều khiển'}</span>
-            </Link>
-          ) : (
-            <>
-              <Link to={loginLink} onClick={playClickSound} className="btn login">
-                Đăng nhập
+          {/* Desktop Only Auth Buttons */}
+          <div className="desktop-auth">
+            {me ? (
+              <Link to={dashboardLink} onClick={playClickSound} className="btn btn-primary">
+                <i data-lucide="layout-dashboard" />
+                <span>{me.username || 'Bảng điều khiển'}</span>
               </Link>
-              <Link to={registerLink} onClick={playClickSound} className="btn btn-primary">
-                Đăng ký miễn phí
-              </Link>
-            </>
-          )}
+            ) : (
+              <>
+                <Link to={loginLink} onClick={playClickSound} className="btn login">
+                  Đăng nhập
+                </Link>
+                <Link to={registerLink} onClick={playClickSound} className="btn btn-primary">
+                  Đăng ký miễn phí
+                </Link>
+              </>
+            )}
+          </div>
 
           <button
             className="btn menu-btn"
