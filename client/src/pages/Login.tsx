@@ -214,8 +214,8 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center px-4 py-10 relative overflow-hidden">
       {/* Background ambient orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo/15 rounded-full blur-3xl -z-0 pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan/10 rounded-full blur-3xl -z-0 pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo/15 rounded-full blur-3xl -z-10 pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan/10 rounded-full blur-3xl -z-10 pointer-events-none" />
 
       <button
         onClick={() => {

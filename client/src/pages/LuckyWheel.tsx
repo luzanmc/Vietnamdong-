@@ -127,7 +127,7 @@ export default function LuckyWheel() {
       {/* Wheel Stage */}
       <div className="relative w-80 h-80 sm:w-96 sm:h-96 mx-auto mb-8 flex items-center justify-center">
         {/* Glowing backdrop halo */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-indigo/25 via-amber/20 to-cyan/25 blur-2xl -z-0 pointer-events-none animate-pulse-soft" />
+        <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-indigo/25 via-amber/20 to-cyan/25 blur-2xl -z-10 pointer-events-none animate-pulse-soft" />
 
         {/* Pointer Pin (at the top, pointing down into the rim) */}
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center">
@@ -238,7 +238,7 @@ export default function LuckyWheel() {
 
         {/* Center Metallic Spin Hub */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-          <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-surface to-surface2 border-4 border-amber shadow-2xl flex flex-col items-center justify-center">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-surface to-surface2 border-4 border-amber shadow-2xl flex flex-col items-center justify-center shrink-0">
             <CurrencyIcon size={24} />
             <span className="text-[10px] font-mono font-bold text-amber mt-0.5">SPIN</span>
           </div>
@@ -288,7 +288,7 @@ export default function LuckyWheel() {
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/70 backdrop-blur-md animate-slide-in">
           <div className="glass-panel rounded-3xl p-6 sm:p-8 max-w-sm w-full border border-amber/40 shadow-2xl text-center relative overflow-hidden">
             {/* Ambient gold glow */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-amber/20 rounded-full blur-2xl -z-0 pointer-events-none" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-amber/20 rounded-full blur-2xl -z-10 pointer-events-none" />
 
             <div className="relative z-10">
               <div className="w-16 h-16 mx-auto rounded-2xl bg-amber/20 border border-amber/40 flex items-center justify-center mb-4 animate-bounce-subtle">

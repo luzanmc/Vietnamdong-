@@ -99,8 +99,8 @@ export default function Dashboard() {
       {/* Hero Banner with Cosmic Glow */}
       <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-line/80 bg-gradient-to-br from-surface via-surface2 to-surface shadow-2xl">
         {/* Glow orb decorations */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-indigo/15 rounded-full blur-3xl -z-0 pointer-events-none" />
-        <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-cyan/10 rounded-full blur-3xl -z-0 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-80 h-80 bg-indigo/15 rounded-full blur-3xl -z-10 pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-cyan/10 rounded-full blur-3xl -z-10 pointer-events-none" />
 
         <div className="relative z-10">
           <div className="flex flex-wrap items-center gap-2 mb-3">

@@ -20,14 +20,19 @@ export default function BackgroundMusicPlayer() {
   if (!musicUrl) return null;
 
   return (
-    <div className="fixed bottom-5 right-5 z-40">
+    <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-40">
       <audio ref={audioRef} src={musicUrl} loop />
       <button
         onClick={toggle}
         aria-label={playing ? 'Tắt nhạc nền' : 'Bật nhạc nền'}
-        className="w-11 h-11 rounded-full bg-indigo text-white shadow-lg flex items-center justify-center hover:brightness-110 transition"
+        title={playing ? 'Tắt nhạc nền' : 'Bật nhạc nền'}
+        className={`w-11 h-11 rounded-full text-white shadow-xl flex items-center justify-center transition btn-press border border-white/20 ${
+          playing
+            ? 'bg-gradient-to-tr from-indigo to-cyan shadow-[0_0_20px_rgba(108,99,245,0.4)] animate-pulse-soft'
+            : 'bg-surface2/90 text-muted hover:text-ink hover:bg-surface2'
+        }`}
       >
-        <i className={`bi ${playing ? 'bi-volume-up-fill' : 'bi-volume-mute-fill'}`} />
+        <i className={`bi text-base ${playing ? 'bi-music-note-beamed text-white' : 'bi-music-note text-muted'}`} />
       </button>
     </div>
   );

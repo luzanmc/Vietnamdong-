@@ -145,7 +145,7 @@ function NavLinks({ onNavigate, isAdmin }: { onNavigate?: () => void; isAdmin: b
                   className={({ isActive }) =>
                     `flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-all group ${
                       isActive
-                        ? 'text-white bg-indigo/15 border border-indigo/30 shadow-[0_0_15px_rgba(108,99,245,0.18)]'
+                        ? 'text-indigo dark:text-cyan bg-indigo/10 dark:bg-indigo/25 border border-indigo/30 dark:border-indigo/40 shadow-sm font-semibold'
                         : 'text-muted hover:text-ink hover:bg-surface2/80 hover:translate-x-0.5'
                     }`
                   }
@@ -199,34 +199,34 @@ export default function Shell() {
   return (
     <div className="min-h-screen bg-bg flex flex-col">
       {/* Header */}
-      <header className="border-b border-line sticky top-0 z-30 bg-bg/85 backdrop-blur-md">
-        <div className="max-w-[1440px] mx-auto flex items-center justify-between px-3 sm:px-6 h-15">
+      <header className="border-b border-line sticky top-0 z-30 bg-bg/90 backdrop-blur-md">
+        <div className="max-w-[1440px] mx-auto flex items-center justify-between px-3 sm:px-6 h-16 gap-2">
           {/* Logo & Brand */}
           <Link
             to="/dashboard"
             onClick={playClickSound}
-            className="flex items-center gap-2.5 group cursor-pointer"
+            className="flex items-center gap-2.5 group cursor-pointer shrink-0"
           >
-            <div className="relative">
+            <div className="relative shrink-0">
               <img
                 src="/logo-mark.png"
                 alt="VietnamDong"
                 className="w-8 h-8 shrink-0 transition-transform group-hover:scale-105"
               />
-              <div className="absolute inset-0 rounded-full bg-indigo/20 blur-sm -z-10 group-hover:bg-indigo/40 transition" />
+              <div className="absolute inset-0 rounded-full bg-indigo/25 blur-sm -z-10 group-hover:bg-indigo/40 transition" />
             </div>
             <div className="flex flex-col">
-              <span className="font-display font-bold text-base tracking-tight gradient-text-indigo leading-none">
+              <span className="font-display font-bold text-sm sm:text-base tracking-tight gradient-text-indigo leading-none">
                 VietnamDong
               </span>
-              <span className="text-[9px] font-mono text-muted uppercase tracking-widest leading-none mt-0.5">
+              <span className="text-[9px] font-mono text-muted uppercase tracking-widest leading-none mt-0.5 hidden xs:inline">
                 VDX Rewards
               </span>
             </div>
           </Link>
 
           {/* User Status, Balance & Quick Actions */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {me && (
               <>
                 {/* Quick Balance Pill */}
@@ -234,14 +234,14 @@ export default function Shell() {
                   to="/wallet"
                   onClick={playClickSound}
                   title="Xem số dư & Rút tiền"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface2/90 border border-line/80 hover:border-amber/50 hover:shadow-[0_0_15px_rgba(245,165,36,0.15)] transition btn-press group"
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-surface2/90 border border-line/80 hover:border-amber/50 hover:shadow-[0_0_15px_rgba(245,165,36,0.15)] transition btn-press group shrink-0"
                 >
-                  <CurrencyIcon size={18} />
+                  <CurrencyIcon size={16} />
                   <span className="font-mono text-xs sm:text-sm font-bold text-ink">
                     <AnimatedNumber value={me.balance_nova} />
                   </span>
                   <span className="text-[10px] font-bold text-amber hidden xs:inline">VDX</span>
-                  <i className="bi bi-plus-circle-fill text-indigo text-xs ml-0.5 group-hover:scale-110 transition-transform" />
+                  <i className="bi bi-plus-circle-fill text-indigo text-xs ml-0.5 group-hover:scale-110 transition-transform hidden sm:inline" />
                 </Link>
 
                 {/* Streak Badge */}
@@ -249,7 +249,7 @@ export default function Shell() {
                   to="/daily-reward"
                   onClick={playClickSound}
                   title="Chuỗi điểm danh"
-                  className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-rose/10 border border-rose/30 text-rose text-xs font-semibold hover:bg-rose/20 transition btn-press"
+                  className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-rose/10 border border-rose/30 text-rose text-xs font-semibold hover:bg-rose/20 transition btn-press shrink-0"
                 >
                   <i className="bi bi-fire text-rose text-sm animate-pulse-soft" />
                   <span>{me.streak_days}d</span>
@@ -261,20 +261,20 @@ export default function Shell() {
             <div className="hidden md:flex items-center gap-1 pl-1 border-l border-line/70">
               <SoundToggle />
               <LanguageToggle />
-              <ThemeToggle />
             </div>
 
+            <ThemeToggle />
             <NotificationBell />
 
-            {/* Logout button */}
+            {/* Desktop Logout button */}
             <button
               onClick={handleLogout}
               aria-label={t('nav.logout')}
               title={t('nav.logout')}
-              className="flex items-center gap-1.5 text-xs text-muted hover:text-rose transition px-2.5 py-1.5 rounded-lg hover:bg-rose/10 btn-press"
+              className="hidden lg:flex items-center gap-1.5 text-xs text-muted hover:text-rose transition px-2.5 py-1.5 rounded-lg hover:bg-rose/10 btn-press shrink-0"
             >
               <i className="bi bi-box-arrow-right text-sm" />
-              <span className="hidden lg:inline">{t('nav.logout')}</span>
+              <span>{t('nav.logout')}</span>
             </button>
 
             {/* Mobile Hamburger */}
@@ -283,7 +283,7 @@ export default function Shell() {
                 playClickSound();
                 setMobileOpen(true);
               }}
-              className="lg:hidden w-9 h-9 flex items-center justify-center text-ink rounded-lg hover:bg-surface2 transition btn-press ml-1"
+              className="lg:hidden w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-ink rounded-lg hover:bg-surface2 transition btn-press shrink-0"
               aria-label={t('nav.menu')}
             >
               <i className="bi bi-list text-2xl" />
@@ -398,11 +398,98 @@ export default function Shell() {
         {/* Page Outlet */}
         <main
           key={pathname}
-          className="page-enter flex-1 px-3.5 sm:px-8 py-6 min-w-0 max-w-full overflow-x-hidden"
+          className="page-enter flex-1 px-3.5 sm:px-8 py-6 pb-24 lg:pb-8 min-w-0 max-w-full overflow-x-hidden"
         >
           <Outlet />
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation Bar (Persistent on screens < lg) */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/90 backdrop-blur-xl border-t border-line/80 px-2 py-1.5 flex items-center justify-around shadow-[0_-4px_25px_rgba(0,0,0,0.15)] pb-[calc(0.4rem+env(safe-area-inset-bottom))]">
+        <NavLink
+          to="/dashboard"
+          onClick={playClickSound}
+          className={({ isActive }) =>
+            `flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all relative ${
+              isActive ? 'text-indigo dark:text-cyan' : 'text-muted hover:text-ink'
+            }`
+          }
+        >
+          {({ isActive }) => (
+            <>
+              <i className={`bi ${isActive ? 'bi-grid-1x2-fill' : 'bi-grid-1x2'} text-lg`} />
+              <span className="mt-0.5 leading-none">Tổng quan</span>
+              {isActive && <span className="w-1 h-1 rounded-full bg-indigo dark:bg-cyan mt-1" />}
+            </>
+          )}
+        </NavLink>
+
+        <NavLink
+          to="/quests"
+          onClick={playClickSound}
+          className={({ isActive }) =>
+            `flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all relative ${
+              isActive ? 'text-indigo dark:text-cyan' : 'text-muted hover:text-ink'
+            }`
+          }
+        >
+          {({ isActive }) => (
+            <>
+              <i className={`bi ${isActive ? 'bi-list-task' : 'bi-list-check'} text-lg`} />
+              <span className="mt-0.5 leading-none">Nhiệm vụ</span>
+              {isActive && <span className="w-1 h-1 rounded-full bg-indigo dark:bg-cyan mt-1" />}
+            </>
+          )}
+        </NavLink>
+
+        <NavLink
+          to="/lucky-wheel"
+          onClick={playClickSound}
+          className={({ isActive }) =>
+            `flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all relative ${
+              isActive ? 'text-amber font-bold' : 'text-amber/80 hover:text-amber'
+            }`
+          }
+        >
+          {({ isActive }) => (
+            <>
+              <i className="bi bi-stars text-xl text-amber animate-pulse-soft" />
+              <span className="mt-0.5 leading-none text-amber font-bold">Vòng quay</span>
+              {isActive && <span className="w-1 h-1 rounded-full bg-amber mt-1" />}
+            </>
+          )}
+        </NavLink>
+
+        <NavLink
+          to="/wallet"
+          onClick={playClickSound}
+          className={({ isActive }) =>
+            `flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all relative ${
+              isActive ? 'text-indigo dark:text-cyan' : 'text-muted hover:text-ink'
+            }`
+          }
+        >
+          {({ isActive }) => (
+            <>
+              <i className={`bi ${isActive ? 'bi-wallet2' : 'bi-wallet'} text-lg`} />
+              <span className="mt-0.5 leading-none">Ví tiền</span>
+              {isActive && <span className="w-1 h-1 rounded-full bg-indigo dark:bg-cyan mt-1" />}
+            </>
+          )}
+        </NavLink>
+
+        <button
+          onClick={() => {
+            playClickSound();
+            setMobileOpen(true);
+          }}
+          className="flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-semibold text-muted hover:text-ink transition"
+          aria-label="Khám phá thêm"
+        >
+          <i className="bi bi-grid-3x3-gap text-lg" />
+          <span className="mt-0.5 leading-none">Khám phá</span>
+        </button>
+      </nav>
 
       <Footer />
       <BackgroundMusicPlayer />

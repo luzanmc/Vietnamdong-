@@ -132,10 +132,10 @@ export default function Wallet() {
       <div className="grid md:grid-cols-5 gap-6 items-start">
         {/* Holographic Virtual Card (Left - 2 Cols) */}
         <div className="md:col-span-2 space-y-4">
-          <div className="relative overflow-hidden rounded-3xl p-6 sm:p-7 border border-white/10 bg-gradient-to-br from-indigo-900 via-surface2 to-indigo-950 shadow-2xl text-white group">
+          <div className="relative overflow-hidden rounded-3xl p-6 sm:p-7 border border-indigo-500/30 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 shadow-2xl text-white group">
             {/* Ambient glows inside card */}
-            <div className="absolute top-0 right-0 w-44 h-44 bg-cyan/20 rounded-full blur-2xl -z-0 pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-36 h-36 bg-indigo/30 rounded-full blur-2xl -z-0 pointer-events-none" />
+            <div className="absolute top-0 right-0 w-44 h-44 bg-cyan/20 rounded-full blur-2xl -z-10 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-36 h-36 bg-indigo/30 rounded-full blur-2xl -z-10 pointer-events-none" />
 
             <div className="relative z-10 flex flex-col justify-between h-48 sm:h-52">
               {/* Card Top */}
@@ -268,7 +268,7 @@ export default function Wallet() {
                   onChange={(e) => setForm({ ...form, amount_nova: e.target.value })}
                   className="w-full bg-surface2 border border-line rounded-xl px-4 py-3 text-sm text-ink focus:outline-none focus:border-indigo font-mono pl-10"
                 />
-                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted">
+                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
                   <CurrencyIcon size={18} />
                 </div>
               </div>

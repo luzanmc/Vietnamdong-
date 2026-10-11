@@ -83,7 +83,7 @@ export default function DailyReward() {
     <div className="max-w-3xl mx-auto py-4 space-y-6">
       {/* Hero Header Card */}
       <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-line glass-panel shadow-2xl">
-        <div className="absolute top-0 right-0 w-72 h-72 bg-rose/15 rounded-full blur-3xl -z-0 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-72 h-72 bg-rose/15 rounded-full blur-3xl -z-10 pointer-events-none" />
 
         <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
           <div>
@@ -143,7 +143,7 @@ export default function DailyReward() {
 
                 {/* Center Icon */}
                 <div
-                  className={`w-11 h-11 rounded-xl flex items-center justify-center mb-2 transition-transform ${
+                  className={`w-11 h-11 rounded-xl flex items-center justify-center mb-2 transition-transform shrink-0 ${
                     isToday
                       ? 'bg-amber/20 text-amber shadow-[0_0_15px_rgba(245,165,36,0.4)]'
                       : isCompleted

@@ -14,7 +14,7 @@ export default function Footer() {
 
   return (
     <footer className="border-t border-line bg-surface mt-10">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-24 lg:pb-6">
         <div className="flex items-center gap-2 mb-3">
           <img src="/logo-mark.png" alt="VietnamDong" className="w-8 h-8" />
           <span className="font-display font-semibold tracking-tight">VietnamDong</span>

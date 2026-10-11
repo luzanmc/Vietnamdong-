@@ -10,8 +10,10 @@ export default function CurrencyIcon({ size = 16, className = '' }: CurrencyIcon
       alt="VDX"
       width={size}
       height={size}
-      className={`inline-block align-middle ${className}`}
-      style={{ width: size, height: size }}
+      className={`inline-block align-middle shrink-0 select-none object-contain ${className}`}
+      style={{ width: size, height: size, minWidth: size, minHeight: size }}
+      loading="eager"
+      draggable={false}
     />
   );
 }

@@ -88,7 +88,7 @@ export default function Faq() {
           placeholder={lang === 'vi' ? 'Tìm kiếm câu hỏi...' : 'Search questions...'}
           className="w-full bg-surface2 border border-line rounded-2xl px-4 py-3 pl-11 text-sm text-ink focus:outline-none focus:border-indigo"
         />
-        <i className="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-muted text-sm" />
+        <i className="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none" />
       </div>
 
       {/* Accordion List */}

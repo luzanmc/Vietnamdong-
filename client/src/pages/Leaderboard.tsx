@@ -111,7 +111,7 @@ export default function Leaderboard() {
                 <div className="font-bold text-xs sm:text-sm text-ink truncate w-full mt-2">
                   {top2.username}
                 </div>
-                <div className="font-mono text-xs sm:text-sm font-bold text-slate-300 mt-1 flex items-center gap-1">
+                <div className="font-mono text-xs sm:text-sm font-bold text-ink mt-1 flex items-center gap-1">
                   <CurrencyIcon size={14} />
                   <span>{top2.earned}</span>
                 </div>
@@ -126,8 +126,8 @@ export default function Leaderboard() {
               <div className="glass-card rounded-2xl p-4 sm:p-5 text-center border-amber/50 shadow-[0_0_30px_rgba(245,165,36,0.2)] relative flex flex-col items-center scale-105 z-10 -translate-y-2">
                 <div className="text-2xl sm:text-3xl mb-1 animate-bounce-subtle">👑</div>
                 <div className="relative">
-                  <UserAvatar url={top1.avatar_url} name={top1.username} size="w-14 h-14 sm:w-18 sm:h-18" text="text-lg" />
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-amber text-black font-bold text-xs flex items-center justify-center border-2 border-surface">
+                  <UserAvatar url={top1.avatar_url} name={top1.username} size="w-14 h-14 sm:w-16 sm:h-16" text="text-lg" />
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-amber text-black font-bold text-xs flex items-center justify-center border-2 border-surface z-10">
                     1
                   </div>
                 </div>
