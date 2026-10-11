@@ -27,11 +27,11 @@ type Mode = 'login' | 'register';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { refresh } = useAuth();
+  const { me, refresh } = useAuth();
   const { lang, toggle, t } = useLanguage();
   const { theme, toggle: toggleTheme } = useTheme();
   const [params] = useSearchParams();
-  const [mode, setMode] = useState<Mode>('login');
+  const [mode, setMode] = useState<Mode>(() => (window.location.pathname === '/register' || params.get('mode') === 'register') ? 'register' : 'login');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -45,6 +45,21 @@ export default function Login() {
   const [pendingToken, setPendingToken] = useState<string | null>(null);
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const [pendingRef] = useState(() => localStorage.getItem('vnd_pending_ref'));
+
+  useEffect(() => {
+    if (me) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [me, navigate]);
+
+  useEffect(() => {
+    const requestedMode = params.get('mode') || params.get('tab');
+    if (requestedMode === 'register') {
+      setMode('register');
+    } else if (requestedMode === 'login') {
+      setMode('login');
+    }
+  }, [params]);
 
   useEffect(() => {
     if (pendingRef) {

@@ -41,11 +41,13 @@ export default function App() {
             <ToastProvider>
               <Routes>
               <Route path="/" element={<Landing />} />
+              <Route path="/landing" element={<Landing />} />
               <Route path="/r/:username" element={<ReferralCapture />} />
               <Route path="/terms" element={<Legal kind="terms" />} />
               <Route path="/privacy" element={<Legal kind="privacy" />} />
               <Route path="/about" element={<Legal kind="about" />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/vuotlinkthanhcong/:token" element={<VerifyLink />} />
