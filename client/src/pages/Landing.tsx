@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
+import { useTheme } from '../context/ThemeContext.js';
 import { playClickSound } from '../utils/sound.js';
 import './Landing.css';
 
@@ -65,6 +66,8 @@ const FAQS = [
 
 export default function Landing() {
   const { me } = useAuth();
+  const { theme, toggle: toggleTheme } = useTheme();
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [total, setTotal] = useState(() => (me?.balance_nova !== undefined ? me.balance_nova : 128450));
@@ -157,11 +160,17 @@ export default function Landing() {
   const primaryAuthLink = me ? dashboardLink : registerLink;
 
   return (
-    <div ref={containerRef} className="vnd-landing-page js">
+    <div
+      ref={containerRef}
+      className={`vnd-landing-page js ${theme === 'light' ? 'light-mode' : 'dark-mode'}`}
+      data-theme={theme}
+    >
       {/* Topbar */}
       <header className="topbar">
         <Link to="/" onClick={playClickSound} className="brand">
-          <span className="brand-mark">V</span>
+          <span className="brand-mark">
+            <img src="/logo-mark.png" alt="VietnamDong" className="brand-logo-img" />
+          </span>
           <span>
             VIETNAMDONG
             <span className="brand-sub">VƯỢT LINK · KIẾM XU</span>
@@ -177,6 +186,19 @@ export default function Landing() {
         </nav>
 
         <div className="top-actions">
+          {/* Light/Dark Mode Switcher in Header */}
+          <button
+            className="btn theme-toggle-btn"
+            onClick={() => {
+              playClickSound();
+              toggleTheme();
+            }}
+            aria-label="Chuyển chế độ sáng/tối"
+            title={theme === 'dark' ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối'}
+          >
+            <i className={`bi ${theme === 'dark' ? 'bi-sun-fill text-amber-400' : 'bi-moon-stars-fill text-indigo-400'}`} />
+          </button>
+
           {me ? (
             <Link to={dashboardLink} onClick={playClickSound} className="btn btn-primary">
               <i data-lucide="layout-dashboard" />
@@ -616,7 +638,10 @@ export default function Landing() {
             <div className="f-top">
               <div className="f-brand">
                 <Link to="/" onClick={playClickSound} className="brand">
-                  <span className="brand-mark">V</span>VIETNAMDONG
+                  <span className="brand-mark">
+                    <img src="/logo-mark.png" alt="VietnamDong Logo" className="brand-logo-img" />
+                  </span>
+                  VIETNAMDONG
                 </Link>
                 <p>
                   Nền tảng kiếm Xu bằng vượt link, giới thiệu bạn bè và nhiệm vụ mỗi ngày. Mọi yêu cầu rút tiền đều do admin duyệt, luôn sẵn sàng phục vụ bạn.
@@ -648,19 +673,33 @@ export default function Landing() {
               </div>
             </div>
 
+            {/* Vietnamese Flag - Synchronized with Dashboard Footer */}
             <div className="f-flag">
               <span className="flag">
-                <i data-lucide="star" />
+                <i className="bi bi-star-fill text-[#ffcd00]" />
               </span>
-              Hoàng Sa &amp; Trường Sa là của Việt Nam!
+              <span>Hoàng Sa &amp; Trường Sa là của Việt Nam!</span>
             </div>
 
             <div className="f-bottom">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <button
+                  className="btn theme-toggle-footer-btn"
+                  onClick={() => {
+                    playClickSound();
+                    toggleTheme();
+                  }}
+                  aria-label="Chuyển chế độ sáng/tối"
+                >
+                  <i className={`bi ${theme === 'dark' ? 'bi-sun-fill text-amber-400' : 'bi-moon-stars-fill text-indigo-400'}`} />
+                  <span>{theme === 'dark' ? 'Giao diện Sáng' : 'Giao diện Tối'}</span>
+                </button>
+                <span className="ver">
+                  <i data-lucide="tag" />
+                  1.0.0
+                </span>
+              </div>
               <span>© {new Date().getFullYear()} VietnamDong. Bảo lưu mọi quyền.</span>
-              <span className="ver">
-                <i data-lucide="tag" />
-                1.0.0
-              </span>
             </div>
           </footer>
         </div>

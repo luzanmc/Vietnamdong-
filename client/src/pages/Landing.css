@@ -19,11 +19,17 @@
   font: 400 15px/1.6 'Be Vietnam Pro', system-ui, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-[data-theme="light"] .vnd-landing-page {
+/* Light Mode Variables & Theme Overrides */
+:root[data-theme="light"] .vnd-landing-page,
+html[data-theme="light"] .vnd-landing-page,
+html:not(.dark) .vnd-landing-page,
+.vnd-landing-page[data-theme="light"],
+.vnd-landing-page.light-mode {
   --bg: #f6f7fb;
-  --panel: #fff;
+  --panel: #ffffff;
   --panel2: #f0f2f8;
   --line: #dfe3ee;
   --text: #0e1424;
@@ -32,7 +38,7 @@
   --purple: #7a53e6;
   --green: #0d9f73;
   --glow: #e3e0ff;
-  --bar: #f6f7fbd9;
+  --bar: rgba(246, 247, 251, 0.9);
 }
 
 .vnd-landing-page * {
@@ -73,6 +79,7 @@
   background: var(--bar);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .vnd-landing-page .brand {
@@ -95,6 +102,15 @@
   font-size: 20px;
   font-weight: 700;
   box-shadow: 0 0 28px #818cf833;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.vnd-landing-page .brand-logo-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  display: block;
 }
 
 .vnd-landing-page .brand-sub {
@@ -135,7 +151,7 @@
   color: var(--text);
   font-weight: 600;
   font-size: 14px;
-  transition: transform .18s, border-color .18s, filter .18s;
+  transition: transform .18s, border-color .18s, filter .18s, background-color .18s, color .18s;
   cursor: pointer;
 }
 
@@ -146,13 +162,50 @@
 
 .vnd-landing-page .btn-primary {
   border: 0;
-  color: #fff;
+  color: #fff !important;
   background: linear-gradient(115deg, #3988ff, #825cf6);
   box-shadow: 0 8px 25px #6255ef2a;
 }
 
 .vnd-landing-page .btn-primary:hover {
   filter: brightness(1.12);
+}
+
+/* Theme Toggle Button */
+.vnd-landing-page .theme-toggle-btn {
+  width: 42px;
+  height: 42px;
+  min-height: 42px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 17px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.vnd-landing-page .theme-toggle-btn:hover {
+  border-color: var(--blue);
+  background: var(--panel2);
+  transform: translateY(-1px);
+}
+
+.vnd-landing-page .theme-toggle-footer-btn {
+  min-height: 32px;
+  padding: 0 14px;
+  border-radius: 99px;
+  font-size: 12px;
+  gap: 6px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.vnd-landing-page .theme-toggle-footer-btn:hover {
+  border-color: var(--blue);
 }
 
 .vnd-landing-page .menu-btn {
@@ -751,30 +804,32 @@
   color: var(--blue);
 }
 
+/* Vietnamese Flag in Footer - Synchronized with Dashboard */
 .vnd-landing-page .f-flag {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   margin: 40px 0 28px;
-  color: var(--text);
+  color: var(--muted);
   font-size: 14px;
 }
 
 .vnd-landing-page .flag {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: #da251d;
   flex-shrink: 0;
+  box-shadow: 0 0 14px rgba(218, 37, 29, 0.35);
 }
 
-.vnd-landing-page .flag svg {
-  width: 20px;
-  height: 20px;
+.vnd-landing-page .flag i.bi-star-fill {
   color: #ffcd00;
-  fill: #ffcd00;
+  font-size: 14px;
+  line-height: 1;
 }
 
 .vnd-landing-page .f-bottom {
@@ -1187,6 +1242,137 @@
 
 .vnd-landing-page.js .mock.in .mock-chart i {
   transform: scaleY(1);
+}
+
+/* Light Mode Overrides for Specific Components */
+:root[data-theme="light"] .vnd-landing-page .glass-card,
+html[data-theme="light"] .vnd-landing-page .glass-card,
+html:not(.dark) .vnd-landing-page .glass-card,
+.vnd-landing-page.light-mode .glass-card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(241, 245, 249, 0.9));
+  border: 1px solid #c7d2fe;
+  box-shadow: 0 24px 60px rgba(99, 102, 241, 0.15), 0 0 45px rgba(129, 140, 248, 0.18);
+}
+
+:root[data-theme="light"] .vnd-landing-page .card-top,
+:root[data-theme="light"] .vnd-landing-page .card-bottom,
+html[data-theme="light"] .vnd-landing-page .card-top,
+html[data-theme="light"] .vnd-landing-page .card-bottom,
+html:not(.dark) .vnd-landing-page .card-top,
+html:not(.dark) .vnd-landing-page .card-bottom,
+.vnd-landing-page.light-mode .card-top,
+.vnd-landing-page.light-mode .card-bottom {
+  color: #64748b;
+}
+
+:root[data-theme="light"] .vnd-landing-page .card-bottom b,
+html[data-theme="light"] .vnd-landing-page .card-bottom b,
+html:not(.dark) .vnd-landing-page .card-bottom b,
+.vnd-landing-page.light-mode .card-bottom b {
+  color: #0f172a;
+}
+
+:root[data-theme="light"] .vnd-landing-page .cube,
+html[data-theme="light"] .vnd-landing-page .cube,
+html:not(.dark) .vnd-landing-page .cube,
+.vnd-landing-page.light-mode .cube {
+  color: #2563eb;
+  text-shadow: 0 0 35px rgba(37, 99, 235, 0.35);
+}
+
+:root[data-theme="light"] .vnd-landing-page .cube span,
+html[data-theme="light"] .vnd-landing-page .cube span,
+html:not(.dark) .vnd-landing-page .cube span,
+.vnd-landing-page.light-mode .cube span {
+  color: #7c3aed;
+}
+
+:root[data-theme="light"] .vnd-landing-page .float,
+html[data-theme="light"] .vnd-landing-page .float,
+html:not(.dark) .vnd-landing-page .float,
+.vnd-landing-page.light-mode .float {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  color: #0f172a;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+}
+
+:root[data-theme="light"] .vnd-landing-page .float svg,
+html[data-theme="light"] .vnd-landing-page .float svg,
+html:not(.dark) .vnd-landing-page .float svg,
+.vnd-landing-page.light-mode .float svg {
+  color: #2563eb;
+}
+
+:root[data-theme="light"] .vnd-landing-page .art::before,
+html[data-theme="light"] .vnd-landing-page .art::before,
+html:not(.dark) .vnd-landing-page .art::before,
+.vnd-landing-page.light-mode .art::before {
+  border-color: rgba(99, 102, 241, 0.25);
+}
+
+:root[data-theme="light"] .vnd-landing-page .art::after,
+html[data-theme="light"] .vnd-landing-page .art::after,
+html:not(.dark) .vnd-landing-page .art::after,
+.vnd-landing-page.light-mode .art::after {
+  border-color: rgba(168, 85, 247, 0.25);
+}
+
+:root[data-theme="light"] .vnd-landing-page .orbit,
+html[data-theme="light"] .vnd-landing-page .orbit,
+html:not(.dark) .vnd-landing-page .orbit,
+.vnd-landing-page.light-mode .orbit {
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+:root[data-theme="light"] .vnd-landing-page .btn:not(.btn-primary):not(.btn-white),
+html[data-theme="light"] .vnd-landing-page .btn:not(.btn-primary):not(.btn-white),
+html:not(.dark) .vnd-landing-page .btn:not(.btn-primary):not(.btn-white),
+.vnd-landing-page.light-mode .btn:not(.btn-primary):not(.btn-white) {
+  border-color: #cbd5e1;
+  color: #0f172a;
+  background: #ffffff;
+}
+
+:root[data-theme="light"] .vnd-landing-page .btn:not(.btn-primary):not(.btn-white):hover,
+html[data-theme="light"] .vnd-landing-page .btn:not(.btn-primary):not(.btn-white):hover,
+html:not(.dark) .vnd-landing-page .btn:not(.btn-primary):not(.btn-white):hover,
+.vnd-landing-page.light-mode .btn:not(.btn-primary):not(.btn-white):hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+}
+
+:root[data-theme="light"] .vnd-landing-page .rate.hot,
+html[data-theme="light"] .vnd-landing-page .rate.hot,
+html:not(.dark) .vnd-landing-page .rate.hot,
+.vnd-landing-page.light-mode .rate.hot {
+  border-color: #818cf8;
+  background: linear-gradient(145deg, #ede9fe, #ffffff);
+  box-shadow: 0 0 40px rgba(99, 102, 241, 0.12);
+}
+
+:root[data-theme="light"] .vnd-landing-page .rev-card,
+html[data-theme="light"] .vnd-landing-page .rev-card,
+html:not(.dark) .vnd-landing-page .rev-card,
+.vnd-landing-page.light-mode .rev-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+:root[data-theme="light"] .vnd-landing-page .qa.open,
+html[data-theme="light"] .vnd-landing-page .qa.open,
+html:not(.dark) .vnd-landing-page .qa.open,
+.vnd-landing-page.light-mode .qa.open {
+  border-color: #93c5fd;
+  background: linear-gradient(145deg, #eff6ff, #ffffff);
+  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.08);
+}
+
+:root[data-theme="light"] .vnd-landing-page .qa.open .tg,
+html[data-theme="light"] .vnd-landing-page .qa.open .tg,
+html:not(.dark) .vnd-landing-page .qa.open .tg,
+.vnd-landing-page.light-mode .qa.open .tg {
+  background: #2563eb;
+  color: #ffffff;
 }
 
 @media (min-width: 901px) {
