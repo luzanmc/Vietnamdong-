@@ -169,7 +169,7 @@ export default function Landing() {
       <header className="topbar">
         <Link to="/" onClick={playClickSound} className="brand">
           <span className="brand-mark">
-            <img src="/logo-mark.png" alt="VietnamDong" className="brand-logo-img" />
+            <img src="/logo-dark.png" alt="VietnamDong" className="brand-logo-img" />
           </span>
           <span>
             VIETNAMDONG
@@ -682,7 +682,7 @@ export default function Landing() {
               <div className="f-brand">
                 <Link to="/" onClick={playClickSound} className="brand">
                   <span className="brand-mark">
-                    <img src="/logo-mark.png" alt="VietnamDong Logo" className="brand-logo-img" />
+                    <img src="/logo-dark.png" alt="VietnamDong Logo" className="brand-logo-img" />
                   </span>
                   VIETNAMDONG
                 </Link>
