@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export interface Queryable {
-  query: <T extends QueryResultRow = any>(text: string, params?: any[]) => Promise<{ rows: T[] }>;
+  query: <T extends QueryResultRow = any>(text: string, params?: any[]) => Promise<{ rows: T[]; rowCount?: number | null }>;
 }
 
 const connectionString = process.env.DATABASE_URL || process.env.SUPABASE_DB_URL;

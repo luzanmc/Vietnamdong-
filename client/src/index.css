@@ -33,10 +33,134 @@
 body {
   background-color: rgb(var(--color-bg));
   color: rgb(var(--color-ink));
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  background-image: 
+    radial-gradient(circle at 15% 15%, rgba(108, 99, 245, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 25%, rgba(34, 211, 238, 0.06) 0%, transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(245, 165, 36, 0.05) 0%, transparent 50%);
+  background-attachment: fixed;
 }
 
 .font-mono-nums { font-variant-numeric: tabular-nums; }
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--color-line), 0.7);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--color-muted), 0.5);
+}
+
+/* Glassmorphism Panels */
+.glass-panel {
+  background: rgba(var(--color-surface), 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(var(--color-line), 0.75);
+}
+
+.glass-card {
+  background: linear-gradient(135deg, rgba(var(--color-surface), 0.9) 0%, rgba(var(--color-surface2), 0.75) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(var(--color-line), 0.8);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-card:hover {
+  border-color: rgba(var(--color-indigo), 0.4);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25), 0 0 20px rgba(var(--color-indigo), 0.12);
+  transform: translateY(-2px);
+}
+
+/* Button tactile press effect */
+.btn-press {
+  transition: transform 0.12s ease, filter 0.15s ease, box-shadow 0.2s ease;
+}
+.btn-press:active {
+  transform: scale(0.96);
+}
+
+/* Glowing text effects */
+.gradient-text-indigo {
+  background: linear-gradient(135deg, #A5B4FC, #6C63F5, #22D3EE);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gradient-text-gold {
+  background: linear-gradient(135deg, #FDE68A, #F5A524, #F59E0B);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gradient-text-fire {
+  background: linear-gradient(135deg, #FCA5A5, #FB6A8A, #F5A524);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Glow Shadows */
+.glow-indigo {
+  box-shadow: 0 0 25px rgba(108, 99, 245, 0.35);
+}
+.glow-amber {
+  box-shadow: 0 0 25px rgba(245, 165, 36, 0.35);
+}
+.glow-cyan {
+  box-shadow: 0 0 25px rgba(34, 211, 238, 0.35);
+}
+
+/* Animations */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-slide-in {
+  animation: slide-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-float {
+  animation: float-gentle 4s ease-in-out infinite;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.85; }
+}
+.animate-pulse-soft {
+  animation: pulse-soft 2.5s ease-in-out infinite;
+}
+
+@keyframes shimmer-fast {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer-badge {
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.15) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer-fast 3s infinite;
+}
 
 @keyframes skeleton-pulse {
   0%, 100% { opacity: 1; }
@@ -44,10 +168,10 @@ body {
 }
 
 @keyframes page-enter {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.page-enter { animation: page-enter 0.35s ease-out both; }
+.page-enter { animation: page-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
 @keyframes skeleton-shimmer {
   0% { background-position: -200% 0; }
@@ -101,7 +225,8 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .page-enter, .skeleton, .loader-ring, .loader-ring-slow, .loader-pulse, .loader-dot,
-  .notfound-float, .notfound-glow, .notfound-number {
+  .notfound-float, .notfound-glow, .notfound-number, .animate-float, .animate-slide-in,
+  .animate-pulse-soft, .shimmer-badge {
     animation: none;
   }
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext.js';
+import { playClickSound } from '../utils/sound.js';
 
 interface FaqItem {
   qVi: string;
@@ -11,15 +12,15 @@ interface FaqItem {
 const ITEMS: FaqItem[] = [
   {
     qVi: 'VDX là gì?',
-    aVi: 'VDX là đơn vị tiền tệ nội bộ của VietnamDong. Bạn kiếm VDX bằng cách hoàn thành nhiệm vụ, điểm danh hằng ngày, giới thiệu bạn bè... rồi quy đổi VDX ra tiền thật hoặc thẻ cào.',
+    aVi: 'VDX là đơn vị tiền tệ nội bộ của VietnamDong. Bạn kiếm VDX bằng cách hoàn thành nhiệm vụ, điểm danh hằng ngày, quay vòng quay may mắn, giới thiệu bạn bè... rồi quy đổi VDX ra tiền thật qua MoMo, Ngân hàng hoặc thẻ cào.',
     qEn: 'What is VDX?',
-    aEn: 'VDX is the internal currency of VietnamDong. You earn VDX by completing tasks, daily check-in, referring friends... then convert VDX into real money or top-up cards.',
+    aEn: 'VDX is the internal currency of VietnamDong. You earn VDX by completing tasks, daily check-in, spinning lucky wheel, referring friends... then convert VDX into real money via MoMo, Bank, or game cards.',
   },
   {
-    qVi: 'Làm sao để kiếm VDX?',
-    aVi: 'Vào trang Tổng quan, chọn 1 nhiệm vụ rút gọn link, hoàn thành theo hướng dẫn để nhận VDX ngay. Bạn cũng có thể điểm danh hằng ngày và giới thiệu bạn bè để kiếm thêm.',
-    qEn: 'How do I earn VDX?',
-    aEn: 'Go to the Dashboard, pick a shortlink task, and complete it as instructed to earn VDX instantly. You can also check in daily and refer friends to earn more.',
+    qVi: 'Làm sao để kiếm VDX nhanh nhất?',
+    aVi: 'Vào trang Tổng quan, chọn các nhiệm vụ rút gọn link có gắn nhãn "HOT" để nhận nhiều VDX nhất. Đồng thời giữ streak điểm danh 7 ngày để x2 phần thưởng và mời bạn bè để nhận hoa hồng 20% vĩnh viễn.',
+    qEn: 'How do I earn VDX fastest?',
+    aEn: 'Visit the Dashboard and select tasks marked "HOT" for the highest rewards. Keep a 7-day check-in streak to maximize bonuses, and invite friends for permanent 20% commission.',
   },
   {
     qVi: 'Tỷ giá quy đổi VDX sang VNĐ là bao nhiêu?',
@@ -29,9 +30,9 @@ const ITEMS: FaqItem[] = [
   },
   {
     qVi: 'Rút tiền mất bao lâu?',
-    aVi: 'Mọi yêu cầu rút tiền đều cần admin duyệt thủ công để đảm bảo an toàn, thường trong vòng 24 giờ. Bạn sẽ nhận được thông báo trong app khi yêu cầu được xử lý.',
+    aVi: 'Mọi yêu cầu rút tiền đều được admin duyệt và thanh toán nhanh chóng, thường trong vòng 2 - 24 giờ. Bạn sẽ nhận được thông báo trong app ngay khi tiền được gửi.',
     qEn: 'How long does a withdrawal take?',
-    aEn: 'All withdrawal requests require manual admin approval for safety, usually within 24 hours. You will get an in-app notification once it is processed.',
+    aEn: 'All withdrawal requests are processed quickly by admin, usually within 2 to 24 hours. You will receive an in-app notification once completed.',
   },
   {
     qVi: 'Tại sao tôi chưa rút được tiền?',
@@ -41,9 +42,9 @@ const ITEMS: FaqItem[] = [
   },
   {
     qVi: 'Tài khoản của tôi bị khóa, phải làm sao?',
-    aVi: 'Hệ thống tự động tạm khóa tài khoản có dấu hiệu hoạt động bất thường để bảo vệ cả bạn và cộng đồng. Vui lòng mở 1 ticket ở trang Hỗ trợ để admin xem xét và mở khóa lại.',
+    aVi: 'Hệ thống tự động tạm khóa tài khoản có dấu hiệu hoạt động bất thường hoặc sử dụng bot/cheat để bảo vệ cộng đồng. Vui lòng mở 1 ticket ở trang Hỗ trợ để admin xem xét và mở khóa lại.',
     qEn: 'My account is locked, what do I do?',
-    aEn: 'The system automatically locks accounts showing unusual activity to protect you and the community. Please open a ticket on the Support page so admin can review and unlock it.',
+    aEn: 'The system automatically locks accounts showing unusual activity to protect the community. Please open a ticket on the Support page so admin can review and unlock it.',
   },
   {
     qVi: 'Creator Code là gì?',
@@ -56,27 +57,83 @@ const ITEMS: FaqItem[] = [
 export default function Faq() {
   const { lang } = useLanguage();
   const [open, setOpen] = useState<number | null>(0);
+  const [search, setSearch] = useState('');
+
+  const filtered = ITEMS.filter((item) => {
+    const q = lang === 'vi' ? item.qVi : item.qEn;
+    const a = lang === 'vi' ? item.aVi : item.aEn;
+    return q.toLowerCase().includes(search.toLowerCase()) || a.toLowerCase().includes(search.toLowerCase());
+  });
 
   return (
-    <div className="max-w-2xl">
-      <h1 className="font-display text-xl font-semibold mb-4 flex items-center gap-2">
-        <i className="bi bi-question-circle text-indigo" /> {lang === 'vi' ? 'Câu hỏi thường gặp' : 'Frequently Asked Questions'}
-      </h1>
-      <div className="space-y-2">
-        {ITEMS.map((item, i) => (
-          <div key={i} className="bg-surface border border-line rounded-xl overflow-hidden">
-            <button
-              onClick={() => setOpen(open === i ? null : i)}
-              className="w-full flex items-center justify-between px-4 py-3 text-left text-sm font-medium"
-            >
-              {lang === 'vi' ? item.qVi : item.qEn}
-              <i className={`bi bi-chevron-${open === i ? 'up' : 'down'} text-muted shrink-0 ml-2`} />
-            </button>
-            {open === i && (
-              <div className="px-4 pb-3 text-sm text-muted leading-relaxed">{lang === 'vi' ? item.aVi : item.aEn}</div>
-            )}
+    <div className="max-w-3xl mx-auto py-4 space-y-6">
+      <div>
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo/15 text-indigo border border-indigo/30 mb-2">
+          <i className="bi bi-question-circle-fill" />
+          <span>Trung tâm giải đáp</span>
+        </div>
+        <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-ink flex items-center gap-2">
+          {lang === 'vi' ? 'Câu hỏi thường gặp' : 'Frequently Asked Questions'}
+        </h1>
+        <p className="text-xs sm:text-sm text-muted mt-1">
+          Tổng hợp câu trả lời cho các thắc mắc phổ biến nhất khi tham gia VietnamDong.
+        </p>
+      </div>
+
+      {/* Search Input */}
+      <div className="relative">
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={lang === 'vi' ? 'Tìm kiếm câu hỏi...' : 'Search questions...'}
+          className="w-full bg-surface2 border border-line rounded-2xl px-4 py-3 pl-11 text-sm text-ink focus:outline-none focus:border-indigo"
+        />
+        <i className="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-muted text-sm" />
+      </div>
+
+      {/* Accordion List */}
+      <div className="space-y-3">
+        {filtered.length === 0 ? (
+          <div className="glass-card rounded-2xl p-10 text-center text-muted">
+            Không tìm thấy câu hỏi phù hợp với "{search}".
           </div>
-        ))}
+        ) : (
+          filtered.map((item, i) => {
+            const isOpen = open === i;
+
+            return (
+              <div
+                key={i}
+                className="glass-card rounded-2xl border border-line overflow-hidden transition-all duration-300"
+              >
+                <button
+                  onClick={() => {
+                    playClickSound();
+                    setOpen(isOpen ? null : i);
+                  }}
+                  className="w-full flex items-center justify-between px-5 py-4 text-left text-sm font-semibold text-ink hover:text-indigo transition gap-3 btn-press"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <span className="w-6 h-6 rounded-lg bg-indigo/15 text-indigo font-bold text-xs flex items-center justify-center shrink-0">
+                      ?
+                    </span>
+                    <span>{lang === 'vi' ? item.qVi : item.qEn}</span>
+                  </span>
+                  <i
+                    className={`bi bi-chevron-down text-muted text-xs shrink-0 transition-transform duration-300 ${
+                      isOpen ? 'rotate-180 text-indigo' : ''
+                    }`}
+                  />
+                </button>
+                {isOpen && (
+                  <div className="px-5 pb-5 text-xs sm:text-sm text-muted leading-relaxed border-t border-line/40 pt-3 animate-slide-in">
+                    {lang === 'vi' ? item.aVi : item.aEn}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

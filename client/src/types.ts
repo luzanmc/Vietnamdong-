@@ -113,6 +113,8 @@ export interface VietsubInfo {
   description: string;
   bankInfo: string;
   availableCount: number;
+  logoUrl?: string;
+  apkUrl?: string;
 }
 
 export interface VietsubOrder {

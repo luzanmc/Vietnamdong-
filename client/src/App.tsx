@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext.js';
 import { LanguageProvider } from './context/LanguageContext.js';
 import { ThemeProvider } from './context/ThemeContext.js';
 import { SettingsProvider } from './context/SettingsContext.js';
+import { ToastProvider } from './context/ToastContext.js';
 import ProtectedRoute from './components/ProtectedRoute.js';
 import Login from './pages/Login.js';
 import ForgotPassword from './pages/ForgotPassword.js';
@@ -37,7 +38,8 @@ export default function App() {
       <LanguageProvider>
         <AuthProvider>
           <SettingsProvider>
-            <Routes>
+            <ToastProvider>
+              <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/r/:username" element={<ReferralCapture />} />
               <Route path="/terms" element={<Legal kind="terms" />} />
@@ -74,6 +76,7 @@ export default function App() {
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </ToastProvider>
           </SettingsProvider>
         </AuthProvider>
       </LanguageProvider>

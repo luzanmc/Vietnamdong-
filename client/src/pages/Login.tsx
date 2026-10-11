@@ -6,6 +6,7 @@ import { useLanguage } from '../context/LanguageContext.js';
 import { useTheme } from '../context/ThemeContext.js';
 import Alert from '../components/Alert.js';
 import TurnstileWidget from '../components/TurnstileWidget.js';
+import { playClickSound } from '../utils/sound.js';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -211,48 +212,93 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center px-4 py-10 relative">
+    <div className="min-h-screen bg-bg flex items-center justify-center px-4 py-10 relative overflow-hidden">
+      {/* Background ambient orbs */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo/15 rounded-full blur-3xl -z-0 pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan/10 rounded-full blur-3xl -z-0 pointer-events-none" />
+
       <button
-        onClick={toggleTheme}
+        onClick={() => {
+          playClickSound();
+          toggleTheme();
+        }}
         aria-label="Toggle theme"
-        className="absolute top-4 left-4 w-9 h-9 flex items-center justify-center rounded-md text-muted hover:text-ink hover:bg-surface2 transition border border-line"
+        className="absolute top-5 left-5 w-10 h-10 flex items-center justify-center rounded-xl text-muted hover:text-ink hover:bg-surface2 transition border border-line btn-press z-10"
       >
-        <i className={`bi ${theme === 'dark' ? 'bi-sun' : 'bi-moon-stars'}`} />
+        <i className={`bi ${theme === 'dark' ? 'bi-sun-fill text-amber' : 'bi-moon-stars-fill text-indigo'}`} />
       </button>
+
       <button
-        onClick={toggle}
+        onClick={() => {
+          playClickSound();
+          toggle();
+        }}
         aria-label="Switch language"
-        className="absolute top-4 right-4 flex items-center gap-1 text-xs font-medium text-muted hover:text-ink transition px-2.5 py-1.5 rounded-md hover:bg-surface2 border border-line"
+        className="absolute top-5 right-5 flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-ink transition px-3 py-2 rounded-xl hover:bg-surface2 border border-line btn-press z-10"
       >
-        <i className="bi bi-translate text-sm" />
+        <i className="bi bi-translate text-sm text-cyan" />
         <span>{lang === 'vi' ? 'VI' : 'EN'}</span>
       </button>
 
-      <div className="w-full max-w-sm bg-gradient-to-b from-surface to-surface2 border border-line rounded-2xl p-6">
-        <div className="text-center mb-5">
-          <img src="/logo-mark.png" alt="VietnamDong" className="w-14 h-14 mx-auto mb-3" />
-          <h1 className="font-display font-semibold text-lg">
+      <div className="w-full max-w-md glass-panel rounded-3xl p-6 sm:p-8 border border-line shadow-2xl relative z-10">
+        <div className="text-center mb-6">
+          <Link to="/" onClick={playClickSound} className="inline-block group mb-3">
+            <div className="relative inline-block">
+              <img src="/logo-mark.png" alt="VietnamDong" className="w-14 h-14 mx-auto group-hover:scale-105 transition-transform" />
+              <div className="absolute inset-0 rounded-full bg-indigo/25 blur-md -z-10" />
+            </div>
+          </Link>
+          <h1 className="font-display font-bold text-xl sm:text-2xl text-ink">
             {mode === 'login' ? t('login.title') : t('login.register_title')}
           </h1>
-          <p className="text-xs text-muted mt-1">{t('login.subtitle')}</p>
+          <p className="text-xs text-muted mt-1 max-w-xs mx-auto">{t('login.subtitle')}</p>
+        </div>
+
+        {/* Mode Switch Tabs */}
+        <div className="grid grid-cols-2 p-1 bg-surface2/80 rounded-2xl border border-line mb-5">
+          <button
+            type="button"
+            onClick={() => {
+              playClickSound();
+              switchMode('login');
+            }}
+            className={`py-2 rounded-xl text-xs font-bold transition btn-press ${
+              mode === 'login' ? 'bg-indigo text-white shadow-md' : 'text-muted hover:text-ink'
+            }`}
+          >
+            {t('login.submit_login')}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              playClickSound();
+              switchMode('register');
+            }}
+            className={`py-2 rounded-xl text-xs font-bold transition btn-press ${
+              mode === 'register' ? 'bg-indigo text-white shadow-md' : 'text-muted hover:text-ink'
+            }`}
+          >
+            {t('login.submit_register')}
+          </button>
         </div>
 
         {notice && (
-          <div className="mb-3">
+          <div className="mb-4">
             <Alert type="success">{notice}</Alert>
           </div>
         )}
         {error && (
-          <div className="mb-3">
+          <div className="mb-4">
             <Alert type="error">{error}</Alert>
           </div>
         )}
 
         <a
           href="/api/auth/discord"
-          className="w-full flex items-center justify-center gap-2 bg-[#5865F2] hover:brightness-110 text-white text-sm font-medium py-2.5 rounded-lg mb-3 transition"
+          onClick={playClickSound}
+          className="w-full flex items-center justify-center gap-2 bg-[#5865F2] hover:brightness-110 text-white text-xs sm:text-sm font-bold py-3 rounded-xl mb-3 transition shadow-md btn-press"
         >
-          <i className="bi bi-discord" /> {t('login.discord')}
+          <i className="bi bi-discord text-base" /> {t('login.discord')}
         </a>
 
         <div id="googleLoginContainer" className="flex justify-center mb-3" />
@@ -262,58 +308,66 @@ export default function Login() {
 
         <div className="flex items-center gap-3 my-4">
           <div className="h-px bg-line flex-1" />
-          <span className="text-[11px] text-muted">{t('login.or_email')}</span>
+          <span className="text-[11px] text-muted uppercase font-medium">{t('login.or_email')}</span>
           <div className="h-px bg-line flex-1" />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-3.5">
           {mode === 'register' && (
-            <input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder={t('login.username')}
-              required
-              className="w-full bg-surface2 border border-line rounded-lg px-3 py-2 text-sm"
-            />
-          )}
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder={t('login.email')}
-            required
-            className="w-full bg-surface2 border border-line rounded-lg px-3 py-2 text-sm"
-          />
-          <div className="relative">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder={t('login.password')}
-              required
-              minLength={8}
-              className="w-full bg-surface2 border border-line rounded-lg px-3 py-2 pr-10 text-sm"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted"
-              tabIndex={-1}
-            >
-              <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`} />
-            </button>
-          </div>
-
-          {mode === 'login' && (
-            <div className="text-right">
-              <Link to="/forgot-password" className="text-xs text-indigo hover:underline">
-                {t('login.forgot')}
-              </Link>
+            <div>
+              <label className="text-xs font-semibold text-muted block mb-1">{t('login.username')}</label>
+              <input
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="VD: nguyenvan_a"
+                required
+                className="w-full bg-surface2 border border-line rounded-xl px-4 py-2.5 text-sm text-ink focus:outline-none focus:border-indigo"
+              />
             </div>
           )}
+          <div>
+            <label className="text-xs font-semibold text-muted block mb-1">{t('login.email')}</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="tenban@gmail.com"
+              required
+              className="w-full bg-surface2 border border-line rounded-xl px-4 py-2.5 text-sm text-ink focus:outline-none focus:border-indigo"
+            />
+          </div>
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-semibold text-muted">{t('login.password')}</label>
+              {mode === 'login' && (
+                <Link to="/forgot-password" onClick={playClickSound} className="text-xs text-indigo hover:underline">
+                  {t('login.forgot')}
+                </Link>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                minLength={8}
+                className="w-full bg-surface2 border border-line rounded-xl px-4 py-2.5 pr-11 text-sm text-ink focus:outline-none focus:border-indigo"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink transition"
+                tabIndex={-1}
+              >
+                <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`} />
+              </button>
+            </div>
+          </div>
 
           {mode === 'register' && (
-            <label className="flex items-start gap-2 text-xs text-muted leading-relaxed cursor-pointer">
+            <label className="flex items-start gap-2 text-xs text-muted leading-relaxed cursor-pointer pt-1">
               <input
                 type="checkbox"
                 checked={acceptedTerms}
@@ -322,50 +376,43 @@ export default function Login() {
               />
               <span>
                 {t('login.accept_prefix')}{' '}
-                <Link to="/terms" target="_blank" className="text-indigo hover:underline">{t('footer.terms')}</Link>{' '}
+                <Link to="/terms" target="_blank" className="text-indigo hover:underline font-semibold">{t('footer.terms')}</Link>{' '}
                 {t('login.accept_and')}{' '}
-                <Link to="/privacy" target="_blank" className="text-indigo hover:underline">{t('footer.privacy')}</Link>
+                <Link to="/privacy" target="_blank" className="text-indigo hover:underline font-semibold">{t('footer.privacy')}</Link>
               </span>
             </label>
           )}
 
-          <TurnstileWidget onToken={setCaptchaToken} reset={captchaReset} />
+          <div className="py-1">
+            <TurnstileWidget onToken={setCaptchaToken} reset={captchaReset} />
+          </div>
 
           <button
             type="submit"
             disabled={busy}
-            className="w-full bg-indigo hover:brightness-110 disabled:opacity-60 text-white text-sm font-medium py-2.5 rounded-lg transition"
+            className="w-full bg-gradient-to-r from-indigo to-cyan hover:brightness-110 disabled:opacity-60 text-white text-sm font-bold py-3.5 rounded-xl transition shadow-lg shadow-indigo/20 btn-press flex items-center justify-center gap-2"
           >
-            {busy ? t('login.processing') : mode === 'login' ? t('login.submit_login') : t('login.submit_register')}
+            {busy ? (
+              <>
+                <i className="bi bi-arrow-repeat animate-spin" />
+                <span>{t('login.processing')}</span>
+              </>
+            ) : mode === 'login' ? (
+              t('login.submit_login')
+            ) : (
+              t('login.submit_register')
+            )}
           </button>
         </form>
 
         {mode === 'login' && (
-          <p className="text-[11px] text-muted text-center mt-4 leading-relaxed">
+          <p className="text-[11px] text-muted text-center mt-5 leading-relaxed">
             {t('login.oauth_notice')}{' '}
             <Link to="/terms" target="_blank" className="text-indigo hover:underline">{t('footer.terms')}</Link>{' '}
             {t('login.accept_and')}{' '}
             <Link to="/privacy" target="_blank" className="text-indigo hover:underline">{t('footer.privacy')}</Link>
           </p>
         )}
-
-        <p className="text-xs text-muted text-center mt-4">
-          {mode === 'login' ? (
-            <>
-              {t('login.no_account')}{' '}
-              <button onClick={() => switchMode('register')} className="text-indigo hover:underline">
-                {t('login.register_now')}
-              </button>
-            </>
-          ) : (
-            <>
-              {t('login.has_account')}{' '}
-              <button onClick={() => switchMode('login')} className="text-indigo hover:underline">
-                {t('login.login_now')}
-              </button>
-            </>
-          )}
-        </p>
       </div>
     </div>
   );
