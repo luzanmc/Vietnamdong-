@@ -23,7 +23,7 @@ const VI_TERMS: LegalDoc = {
       heading: `1. Định nghĩa`,
       items: [
         `"Dịch vụ" là website, ứng dụng web (PWA) và các tính năng do VietnamDong cung cấp, gồm nhiệm vụ rút gọn link, điểm danh, vòng quay, nhiệm vụ tuần/tháng, bảng xếp hạng, giới thiệu bạn bè, Creator Code, đổi thưởng, rút tiền và Vietsub Studio.`,
-        `"VDX" là đơn vị điểm thưởng nội bộ của Dịch vụ (một số tên trường kỹ thuật có thể ghi là "nova").`,
+        `"VNC" là đơn vị điểm thưởng nội bộ của Dịch vụ (một số tên trường kỹ thuật có thể ghi là "nova").`,
         `"Admin" là người quản trị được VietnamDong ủy quyền xem xét, phê duyệt hoặc từ chối các yêu cầu của người dùng.`,
         `"Bạn" là cá nhân tạo tài khoản và sử dụng Dịch vụ.`,
       ],
@@ -39,19 +39,19 @@ const VI_TERMS: LegalDoc = {
       ],
     },
     {
-      heading: `3. Bản chất của VDX`,
+      heading: `3. Bản chất của VNC`,
       items: [
-        `VDX là điểm thưởng nội bộ, chỉ có giá trị trong hệ thống VietnamDong. VDX không phải là tiền tệ, tiền điện tử, tài sản số được pháp luật công nhận, chứng khoán hay phương tiện thanh toán hợp pháp.`,
-        `VDX không phát sinh lãi, không được bảo đảm giá trị và không thể mua bán, trao đổi bên ngoài Dịch vụ. Mọi giao dịch VDX ngoài Dịch vụ (nếu có) đều nằm ngoài sự kiểm soát và trách nhiệm của chúng tôi.`,
-        `Tỷ giá quy đổi VDX sang VNĐ được hiển thị trên Dịch vụ và có thể được điều chỉnh theo thời gian. Tỷ giá áp dụng cho một yêu cầu là tỷ giá có hiệu lực tại thời điểm yêu cầu được tạo, trừ khi chúng tôi thông báo khác.`,
-        `Số dư VDX hiển thị là số liệu tham chiếu theo sổ cái của hệ thống. Khi có sai lệch do lỗi kỹ thuật, chúng tôi có quyền đối soát và điều chỉnh về đúng giá trị.`,
+        `VNC là điểm thưởng nội bộ, chỉ có giá trị trong hệ thống VietnamDong. VNC không phải là tiền tệ, tiền điện tử, tài sản số được pháp luật công nhận, chứng khoán hay phương tiện thanh toán hợp pháp.`,
+        `VNC không phát sinh lãi, không được bảo đảm giá trị và không thể mua bán, trao đổi bên ngoài Dịch vụ. Mọi giao dịch VNC ngoài Dịch vụ (nếu có) đều nằm ngoài sự kiểm soát và trách nhiệm của chúng tôi.`,
+        `Tỷ giá quy đổi VNC sang VNĐ được hiển thị trên Dịch vụ và có thể được điều chỉnh theo thời gian. Tỷ giá áp dụng cho một yêu cầu là tỷ giá có hiệu lực tại thời điểm yêu cầu được tạo, trừ khi chúng tôi thông báo khác.`,
+        `Số dư VNC hiển thị là số liệu tham chiếu theo sổ cái của hệ thống. Khi có sai lệch do lỗi kỹ thuật, chúng tôi có quyền đối soát và điều chỉnh về đúng giá trị.`,
       ],
     },
     {
       heading: `4. Nhiệm vụ và cách nhận thưởng`,
       items: [
         `Nhiệm vụ rút gọn link được cung cấp thông qua các nhà cung cấp dịch vụ rút gọn link bên thứ ba. Bạn phải hoàn thành nhiệm vụ trung thực, theo đúng hướng dẫn, bằng thao tác thủ công của chính bạn.`,
-        `VDX chỉ được ghi nhận khi nhiệm vụ được xác nhận hợp lệ. Chúng tôi không bảo đảm nhiệm vụ luôn có sẵn, và có thể thêm, sửa, tạm ngừng hoặc xóa nhiệm vụ bất cứ lúc nào.`,
+        `VNC chỉ được ghi nhận khi nhiệm vụ được xác nhận hợp lệ. Chúng tôi không bảo đảm nhiệm vụ luôn có sẵn, và có thể thêm, sửa, tạm ngừng hoặc xóa nhiệm vụ bất cứ lúc nào.`,
         `Phần thưởng từ điểm danh, vòng quay, nhiệm vụ tuần/tháng, bảng xếp hạng hoặc chương trình khuyến mãi tuân theo điều kiện công bố tại từng tính năng. Phần thưởng có thể bị từ chối hoặc thu hồi nếu có dấu hiệu gian lận hoặc lỗi hệ thống.`,
       ],
     },
@@ -60,7 +60,7 @@ const VI_TERMS: LegalDoc = {
       items: [
         `Mọi yêu cầu rút tiền, đổi thưởng và mua Vietsub Studio đều cần Admin duyệt thủ công. Việc tạo yêu cầu không đồng nghĩa với việc được chấp thuận.`,
         `Thời gian xử lý thông thường khoảng 24 giờ nhưng chỉ mang tính tham khảo, có thể lâu hơn do kiểm tra an ninh, ngày nghỉ hoặc sự cố của đối tác thanh toán.`,
-        `Chúng tôi có quyền yêu cầu bổ sung thông tin xác minh, từ chối hoặc tạm giữ yêu cầu khi có dấu hiệu bất thường, vi phạm điều khoản hoặc theo yêu cầu của cơ quan có thẩm quyền. Khi yêu cầu bị từ chối vì lý do không phải do lỗi của bạn, số VDX liên quan sẽ được hoàn lại vào tài khoản.`,
+        `Chúng tôi có quyền yêu cầu bổ sung thông tin xác minh, từ chối hoặc tạm giữ yêu cầu khi có dấu hiệu bất thường, vi phạm điều khoản hoặc theo yêu cầu của cơ quan có thẩm quyền. Khi yêu cầu bị từ chối vì lý do không phải do lỗi của bạn, số VNC liên quan sẽ được hoàn lại vào tài khoản.`,
         `Bạn phải cung cấp chính xác thông tin nhận (số ví, tài khoản ngân hàng, thông tin đơn hàng). Chúng tôi không chịu trách nhiệm đối với khoản đã xử lý theo đúng thông tin bạn cung cấp nhưng thông tin đó bị sai.`,
         `Phải đạt mức rút tối thiểu và đã xác thực email (nếu đăng ký bằng email) theo quy định hiển thị tại trang Ví và Đổi thưởng. Thẻ cào và dịch vụ số do đối tác cung cấp chỉ được xử lý sau khi Admin phê duyệt.`,
         `Vietsub Studio: khóa bản quyền (license key) dành cho cá nhân đã mua, không được chia sẻ, bán lại hoặc công khai. Khóa bị lộ do lỗi của bạn có thể bị thu hồi. Quy định hoàn tiền áp dụng theo pháp luật về bảo vệ quyền lợi người tiêu dùng và theo chính sách được thông báo tại thời điểm mua.`,
@@ -70,7 +70,7 @@ const VI_TERMS: LegalDoc = {
       heading: `6. Giới thiệu bạn bè và Creator Code`,
       items: [
         `Hoa hồng giới thiệu và hoa hồng Creator Code được tính theo tỷ lệ công bố trong hệ thống và chỉ phát sinh từ hoạt động hợp lệ của người được giới thiệu.`,
-        `Cấm tự giới thiệu, tạo tài khoản ảo để nhận hoa hồng, hoặc quảng bá bằng thông tin sai sự thật, gây hiểu nhầm về mức thu nhập hoặc về bản chất của VDX.`,
+        `Cấm tự giới thiệu, tạo tài khoản ảo để nhận hoa hồng, hoặc quảng bá bằng thông tin sai sự thật, gây hiểu nhầm về mức thu nhập hoặc về bản chất của VNC.`,
         `Chúng tôi có thể thay đổi, tạm ngừng hoặc chấm dứt chương trình giới thiệu và thu hồi hoa hồng phát sinh từ hành vi vi phạm.`,
       ],
     },
@@ -84,14 +84,14 @@ const VI_TERMS: LegalDoc = {
         `Giả mạo danh tính, giả mạo Admin, lừa đảo người dùng khác, chiếm đoạt tài khoản hoặc thông tin của người khác.`,
         `Sử dụng Dịch vụ cho mục đích rửa tiền, gian lận thanh toán, hoặc bất kỳ hoạt động nào trái pháp luật Việt Nam.`,
         `Đăng hoặc gửi nội dung vi phạm pháp luật, xúc phạm, quấy rối, spam hoặc xâm phạm quyền của người khác (bao gồm nội dung tại mục Hỗ trợ).`,
-        `Chuyển VDX nội bộ nhằm lách quy định, trục lợi hoặc phục vụ giao dịch mua bán ngoài hệ thống.`,
+        `Chuyển VNC nội bộ nhằm lách quy định, trục lợi hoặc phục vụ giao dịch mua bán ngoài hệ thống.`,
       ],
     },
     {
       heading: `8. Chống gian lận, khóa và thu hồi`,
       items: [
         `Chúng tôi áp dụng giới hạn đăng ký theo địa chỉ IP và hệ thống phát hiện bất thường tự động (ví dụ số lượng nhiệm vụ hoàn thành bất thường trong thời gian ngắn). Tài khoản bị nghi ngờ có thể bị khóa tạm thời để kiểm tra.`,
-        `Khi xác định có vi phạm, chúng tôi có quyền hủy phần thưởng, thu hồi VDX, từ chối rút tiền, khóa hoặc chấm dứt tài khoản mà không cần báo trước, tùy mức độ vi phạm.`,
+        `Khi xác định có vi phạm, chúng tôi có quyền hủy phần thưởng, thu hồi VNC, từ chối rút tiền, khóa hoặc chấm dứt tài khoản mà không cần báo trước, tùy mức độ vi phạm.`,
         `Nếu cho rằng tài khoản bị khóa nhầm, bạn có thể gửi khiếu nại qua mục Hỗ trợ kèm thông tin để chúng tôi xem xét lại. Quyết định cuối cùng thuộc về chúng tôi, không làm mất các quyền mà pháp luật cho phép bạn.`,
       ],
     },
@@ -119,7 +119,7 @@ const VI_TERMS: LegalDoc = {
     {
       heading: `12. Miễn trừ và giới hạn trách nhiệm`,
       items: [
-        `Dịch vụ được cung cấp trên cơ sở "hiện có". Chúng tôi không cam kết Dịch vụ hoạt động liên tục, không lỗi hoặc không bị gián đoạn, và không bảo đảm mức thu nhập nào cho bạn. Kết quả kiếm VDX phụ thuộc vào nhiệm vụ khả dụng và việc bạn tuân thủ điều khoản.`,
+        `Dịch vụ được cung cấp trên cơ sở "hiện có". Chúng tôi không cam kết Dịch vụ hoạt động liên tục, không lỗi hoặc không bị gián đoạn, và không bảo đảm mức thu nhập nào cho bạn. Kết quả kiếm VNC phụ thuộc vào nhiệm vụ khả dụng và việc bạn tuân thủ điều khoản.`,
         `Trong phạm vi pháp luật cho phép, chúng tôi không chịu trách nhiệm đối với thiệt hại gián tiếp, mất lợi nhuận, mất dữ liệu hoặc thiệt hại do sự kiện bất khả kháng, sự cố của bên thứ ba, hoặc do bạn vi phạm điều khoản. Trách nhiệm tối đa của chúng tôi (nếu có) không vượt quá giá trị yêu cầu giao dịch đang tranh chấp.`,
         `Không nội dung nào trong điều khoản này loại trừ hay hạn chế các quyền bắt buộc của người tiêu dùng và các trách nhiệm mà pháp luật Việt Nam không cho phép loại trừ.`,
       ],
@@ -161,7 +161,7 @@ const EN_TERMS: LegalDoc = {
       heading: `1. Definitions`,
       items: [
         `"Service" means the website, web app (PWA) and features provided by VietnamDong, including shortlink tasks, daily check-in, lucky wheel, weekly/monthly quests, leaderboards, referrals, Creator Codes, redemption, withdrawals and Vietsub Studio.`,
-        `"VDX" means the internal reward points of the Service (some technical field names may say "nova").`,
+        `"VNC" means the internal reward points of the Service (some technical field names may say "nova").`,
         `"Admin" means an administrator authorized by VietnamDong to review, approve or reject user requests.`,
         `"You" means the individual who creates an account and uses the Service.`,
       ],
@@ -177,19 +177,19 @@ const EN_TERMS: LegalDoc = {
       ],
     },
     {
-      heading: `3. Nature of VDX`,
+      heading: `3. Nature of VNC`,
       items: [
-        `VDX is an internal reward point with value only inside VietnamDong. It is not currency, cryptocurrency, a legally recognized digital asset, a security, or a lawful means of payment.`,
-        `VDX bears no interest, has no guaranteed value, and may not be bought, sold or exchanged outside the Service. Any off-platform VDX dealings are outside our control and responsibility.`,
-        `The VDX to VND rate is shown in the Service and may change over time. The rate applied to a request is the one in effect when the request is created, unless we announce otherwise.`,
-        `Displayed VDX balances reflect the system ledger. If a technical error causes a discrepancy, we may reconcile and correct it.`,
+        `VNC is an internal reward point with value only inside VietnamDong. It is not currency, cryptocurrency, a legally recognized digital asset, a security, or a lawful means of payment.`,
+        `VNC bears no interest, has no guaranteed value, and may not be bought, sold or exchanged outside the Service. Any off-platform VNC dealings are outside our control and responsibility.`,
+        `The VNC to VND rate is shown in the Service and may change over time. The rate applied to a request is the one in effect when the request is created, unless we announce otherwise.`,
+        `Displayed VNC balances reflect the system ledger. If a technical error causes a discrepancy, we may reconcile and correct it.`,
       ],
     },
     {
       heading: `4. Tasks and rewards`,
       items: [
         `Shortlink tasks are provided through third-party shortlink providers. You must complete tasks honestly, as instructed, using your own manual actions.`,
-        `VDX is credited only when a task is verified as valid. We do not guarantee that tasks are always available and may add, change, pause or remove tasks at any time.`,
+        `VNC is credited only when a task is verified as valid. We do not guarantee that tasks are always available and may add, change, pause or remove tasks at any time.`,
         `Rewards from check-in, the lucky wheel, quests, leaderboards or promotions follow the conditions published for each feature. Rewards may be refused or revoked in case of suspected fraud or system errors.`,
       ],
     },
@@ -198,7 +198,7 @@ const EN_TERMS: LegalDoc = {
       items: [
         `Every withdrawal, redemption and Vietsub Studio purchase requires manual Admin approval. Submitting a request does not mean it will be approved.`,
         `Typical processing time is about 24 hours, for reference only; it may take longer due to security checks, holidays or payment partner issues.`,
-        `We may request verification, reject or hold a request when we see anomalies, violations, or when required by a competent authority. If a request is rejected for reasons not caused by you, the related VDX is returned to your account.`,
+        `We may request verification, reject or hold a request when we see anomalies, violations, or when required by a competent authority. If a request is rejected for reasons not caused by you, the related VNC is returned to your account.`,
         `You must provide accurate payout details (wallet, bank account, order information). We are not liable for payouts processed according to the details you provided if those details were wrong.`,
         `You must meet the minimum withdrawal amount and verify your email (if you registered with email) as shown on the Wallet and Redeem pages. Cards and digital services from partners are processed only after Admin approval.`,
         `Vietsub Studio: the license key is for the purchasing individual and may not be shared, resold or published. Keys leaked through your fault may be revoked. Refunds follow consumer protection law and the policy announced at the time of purchase.`,
@@ -208,7 +208,7 @@ const EN_TERMS: LegalDoc = {
       heading: `6. Referrals and Creator Codes`,
       items: [
         `Referral and Creator Code commissions are calculated at the rates published in the system and arise only from valid activity of referred users.`,
-        `Self-referral, creating fake accounts to earn commission, or promoting with false information or misleading claims about income or the nature of VDX is prohibited.`,
+        `Self-referral, creating fake accounts to earn commission, or promoting with false information or misleading claims about income or the nature of VNC is prohibited.`,
         `We may change, pause or end the referral program and revoke commissions arising from violations.`,
       ],
     },
@@ -222,14 +222,14 @@ const EN_TERMS: LegalDoc = {
         `Impersonating others or Admins, scamming users, or taking over accounts or information of others.`,
         `Using the Service for money laundering, payment fraud, or any activity that is unlawful under Vietnamese law.`,
         `Posting or sending unlawful, abusive, harassing or spam content, or content infringing others' rights (including in Support tickets).`,
-        `Transferring VDX internally to evade rules, profit improperly, or support off-platform trading.`,
+        `Transferring VNC internally to evade rules, profit improperly, or support off-platform trading.`,
       ],
     },
     {
       heading: `8. Anti-fraud, locks and clawbacks`,
       items: [
         `We apply per-IP registration limits and automated anomaly detection (for example an unusual number of tasks completed in a short time). Suspected accounts may be temporarily locked for review.`,
-        `When a violation is established, we may cancel rewards, revoke VDX, reject withdrawals, and lock or terminate the account without prior notice, depending on severity.`,
+        `When a violation is established, we may cancel rewards, revoke VNC, reject withdrawals, and lock or terminate the account without prior notice, depending on severity.`,
         `If you believe your account was locked by mistake, submit an appeal via Support with relevant details. Our decision is final, without affecting rights granted to you by law.`,
       ],
     },
@@ -257,7 +257,7 @@ const EN_TERMS: LegalDoc = {
     {
       heading: `12. Disclaimers and limitation of liability`,
       items: [
-        `The Service is provided "as is". We do not promise uninterrupted or error-free operation and do not guarantee any level of income. Your VDX earnings depend on available tasks and your compliance with these terms.`,
+        `The Service is provided "as is". We do not promise uninterrupted or error-free operation and do not guarantee any level of income. Your VNC earnings depend on available tasks and your compliance with these terms.`,
         `To the extent permitted by law, we are not liable for indirect damages, lost profits, data loss, or damage from force majeure, third-party failures, or your breach of these terms. Our maximum liability (if any) will not exceed the value of the disputed transaction request.`,
         `Nothing in these terms excludes or limits mandatory consumer rights or liabilities that Vietnamese law does not permit to be excluded.`,
       ],
@@ -299,7 +299,7 @@ const VI_PRIVACY: LegalDoc = {
       heading: `1. Dữ liệu chúng tôi thu thập`,
       items: [
         `Dữ liệu tài khoản: tên đăng nhập, email, mật khẩu (chỉ lưu dạng băm, không lưu mật khẩu gốc), ảnh đại diện và mã định danh từ Discord hoặc Google khi bạn đăng nhập bằng các phương thức này.`,
-        `Dữ liệu giao dịch: số dư VDX, lịch sử nhiệm vụ, điểm danh, chuyển khoản nội bộ, giới thiệu, đơn đổi thưởng, yêu cầu rút tiền, đơn Vietsub Studio.`,
+        `Dữ liệu giao dịch: số dư VNC, lịch sử nhiệm vụ, điểm danh, chuyển khoản nội bộ, giới thiệu, đơn đổi thưởng, yêu cầu rút tiền, đơn Vietsub Studio.`,
         `Thông tin nhận tiền bạn cung cấp: số ví điện tử, tài khoản ngân hàng, thông tin nhận thẻ hoặc dịch vụ.`,
         `Dữ liệu kỹ thuật và an ninh: địa chỉ IP (gồm IP lúc đăng ký), nhật ký truy cập, dữ liệu chống gian lận, thời điểm đồng ý điều khoản.`,
         `Dữ liệu bảo mật 2FA: khóa bí mật TOTP nếu bạn bật xác thực 2 lớp.`,
@@ -390,7 +390,7 @@ const EN_PRIVACY: LegalDoc = {
       heading: `1. Data we collect`,
       items: [
         `Account data: username, email, password (stored only as a hash, never in plain text), avatar and identifiers from Discord or Google if you sign in with them.`,
-        `Transaction data: VDX balance, task history, check-ins, internal transfers, referrals, redemption orders, withdrawal requests, Vietsub Studio orders.`,
+        `Transaction data: VNC balance, task history, check-ins, internal transfers, referrals, redemption orders, withdrawal requests, Vietsub Studio orders.`,
         `Payout details you provide: e-wallet number, bank account, details for receiving cards or services.`,
         `Technical and security data: IP address (including registration IP), access logs, anti-fraud data, time you accepted the terms.`,
         `2FA security data: a TOTP secret key if you enable two-factor authentication.`,
@@ -475,12 +475,12 @@ const EN_PRIVACY: LegalDoc = {
 const VI_ABOUT: LegalDoc = {
   title: `Về chúng tôi`,
   updated: ``,
-  intro: `VietnamDong là nền tảng kiếm VDX bằng nhiệm vụ rút gọn link, điểm danh, vòng quay và giới thiệu bạn bè, sau đó quy đổi ra tiền mặt hoặc thẻ cào theo tỷ giá công khai.`,
+  intro: `VietnamDong là nền tảng kiếm VNC bằng nhiệm vụ rút gọn link, điểm danh, vòng quay và giới thiệu bạn bè, sau đó quy đổi ra tiền mặt hoặc thẻ cào theo tỷ giá công khai.`,
   sections: [
     {
       heading: `Chúng tôi làm gì`,
       items: [
-        `Cung cấp nhiều nhiệm vụ rút gọn link từ các nhà cung cấp khác nhau, hoàn thành xong nhận VDX.`,
+        `Cung cấp nhiều nhiệm vụ rút gọn link từ các nhà cung cấp khác nhau, hoàn thành xong nhận VNC.`,
         `Thưởng điểm danh theo chuỗi ngày, vòng quay may mắn, nhiệm vụ tuần/tháng và bảng xếp hạng.`,
         `Chương trình giới thiệu và Creator Code với hoa hồng minh bạch.`,
         `Vietsub Studio: công cụ làm vietsub dành cho người dùng mua khóa bản quyền.`,
@@ -490,9 +490,9 @@ const VI_ABOUT: LegalDoc = {
       heading: `Cam kết minh bạch và an toàn`,
       items: [
         `Mọi giao dịch rút tiền, đổi thưởng và mua Vietsub Studio đều do Admin duyệt thủ công.`,
-        `Tỷ giá VDX hiển thị công khai; lịch sử giao dịch của bạn luôn xem được và xuất được.`,
+        `Tỷ giá VNC hiển thị công khai; lịch sử giao dịch của bạn luôn xem được và xuất được.`,
         `Bảo mật bằng Cloudflare Turnstile, giới hạn đăng ký theo IP, phát hiện bất thường và xác thực 2 lớp tùy chọn.`,
-        `VDX là điểm thưởng nội bộ, không phải tiền tệ hay tài sản đầu tư. Chúng tôi không hứa hẹn mức thu nhập cố định.`,
+        `VNC là điểm thưởng nội bộ, không phải tiền tệ hay tài sản đầu tư. Chúng tôi không hứa hẹn mức thu nhập cố định.`,
       ],
     },
     {
@@ -505,12 +505,12 @@ const VI_ABOUT: LegalDoc = {
 const EN_ABOUT: LegalDoc = {
   title: `About us`,
   updated: ``,
-  intro: `VietnamDong is a platform where you earn VDX through shortlink tasks, daily check-ins, the lucky wheel and referrals, then convert it to cash or top-up cards at a publicly shown rate.`,
+  intro: `VietnamDong is a platform where you earn VNC through shortlink tasks, daily check-ins, the lucky wheel and referrals, then convert it to cash or top-up cards at a publicly shown rate.`,
   sections: [
     {
       heading: `What we do`,
       items: [
-        `Offer shortlink tasks from multiple providers; finish a task and receive VDX.`,
+        `Offer shortlink tasks from multiple providers; finish a task and receive VNC.`,
         `Streak-based daily rewards, a lucky wheel, weekly/monthly quests and leaderboards.`,
         `A referral program and Creator Codes with transparent commissions.`,
         `Vietsub Studio: a subtitling tool for users who purchase a license key.`,
@@ -520,9 +520,9 @@ const EN_ABOUT: LegalDoc = {
       heading: `Our commitment to transparency and safety`,
       items: [
         `Every withdrawal, redemption and Vietsub Studio purchase is manually approved by an Admin.`,
-        `The VDX rate is publicly shown; your transaction history is always viewable and exportable.`,
+        `The VNC rate is publicly shown; your transaction history is always viewable and exportable.`,
         `Protection through Cloudflare Turnstile, per-IP registration limits, anomaly detection and optional two-factor authentication.`,
-        `VDX is an internal reward point, not currency or an investment asset. We do not promise any fixed income.`,
+        `VNC is an internal reward point, not currency or an investment asset. We do not promise any fixed income.`,
       ],
     },
     {

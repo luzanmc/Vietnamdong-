@@ -69,7 +69,7 @@ function Overview() {
   async function triggerMonthlyPayout() {
     if (!confirm('Phát thưởng top 3 bảng xếp hạng tháng ngay bây giờ?')) return;
     const result = await adminApi<{ paid: { username: string; amount: number }[] }>('/leaderboard/monthly-payout', { method: 'POST' });
-    setPayoutMsg(result.paid.length > 0 ? result.paid.map((p) => `${p.username}: +${p.amount} VDX`).join(', ') : 'Chưa có ai đủ điều kiện.');
+    setPayoutMsg(result.paid.length > 0 ? result.paid.map((p) => `${p.username}: +${p.amount} VNC`).join(', ') : 'Chưa có ai đủ điều kiện.');
   }
 
   return (
@@ -80,7 +80,7 @@ function Overview() {
           {stats ? <div className="font-mono text-2xl">{stats.users}</div> : <Skeleton className="h-8 w-16 mt-1" />}
         </div>
         <div className="bg-surface border border-line rounded-xl p-4">
-          <div className="text-[11px] text-muted uppercase">Tổng VDX đã phát</div>
+          <div className="text-[11px] text-muted uppercase">Tổng VNC đã phát</div>
           {stats ? <div className="font-mono text-2xl">{stats.totalNovaOut}</div> : <Skeleton className="h-8 w-20 mt-1" />}
         </div>
         <div className="bg-surface border border-line rounded-xl p-4">
@@ -89,7 +89,7 @@ function Overview() {
         </div>
       </div>
       <div className="bg-surface border border-line rounded-xl p-4">
-        <h2 className="text-sm font-semibold mb-2">Phát thưởng bảng xếp hạng tháng (top 3: 500 / 300 / 100 VDX)</h2>
+        <h2 className="text-sm font-semibold mb-2">Phát thưởng bảng xếp hạng tháng (top 3: 500 / 300 / 100 VNC)</h2>
         <button onClick={triggerMonthlyPayout} className="bg-indigo text-white text-xs font-medium px-3 py-2 rounded-lg">Phát thưởng ngay</button>
         {payoutMsg && <p className="text-xs text-cyan mt-2">{payoutMsg}</p>}
       </div>
@@ -138,7 +138,7 @@ function Withdrawals() {
       </div>
       <TableWrap>
       <thead className="bg-surface2 text-muted text-xs">
-        <tr><th className="text-left px-3 py-2">User</th><th className="text-left px-3 py-2">VDX</th><th className="text-left px-3 py-2">VNĐ</th><th className="text-left px-3 py-2">Trạng thái</th><th className="text-left px-3 py-2">Hành động</th></tr>
+        <tr><th className="text-left px-3 py-2">User</th><th className="text-left px-3 py-2">VNC</th><th className="text-left px-3 py-2">VNĐ</th><th className="text-left px-3 py-2">Trạng thái</th><th className="text-left px-3 py-2">Hành động</th></tr>
       </thead>
       <tbody>
         {!rows ? (
@@ -191,7 +191,7 @@ function RedeemOrders() {
       </div>
       <TableWrap>
       <thead className="bg-surface2 text-muted text-xs">
-        <tr><th className="text-left px-3 py-2">User</th><th className="text-left px-3 py-2">Vật phẩm</th><th className="text-left px-3 py-2">VDX</th><th className="text-left px-3 py-2">Trạng thái</th><th className="text-left px-3 py-2">Hành động</th></tr>
+        <tr><th className="text-left px-3 py-2">User</th><th className="text-left px-3 py-2">Vật phẩm</th><th className="text-left px-3 py-2">VNC</th><th className="text-left px-3 py-2">Trạng thái</th><th className="text-left px-3 py-2">Hành động</th></tr>
       </thead>
       <tbody>
         {!rows ? (
@@ -367,7 +367,7 @@ function Users() {
       </div>
       <TableWrap>
         <thead className="bg-surface2 text-muted text-xs">
-          <tr><th className="text-left px-3 py-2">Username</th><th className="text-left px-3 py-2">Số dư</th><th className="text-left px-3 py-2">Vai trò</th><th className="text-left px-3 py-2">Điều chỉnh VDX</th></tr>
+          <tr><th className="text-left px-3 py-2">Username</th><th className="text-left px-3 py-2">Số dư</th><th className="text-left px-3 py-2">Vai trò</th><th className="text-left px-3 py-2">Điều chỉnh VNC</th></tr>
         </thead>
         <tbody>
           {!rows ? (
@@ -381,7 +381,7 @@ function Users() {
                 <td className="px-3 py-2 flex gap-2">
                   <input
                     value={adjust[u.id] || ''} onChange={(e) => setAdjust((a) => ({ ...a, [u.id]: e.target.value }))}
-                    placeholder="+/- VDX" className="w-24 bg-surface2 border border-line rounded px-2 py-1 text-xs"
+                    placeholder="+/- VNC" className="w-24 bg-surface2 border border-line rounded px-2 py-1 text-xs"
                   />
                   <button onClick={() => submitAdjust(u.id)} className="text-xs text-cyan">Áp dụng</button>
                 </td>
@@ -480,7 +480,7 @@ function VietsubAdmin() {
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-[11px] text-muted block mb-1">Giá (VDX)</label>
+            <label className="text-[11px] text-muted block mb-1">Giá (VNC)</label>
             <input type="number" value={form.priceNova} onChange={(e) => setForm({ ...form, priceNova: Number(e.target.value) })} className="w-full bg-surface2 border border-line rounded-lg px-3 py-1.5 text-sm" />
           </div>
           <div>
@@ -521,14 +521,14 @@ function VietsubAdmin() {
             {orders.map((o) => (
               <tr key={o.id} className="border-t border-line">
                 <td className="px-3 py-2">{o.username}</td>
-                <td className="px-3 py-2">{o.payment_method === 'nova' ? 'VDX' : 'Chuyển khoản'}</td>
+                <td className="px-3 py-2">{o.payment_method === 'nova' ? 'VNC' : 'Chuyển khoản'}</td>
                 <td className="px-3 py-2 font-mono">{o.payment_method === 'nova' ? o.price_nova : o.price_vnd?.toLocaleString('vi-VN') + 'đ'}</td>
                 <td className="px-3 py-2 text-xs">{o.transfer_note || '-'}</td>
                 <td className="px-3 py-2">{o.status}</td>
                 <td className="px-3 py-2 space-x-2 whitespace-nowrap">
                   {o.status === 'pending' && (<>
                     <button onClick={() => actOrder(o.id, 'approve')} className="text-cyan text-xs">
-                      {o.payment_method === 'nova' ? 'Duyệt (trừ VDX + giao key)' : 'Duyệt (đã nhận tiền)'}
+                      {o.payment_method === 'nova' ? 'Duyệt (trừ VNC + giao key)' : 'Duyệt (đã nhận tiền)'}
                     </button>
                     <button onClick={() => actOrder(o.id, 'reject')} className="text-rose text-xs">Từ chối</button>
                   </>)}

@@ -6,12 +6,12 @@ export interface SpinSegment {
 }
 
 export const SPIN_SEGMENTS: SpinSegment[] = [
-  { label: '0 VDX', reward: 0, weight: 30, color: '#242430' },
-  { label: '1 VDX', reward: 1, weight: 28, color: '#6C63F5' },
-  { label: '2 VDX', reward: 2, weight: 20, color: '#22D3EE' },
-  { label: '5 VDX', reward: 5, weight: 12, color: '#F5A524' },
-  { label: '10 VDX', reward: 10, weight: 7, color: '#FB6A8A' },
-  { label: '50 VDX', reward: 50, weight: 3, color: '#F5A524' },
+  { label: '0 VNC', reward: 0, weight: 30, color: '#242430' },
+  { label: '1 VNC', reward: 1, weight: 28, color: '#6C63F5' },
+  { label: '2 VNC', reward: 2, weight: 20, color: '#22D3EE' },
+  { label: '5 VNC', reward: 5, weight: 12, color: '#F5A524' },
+  { label: '10 VNC', reward: 10, weight: 7, color: '#FB6A8A' },
+  { label: '50 VNC', reward: 50, weight: 3, color: '#F5A524' },
 ];
 
 export function pickWeightedSegment(): { index: number; segment: SpinSegment } {

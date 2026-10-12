@@ -55,7 +55,7 @@ walletRouter.post('/withdraw', requireAuth, requireNotLocked, requireEmailVerifi
   try {
     const { amount_nova, method, destination } = req.body;
     if (amount_nova < env.economy.minWithdrawNova) {
-      return res.status(400).json({ error: `Số VDX rút tối thiểu là ${env.economy.minWithdrawNova}` });
+      return res.status(400).json({ error: `Số VNC rút tối thiểu là ${env.economy.minWithdrawNova}` });
     }
 
     const id = nanoid();

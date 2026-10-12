@@ -144,7 +144,7 @@ export default function Security() {
           <i className="bi bi-shield-lock-fill text-indigo" /> {t('security.title')}
         </h1>
         <p className="text-xs sm:text-sm text-muted mt-1 leading-relaxed">
-          Kích hoạt xác thực 2 bước để ngăn chặn hoàn toàn nguy cơ mất tài khoản hoặc số dư VDX.
+          Kích hoạt xác thực 2 bước để ngăn chặn hoàn toàn nguy cơ mất tài khoản hoặc số dư VNC.
         </p>
       </div>
 

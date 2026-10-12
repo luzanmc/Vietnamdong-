@@ -11,22 +11,22 @@ interface FaqItem {
 
 const ITEMS: FaqItem[] = [
   {
-    qVi: 'VDX là gì?',
-    aVi: 'VDX là đơn vị tiền tệ nội bộ của VietnamDong. Bạn kiếm VDX bằng cách hoàn thành nhiệm vụ, điểm danh hằng ngày, quay vòng quay may mắn, giới thiệu bạn bè... rồi quy đổi VDX ra tiền thật qua MoMo, Ngân hàng hoặc thẻ cào.',
-    qEn: 'What is VDX?',
-    aEn: 'VDX is the internal currency of VietnamDong. You earn VDX by completing tasks, daily check-in, spinning lucky wheel, referring friends... then convert VDX into real money via MoMo, Bank, or game cards.',
+    qVi: 'VNC là gì?',
+    aVi: 'VNC là đơn vị tiền tệ nội bộ của VietnamDong. Bạn kiếm VNC bằng cách hoàn thành nhiệm vụ, điểm danh hằng ngày, quay vòng quay may mắn, giới thiệu bạn bè... rồi quy đổi VNC ra tiền thật qua MoMo, Ngân hàng hoặc thẻ cào.',
+    qEn: 'What is VNC?',
+    aEn: 'VNC is the internal currency of VietnamDong. You earn VNC by completing tasks, daily check-in, spinning lucky wheel, referring friends... then convert VNC into real money via MoMo, Bank, or game cards.',
   },
   {
-    qVi: 'Làm sao để kiếm VDX nhanh nhất?',
-    aVi: 'Vào trang Tổng quan, chọn các nhiệm vụ rút gọn link có gắn nhãn "HOT" để nhận nhiều VDX nhất. Đồng thời giữ streak điểm danh 7 ngày để x2 phần thưởng và mời bạn bè để nhận hoa hồng 20% vĩnh viễn.',
-    qEn: 'How do I earn VDX fastest?',
+    qVi: 'Làm sao để kiếm VNC nhanh nhất?',
+    aVi: 'Vào trang Tổng quan, chọn các nhiệm vụ rút gọn link có gắn nhãn "HOT" để nhận nhiều VNC nhất. Đồng thời giữ streak điểm danh 7 ngày để x2 phần thưởng và mời bạn bè để nhận hoa hồng 20% vĩnh viễn.',
+    qEn: 'How do I earn VNC fastest?',
     aEn: 'Visit the Dashboard and select tasks marked "HOT" for the highest rewards. Keep a 7-day check-in streak to maximize bonuses, and invite friends for permanent 20% commission.',
   },
   {
-    qVi: 'Tỷ giá quy đổi VDX sang VNĐ là bao nhiêu?',
-    aVi: 'Tỷ giá hiện tại được hiển thị trực tiếp cạnh mỗi số VDX trên web (dạng "~X đ"). Tỷ giá có thể thay đổi theo thời gian, admin sẽ thông báo nếu có điều chỉnh.',
-    qEn: 'What is the VDX to VND exchange rate?',
-    aEn: 'The current rate is shown right next to every VDX amount on the site (as "~X đ"). The rate may change over time; admin will announce any adjustments.',
+    qVi: 'Tỷ giá quy đổi VNC sang VNĐ là bao nhiêu?',
+    aVi: 'Tỷ giá hiện tại được hiển thị trực tiếp cạnh mỗi số VNC trên web (dạng "~X đ"). Tỷ giá có thể thay đổi theo thời gian, admin sẽ thông báo nếu có điều chỉnh.',
+    qEn: 'What is the VNC to VND exchange rate?',
+    aEn: 'The current rate is shown right next to every VNC amount on the site (as "~X đ"). The rate may change over time; admin will announce any adjustments.',
   },
   {
     qVi: 'Rút tiền mất bao lâu?',

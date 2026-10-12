@@ -82,7 +82,7 @@ export default function VerifyLink() {
         {!error && attempt && !result && (
           <>
             <div className="text-sm text-[#8A8A93] mb-1">Nhiệm vụ</div>
-            <div className="font-semibold mb-4">{attempt.taskName} (+{attempt.rewardNova} VDX)</div>
+            <div className="font-semibold mb-4">{attempt.taskName} (+{attempt.rewardNova} VNC)</div>
 
             {!SITE_KEY && (
               <p className="text-xs text-amber-400 mb-3">
@@ -101,7 +101,7 @@ export default function VerifyLink() {
             </div>
             <div className="font-bold mb-1">🎉 Chúc mừng vượt link thành công!</div>
             <p className="text-sm text-[#8A8A93] mb-3">
-              Bạn đã nhận được <span className="font-mono font-semibold text-[#12B76A]">+{result.rewardNova} VDX</span>
+              Bạn đã nhận được <span className="font-mono font-semibold text-[#12B76A]">+{result.rewardNova} VNC</span>
             </p>
             <a href="/dashboard" className="inline-block bg-white text-black text-sm font-semibold px-5 py-2 rounded-lg">
               Quay lại trang chủ

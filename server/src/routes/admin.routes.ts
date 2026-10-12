@@ -65,7 +65,7 @@ adminRouter.post('/withdrawals/:id/approve', async (req, res, next) => {
     const w = await getPendingWithdrawal(req.params.id);
     if (!w) return res.status(404).json({ error: 'Không tìm thấy yêu cầu' });
     await markWithdrawalPaid(req.params.id, req.body.note || null);
-    await createNotification(nanoid(), w.user_id, `Yêu cầu rút ${w.amount_nova} VDX đã được duyệt và thanh toán.`, '/wallet');
+    await createNotification(nanoid(), w.user_id, `Yêu cầu rút ${w.amount_nova} VNC đã được duyệt và thanh toán.`, '/wallet');
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -78,7 +78,7 @@ adminRouter.post('/withdrawals/:id/reject', async (req, res, next) => {
     if (!w) return res.status(404).json({ error: 'Không tìm thấy yêu cầu' });
     await credit(w.user_id, w.amount_nova, 'admin_adjust', w.id);
     await markWithdrawalRejected(req.params.id, req.body.note || 'Từ chối bởi admin');
-    await createNotification(nanoid(), w.user_id, `Yêu cầu rút ${w.amount_nova} VDX bị từ chối, đã hoàn lại VDX.`, '/wallet');
+    await createNotification(nanoid(), w.user_id, `Yêu cầu rút ${w.amount_nova} VNC bị từ chối, đã hoàn lại VNC.`, '/wallet');
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -181,7 +181,7 @@ adminRouter.get('/users', async (req, res, next) => {
 adminRouter.post('/users/:id/adjust', async (req, res, next) => {
   try {
     const amount = Number(req.body.amount);
-    if (!amount) return res.status(400).json({ error: 'Số VDX không hợp lệ' });
+    if (!amount) return res.status(400).json({ error: 'Số VNC không hợp lệ' });
     if (amount > 0) await credit(req.params.id, amount, 'admin_adjust', req.body.note || null);
     else await adjustUserBalanceRaw(req.params.id, amount);
     res.json({ ok: true });
@@ -330,7 +330,7 @@ adminRouter.post('/leaderboard/monthly-payout', async (req, res, next) => {
       const user = await getUserByUsername(row.username);
       if (!user) continue;
       await credit(user.id, prizes[i], 'monthly_leaderboard_reward', `month-top-${i + 1}`);
-      await createNotification(nanoid(), user.id, `Chúc mừng! Bạn đạt hạng ${i + 1} bảng xếp hạng tháng, nhận thưởng ${prizes[i]} VDX`, '/leaderboard');
+      await createNotification(nanoid(), user.id, `Chúc mừng! Bạn đạt hạng ${i + 1} bảng xếp hạng tháng, nhận thưởng ${prizes[i]} VNC`, '/leaderboard');
       paid.push({ username: user.username, amount: prizes[i] });
     }
 

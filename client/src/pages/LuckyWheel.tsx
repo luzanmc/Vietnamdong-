@@ -29,12 +29,12 @@ export default function LuckyWheel() {
   const segments: SpinSegment[] = status?.segments?.length
     ? status.segments
     : [
-        { label: '0 VDX', reward: 0, weight: 30, color: '#242430' },
-        { label: '1 VDX', reward: 1, weight: 28, color: '#6C63F5' },
-        { label: '2 VDX', reward: 2, weight: 20, color: '#22D3EE' },
-        { label: '5 VDX', reward: 5, weight: 12, color: '#F5A524' },
-        { label: '10 VDX', reward: 10, weight: 7, color: '#FB6A8A' },
-        { label: '50 VDX', reward: 50, weight: 3, color: '#F5A524' },
+        { label: '0 VNC', reward: 0, weight: 30, color: '#242430' },
+        { label: '1 VNC', reward: 1, weight: 28, color: '#6C63F5' },
+        { label: '2 VNC', reward: 2, weight: 20, color: '#22D3EE' },
+        { label: '5 VNC', reward: 5, weight: 12, color: '#F5A524' },
+        { label: '10 VNC', reward: 10, weight: 7, color: '#FB6A8A' },
+        { label: '50 VNC', reward: 50, weight: 3, color: '#F5A524' },
       ];
 
   const numSegments = segments.length;
@@ -75,13 +75,13 @@ export default function LuckyWheel() {
         setSpinning(false);
         setStatus((s) => (s ? { ...s, can_spin: false } : s));
 
-        const wonSegment = segments[res.segmentIndex] || { reward: res.reward, label: `${res.reward} VDX` };
+        const wonSegment = segments[res.segmentIndex] || { reward: res.reward, label: `${res.reward} VNC` };
         setWonPrize({ reward: res.reward, label: wonSegment.label });
 
         if (res.reward > 0) {
           playWinFanfare();
           triggerConfetti();
-          toastSuccess(`Chúc mừng bạn nhận được ${res.reward} VDX!`, 'Vòng quay may mắn');
+          toastSuccess(`Chúc mừng bạn nhận được ${res.reward} VNC!`, 'Vòng quay may mắn');
         } else {
           playCoinSound();
           toastSuccess('Chúc bạn may mắn lần sau!', 'Vòng quay');
@@ -120,7 +120,7 @@ export default function LuckyWheel() {
           {t('spin.title')}
         </h1>
         <p className="text-xs sm:text-sm text-muted mt-1 max-w-sm mx-auto">
-          Mỗi ngày nhận 1 lượt quay miễn phí trúng tới <span className="text-amber font-bold">50 VDX</span>!
+          Mỗi ngày nhận 1 lượt quay miễn phí trúng tới <span className="text-amber font-bold">50 VNC</span>!
         </p>
       </div>
 
@@ -226,7 +226,7 @@ export default function LuckyWheel() {
                         dy="14"
                         opacity="0.9"
                       >
-                        VDX
+                        VNC
                       </text>
                     </g>
                   </g>
@@ -301,12 +301,12 @@ export default function LuckyWheel() {
 
               <div className="font-mono text-3xl font-extrabold text-amber my-3 flex items-center justify-center gap-2">
                 <span>+{wonPrize.reward}</span>
-                <span className="text-lg font-body font-normal text-muted">VDX</span>
+                <span className="text-lg font-body font-normal text-muted">VNC</span>
               </div>
 
               <p className="text-xs text-muted leading-relaxed mb-6">
                 {wonPrize.reward > 0
-                  ? 'Phần thưởng VDX đã được cộng trực tiếp vào ví của bạn.'
+                  ? 'Phần thưởng VNC đã được cộng trực tiếp vào ví của bạn.'
                   : 'Đừng buồn, hãy quay lại vào ngày mai để thử lại vận may nhé!'}
               </p>
 

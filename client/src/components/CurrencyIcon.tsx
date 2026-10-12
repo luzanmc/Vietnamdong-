@@ -7,7 +7,7 @@ export default function CurrencyIcon({ size = 16, className = '' }: CurrencyIcon
   return (
     <img
       src="/currency-vnc.png"
-      alt="VDX"
+      alt="VNC"
       width={size}
       height={size}
       className={`inline-block align-middle shrink-0 select-none object-contain ${className}`}

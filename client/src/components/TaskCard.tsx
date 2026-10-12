@@ -38,7 +38,7 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
                 )}
               </div>
               <div className="text-[11px] text-muted truncate mt-0.5">
-                Vượt link rút gọn để nhận thưởng VDX ngay
+                Vượt link rút gọn để nhận thưởng VNC ngay
               </div>
             </div>
           </div>
@@ -48,7 +48,7 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
             <div className="flex items-center gap-1.5 text-base sm:text-lg">
               <CurrencyIcon size={18} />
               <span>+{task.reward_nova}</span>
-              <span className="text-xs text-amber/80 font-normal">VDX</span>
+              <span className="text-xs text-amber/80 font-normal">VNC</span>
             </div>
             {novaToVndRate > 0 && (
               <div className="text-[10px] text-muted font-body font-normal">

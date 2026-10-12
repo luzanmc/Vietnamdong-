@@ -118,7 +118,7 @@ export default function Dashboard() {
             Chào mừng trở lại, <span className="gradient-text-indigo">{me.username}</span> 👋
           </h1>
           <p className="text-sm text-muted mt-2 max-w-xl leading-relaxed">
-            Kiếm VDX mỗi ngày bằng cách hoàn thành nhiệm vụ vượt link, điểm danh chuỗi, và chia sẻ bạn bè — quy đổi ra tiền mặt hoặc nạp game tức thì!
+            Kiếm VNC mỗi ngày bằng cách hoàn thành nhiệm vụ vượt link, điểm danh chuỗi, và chia sẻ bạn bè — quy đổi ra tiền mặt hoặc nạp game tức thì!
           </p>
 
           {/* Quick Action Shortcuts */}
@@ -165,9 +165,9 @@ export default function Dashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         <StatCard
-          label="Số dư VDX"
+          label="Số dư VNC"
           value={wallet?.balance_nova ?? 0}
-          suffix="VDX"
+          suffix="VNC"
           icon="bi-coin"
           iconColor="text-amber"
           hint={`≈ ${(wallet?.balance_vnd ?? 0).toLocaleString('vi-VN')}đ`}
@@ -176,10 +176,10 @@ export default function Dashboard() {
         <StatCard
           label="Đã quy đổi"
           value={wallet?.total_redeemed_nova ?? 0}
-          suffix="VDX"
+          suffix="VNC"
           icon="bi-receipt-cutoff"
           iconColor="text-cyan"
-          hint="Tổng VDX đã rút"
+          hint="Tổng VNC đã rút"
         />
         <StatCard
           label="Chuỗi điểm danh"
@@ -207,7 +207,7 @@ export default function Dashboard() {
               <i className="bi bi-lightning-charge-fill text-amber" /> Nhiệm vụ rút gọn liên kết
             </h2>
             <p className="text-xs text-muted mt-0.5">
-              Hoàn thành các liên kết bên dưới để cộng VDX trực tiếp vào số dư
+              Hoàn thành các liên kết bên dưới để cộng VNC trực tiếp vào số dư
             </p>
           </div>
 

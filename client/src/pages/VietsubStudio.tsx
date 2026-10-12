@@ -227,7 +227,7 @@ export default function VietsubStudio() {
               <div key={o.id} className="glass-card rounded-2xl p-4 border border-line space-y-1">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-mono font-bold text-amber">
-                    {o.payment_method === 'nova' ? `${o.price_nova} VDX` : `${o.price_vnd?.toLocaleString('vi-VN')}đ`}
+                    {o.payment_method === 'nova' ? `${o.price_nova} VNC` : `${o.price_vnd?.toLocaleString('vi-VN')}đ`}
                   </span>
                   <span className="text-muted capitalize text-[11px] bg-surface2 px-2 py-0.5 rounded-full border border-line">
                     {o.status}

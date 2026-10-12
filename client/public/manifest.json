@@ -1,7 +1,7 @@
 {
   "name": "VietnamDong",
   "short_name": "VietnamDong",
-  "description": "Kiếm VDX bằng nhiệm vụ rút gọn link, đổi ra tiền thật",
+  "description": "Kiếm VNC bằng nhiệm vụ rút gọn link, đổi ra tiền thật",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#0A0A0F",

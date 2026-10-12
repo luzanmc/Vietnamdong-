@@ -28,7 +28,7 @@ export default function Referral() {
     });
   }
 
-  const shareText = encodeURIComponent('Tham gia VietnamDong cùng mình, kiếm VDX đổi tiền thật mỗi ngày!');
+  const shareText = encodeURIComponent('Tham gia VietnamDong cùng mình, kiếm VNC đổi tiền thật mỗi ngày!');
   const shareUrl = info ? encodeURIComponent(info.referral_link) : '';
 
   return (
@@ -43,7 +43,7 @@ export default function Referral() {
           <i className="bi bi-people text-indigo" /> {t('referral.title')}
         </h1>
         <p className="text-xs sm:text-sm text-muted mt-1 leading-relaxed">
-          Mời bạn bè tham gia VietnamDong. Bạn sẽ nhận được 20% hoa hồng VDX vĩnh viễn từ mọi nhiệm vụ mà người bạn giới thiệu hoàn thành!
+          Mời bạn bè tham gia VietnamDong. Bạn sẽ nhận được 20% hoa hồng VNC vĩnh viễn từ mọi nhiệm vụ mà người bạn giới thiệu hoàn thành!
         </p>
       </div>
 
@@ -147,7 +147,7 @@ export default function Referral() {
               <div className="font-mono text-3xl font-bold text-amber mt-1 flex items-center justify-center gap-1.5">
                 <CurrencyIcon size={24} />
                 <span>{info.total_earned_nova}</span>
-                <span className="text-xs text-muted font-body font-normal">VDX</span>
+                <span className="text-xs text-muted font-body font-normal">VNC</span>
               </div>
             </div>
           </div>

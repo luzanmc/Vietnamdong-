@@ -38,16 +38,31 @@ export async function withTransaction<T>(fn: (client: PoolClient) => Promise<T>)
   }
 }
 
+import { schemaSql } from './schemaSql.js';
+
 let readyPromise: Promise<void> | null = null;
 
 export function ensureReady(): Promise<void> {
-  if (!readyPromise) readyPromise = migrate();
+  if (!readyPromise) {
+    readyPromise = migrate().catch((err) => {
+      readyPromise = null;
+      throw err;
+    });
+  }
   return readyPromise;
 }
 
 async function migrate(): Promise<void> {
   if (!connectionString) {
     throw new Error('DATABASE_URL (hoặc SUPABASE_DB_URL) chưa được cấu hình trên server');
+  }
+
+  // Fast check: if users table already exists, skip migration
+  try {
+    const check = await pool.query('SELECT 1 FROM users LIMIT 1');
+    if (check) return;
+  } catch {
+    // Table does not exist yet or first run, proceed with migration below
   }
 
   const migrationPool = new Pool({
@@ -57,7 +72,14 @@ async function migrate(): Promise<void> {
   });
 
   try {
-    const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf-8');
+    let schema = schemaSql;
+    if (!schema) {
+      try {
+        schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf-8');
+      } catch {
+        // fallback to embedded
+      }
+    }
     await migrationPool.query(schema);
 
     const seedTaskCount = await migrationPool.query('SELECT COUNT(*) AS c FROM tasks');

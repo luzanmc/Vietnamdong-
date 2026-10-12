@@ -51,7 +51,7 @@ export default function Quests() {
           <i className="bi bi-list-task text-indigo" /> {t('quests.title')}
         </h1>
         <p className="text-xs sm:text-sm text-muted mt-1">
-          Hoàn thành các cột mốc đặc biệt để nhận thêm một lượng lớn VDX thưởng.
+          Hoàn thành các cột mốc đặc biệt để nhận thêm một lượng lớn VNC thưởng.
         </p>
       </div>
 
@@ -87,7 +87,7 @@ export default function Quests() {
                   <div className="font-mono text-base font-bold text-amber flex items-center gap-1 shrink-0 bg-amber/10 px-2.5 py-1 rounded-xl border border-amber/20">
                     <CurrencyIcon size={16} />
                     <span>+{q.reward}</span>
-                    <span className="text-xs">VDX</span>
+                    <span className="text-xs">VNC</span>
                   </div>
                 </div>
 

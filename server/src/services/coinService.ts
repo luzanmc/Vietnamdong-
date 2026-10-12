@@ -44,7 +44,7 @@ export async function debit(
       userId,
     ]);
     const user = rows[0];
-    if (!user || user.balance_nova < amount) throw new HttpError(400, 'Số dư VDX không đủ');
+    if (!user || user.balance_nova < amount) throw new HttpError(400, 'Số dư VNC không đủ');
     await c.query('UPDATE users SET balance_nova = balance_nova - $1 WHERE id = $2', [amount, userId]);
     await c.query('INSERT INTO coin_ledger (id, user_id, amount, reason, ref_id) VALUES ($1, $2, $3, $4, $5)', [
       nanoid(),

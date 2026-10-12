@@ -78,11 +78,11 @@ export default function Wallet() {
     e.preventDefault();
     const amount = Number(form.amount_nova);
     if (!amount || amount <= 0) {
-      toastError('Vui lòng nhập số VDX hợp lệ.', 'Số lượng không hợp lệ');
+      toastError('Vui lòng nhập số VNC hợp lệ.', 'Số lượng không hợp lệ');
       return;
     }
     if (wallet && amount > wallet.balance_nova) {
-      toastError('Số dư VDX không đủ để thực hiện yêu cầu.', 'Số dư không đủ');
+      toastError('Số dư VNC không đủ để thực hiện yêu cầu.', 'Số dư không đủ');
       return;
     }
     if (!form.destination.trim()) {
@@ -125,7 +125,7 @@ export default function Wallet() {
           <i className="bi bi-wallet2 text-cyan" /> {t('wallet.title')}
         </h1>
         <p className="text-xs sm:text-sm text-muted mt-1">
-          Quản lý số dư VDX, yêu cầu rút tiền về ngân hàng hoặc đổi thẻ cào nhanh chóng.
+          Quản lý số dư VNC, yêu cầu rút tiền về ngân hàng hoặc đổi thẻ cào nhanh chóng.
         </p>
       </div>
 
@@ -158,7 +158,7 @@ export default function Wallet() {
                   <div className="font-mono text-3xl font-extrabold flex items-center gap-2 tracking-tight">
                     <CurrencyIcon size={26} />
                     <AnimatedNumber value={wallet.balance_nova} />
-                    <span className="text-sm font-normal text-amber">VDX</span>
+                    <span className="text-sm font-normal text-amber">VNC</span>
                   </div>
                 ) : (
                   <Skeleton className="h-9 w-36 bg-white/10" />
@@ -198,7 +198,7 @@ export default function Wallet() {
             <div className="glass-card rounded-2xl p-4">
               <div className="text-[11px] text-muted uppercase">Tỷ giá quy đổi</div>
               <div className="font-mono text-lg font-bold text-amber mt-1">
-                1 VDX = {novaToVndRate > 0 ? novaToVndRate.toLocaleString('vi-VN') : '1.000'}đ
+                1 VNC = {novaToVndRate > 0 ? novaToVndRate.toLocaleString('vi-VN') : '1.000'}đ
               </div>
             </div>
           </div>
@@ -215,7 +215,7 @@ export default function Wallet() {
                 <i className="bi bi-cash-stack text-indigo" /> {t('wallet.withdraw_title')}
               </h2>
               <p className="text-xs text-muted mt-0.5">
-                Chọn phương thức và nhập số lượng VDX bạn muốn quy đổi
+                Chọn phương thức và nhập số lượng VNC bạn muốn quy đổi
               </p>
             </div>
 
@@ -251,7 +251,7 @@ export default function Wallet() {
             {/* Amount input & Preset chips */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <label className="font-semibold text-muted">Số lượng VDX rút</label>
+                <label className="font-semibold text-muted">Số lượng VNC rút</label>
                 {selectedAmount > 0 && (
                   <span className="text-cyan font-mono font-medium">
                     Nhận ≈ {Math.round(estimatedVnd).toLocaleString('vi-VN')} VND
@@ -285,7 +285,7 @@ export default function Wallet() {
                     }}
                     className="px-2.5 py-1 rounded-lg text-xs font-mono font-semibold bg-surface2 hover:bg-line border border-line text-muted hover:text-ink transition btn-press"
                   >
-                    +{preset} VDX
+                    +{preset} VNC
                   </button>
                 ))}
                 {wallet && wallet.balance_nova > 0 && (

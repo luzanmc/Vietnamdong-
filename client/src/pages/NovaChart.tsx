@@ -33,7 +33,7 @@ export default function NovaChart() {
           <i className="bi bi-graph-up-arrow text-indigo" /> {t('chart.title')}
         </h1>
         <p className="text-xs sm:text-sm text-muted mt-1">
-          Theo dõi tổng biến động số dư VDX ròng của bạn trong vòng 30 ngày qua.
+          Theo dõi tổng biến động số dư VNC ròng của bạn trong vòng 30 ngày qua.
         </p>
       </div>
 
@@ -47,7 +47,7 @@ export default function NovaChart() {
               {totalNet >= 0 ? '+' : ''}
               <AnimatedNumber value={totalNet} />
             </span>
-            <span className="text-xs font-normal text-muted">VDX</span>
+            <span className="text-xs font-normal text-muted">VNC</span>
           </div>
         </div>
 
@@ -56,7 +56,7 @@ export default function NovaChart() {
           <div className="font-mono text-2xl font-bold text-amber mt-1 flex items-center gap-1.5">
             <CurrencyIcon size={20} />
             <span>+{highestDay?.net ?? 0}</span>
-            <span className="text-xs font-normal text-muted">VDX</span>
+            <span className="text-xs font-normal text-muted">VNC</span>
           </div>
           {highestDay && <div className="text-[10px] text-muted font-mono mt-0.5">{highestDay.day}</div>}
         </div>
@@ -87,7 +87,7 @@ export default function NovaChart() {
                   <span className="text-muted">{hovered.day}:</span>
                   <span className={`font-bold flex items-center gap-1 ${hovered.net >= 0 ? 'text-cyan' : 'text-rose'}`}>
                     <CurrencyIcon size={14} />
-                    {hovered.net >= 0 ? '+' : ''}{hovered.net} VDX
+                    {hovered.net >= 0 ? '+' : ''}{hovered.net} VNC
                   </span>
                 </div>
               ) : (

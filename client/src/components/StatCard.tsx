@@ -37,7 +37,7 @@ export default function StatCard({
       </div>
 
       <div className="font-mono font-mono-nums text-xl sm:text-2xl md:text-3xl font-bold tracking-tight flex items-baseline gap-1.5 relative z-10 min-w-0 flex-wrap">
-        {suffix === 'VDX' && (
+        {suffix === 'VNC' && (
           <span className="self-center shrink-0">
             <CurrencyIcon size={20} />
           </span>
@@ -45,7 +45,7 @@ export default function StatCard({
         <span className="text-ink truncate">
           {typeof value === 'number' ? <AnimatedNumber value={value} /> : value}
         </span>
-        {suffix && suffix !== 'VDX' && (
+        {suffix && suffix !== 'VNC' && (
           <span className="text-xs sm:text-sm text-muted font-body font-medium shrink-0">
             {suffix}
           </span>

@@ -172,7 +172,7 @@ export default function Redeem() {
                         <span className="font-mono text-xl font-extrabold text-amber">
                           {item.price_nova}
                         </span>
-                        <span className="text-xs font-bold text-amber">VDX</span>
+                        <span className="text-xs font-bold text-amber">VNC</span>
                       </div>
 
                       {novaToVndRate > 0 && (
@@ -235,7 +235,7 @@ export default function Redeem() {
               </div>
               <div className="font-mono text-base font-bold text-amber flex items-center gap-1">
                 <CurrencyIcon size={18} />
-                <span>{activeItem.price_nova} VDX</span>
+                <span>{activeItem.price_nova} VNC</span>
               </div>
             </div>
 

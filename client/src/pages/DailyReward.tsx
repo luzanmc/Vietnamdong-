@@ -95,7 +95,7 @@ export default function DailyReward() {
               {t('daily.title')}
             </h1>
             <p className="text-xs sm:text-sm text-muted mt-1.5 max-w-md leading-relaxed">
-              Duy trì chuỗi điểm danh mỗi ngày để gia tăng lượng VDX nhận được. Nếu bỏ lỡ một ngày, chuỗi sẽ được làm mới về Ngày 1!
+              Duy trì chuỗi điểm danh mỗi ngày để gia tăng lượng VNC nhận được. Nếu bỏ lỡ một ngày, chuỗi sẽ được làm mới về Ngày 1!
             </p>
           </div>
 
@@ -164,7 +164,7 @@ export default function DailyReward() {
 
                 {/* Reward Value */}
                 <div className="font-mono text-sm font-bold text-ink">
-                  +{m.reward} <span className="text-[10px] text-muted font-body">VDX</span>
+                  +{m.reward} <span className="text-[10px] text-muted font-body">VNC</span>
                 </div>
 
                 {/* Status tag */}
@@ -190,7 +190,7 @@ export default function DailyReward() {
             <div className="text-xs text-muted mb-2">Phần thưởng hôm nay sẵn sàng:</div>
             <div className="font-mono text-3xl font-extrabold text-amber mb-4 flex items-center justify-center gap-2">
               <CurrencyIcon size={28} />
-              <span>+{status.next_reward_nova} VDX</span>
+              <span>+{status.next_reward_nova} VNC</span>
             </div>
             <button
               onClick={claim}

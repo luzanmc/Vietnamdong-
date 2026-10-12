@@ -80,7 +80,7 @@ export default function TransactionHistory() {
           {t('history.title')}
         </h1>
         <p className="text-xs sm:text-sm text-muted mt-1">
-          Chi tiết mọi lượt cộng trừ VDX trong tài khoản của bạn theo thời gian thực.
+          Chi tiết mọi lượt cộng trừ VNC trong tài khoản của bạn theo thời gian thực.
         </p>
       </div>
 
@@ -186,7 +186,7 @@ export default function TransactionHistory() {
                       {isPositive ? '+' : ''}
                       {item.amount}
                     </span>
-                    <span className="text-[11px] font-body font-normal text-muted">VDX</span>
+                    <span className="text-[11px] font-body font-normal text-muted">VNC</span>
                   </div>
                 </div>
               );

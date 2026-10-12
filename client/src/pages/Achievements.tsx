@@ -42,7 +42,7 @@ export default function Achievements() {
           {t('achievements.title')}
         </h1>
         <p className="text-xs sm:text-sm text-muted mt-1">
-          Chinh phục các mốc thành tựu trong hành trình kiếm VDX để khẳng định vị thế.
+          Chinh phục các mốc thành tựu trong hành trình kiếm VNC để khẳng định vị thế.
         </p>
       </div>
 

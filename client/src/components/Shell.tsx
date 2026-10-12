@@ -220,7 +220,7 @@ export default function Shell() {
                 VietnamDong
               </span>
               <span className="text-[9px] font-mono text-muted uppercase tracking-widest leading-none mt-0.5 hidden xs:inline">
-                VDX Rewards
+                VNC Rewards
               </span>
             </div>
           </Link>
@@ -240,7 +240,7 @@ export default function Shell() {
                   <span className="font-mono text-xs sm:text-sm font-bold text-ink">
                     <AnimatedNumber value={me.balance_nova} />
                   </span>
-                  <span className="text-[10px] font-bold text-amber hidden xs:inline">VDX</span>
+                  <span className="text-[10px] font-bold text-amber hidden xs:inline">VNC</span>
                   <i className="bi bi-plus-circle-fill text-indigo text-xs ml-0.5 group-hover:scale-110 transition-transform hidden sm:inline" />
                 </Link>
 
@@ -356,7 +356,7 @@ export default function Shell() {
                   <div className="grid grid-cols-2 gap-2 pt-2 border-t border-line/60">
                     <div className="text-center p-1.5 rounded-lg bg-bg/50">
                       <div className="text-[10px] text-muted">Số dư</div>
-                      <div className="font-mono text-xs font-bold text-amber">{me.balance_nova} VDX</div>
+                      <div className="font-mono text-xs font-bold text-amber">{me.balance_nova} VNC</div>
                     </div>
                     <div className="text-center p-1.5 rounded-lg bg-bg/50">
                       <div className="text-[10px] text-muted">Chuỗi ngày</div>

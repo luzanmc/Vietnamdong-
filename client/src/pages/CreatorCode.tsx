@@ -98,7 +98,7 @@ export default function CreatorCode() {
               <div className="text-[11px] text-muted">{t('creator.total_earned')}</div>
               <div className="font-mono text-xl font-bold text-amber mt-0.5 flex items-center justify-center gap-1">
                 <CurrencyIcon size={16} />
-                <span>{mine.total_earned_nova} VDX</span>
+                <span>{mine.total_earned_nova} VNC</span>
               </div>
             </div>
           </div>

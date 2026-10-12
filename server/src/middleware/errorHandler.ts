@@ -1,11 +1,16 @@
 import type { Request, Response, NextFunction } from 'express';
 import { HttpError } from '../utils/httpError.js';
 
-export function errorHandler(err: Error, req: Request, res: Response, next: NextFunction): void {
+export function errorHandler(err: any, req: Request, res: Response, next: NextFunction): void {
   console.error(err);
-  if (err instanceof HttpError) {
-    res.status(err.status).json({ error: err.publicMessage });
+  if (err instanceof HttpError || (typeof err?.status === 'number' && (err?.publicMessage || err?.message))) {
+    const status = err.status || 500;
+    const msg = err.publicMessage || err.message;
+    res.status(status).json({ error: msg });
     return;
   }
-  res.status(500).json({ error: 'Đã có lỗi xảy ra, vui lòng thử lại sau' });
+  const isDev = process.env.NODE_ENV !== 'production';
+  res.status(500).json({
+    error: isDev && err?.message ? `Đã có lỗi xảy ra: ${err.message}` : 'Đã có lỗi xảy ra, vui lòng thử lại sau',
+  });
 }

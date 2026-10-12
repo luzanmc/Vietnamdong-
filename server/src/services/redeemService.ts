@@ -42,7 +42,7 @@ export async function createOrderForUser(userId: string, itemId: string, destina
   await debit(userId, item.price_nova, 'redeem_order', id);
   await createRedeemOrder(id, userId, item.id, destination, item.price_nova);
 
-  logToDiscord(`🎁 **${user?.username}** đổi **${item.label}** (-${item.price_nova} VDX) — chờ admin duyệt`);
+  logToDiscord(`🎁 **${user?.username}** đổi **${item.label}** (-${item.price_nova} VNC) — chờ admin duyệt`);
   return { id };
 }
 
@@ -64,7 +64,7 @@ export async function adminFulfillOrder(orderId: string, note: string): Promise<
       throw new HttpError(409, 'Card2K đang xử lý đơn này (chờ callback), thử duyệt lại sau');
     }
 
-    throw new HttpError(400, `Card2K từ chối đơn này (${result.status}), dùng nút Từ chối để hoàn VDX cho user`);
+    throw new HttpError(400, `Card2K từ chối đơn này (${result.status}), dùng nút Từ chối để hoàn VNC cho user`);
   }
 
   await markRedeemOrderFulfilled(orderId, note);
@@ -77,5 +77,5 @@ export async function adminRejectOrder(orderId: string, note: string): Promise<v
 
   await credit(order.user_id, order.price_nova, 'admin_adjust', orderId);
   await markRedeemOrderRejected(orderId, order.result_data, note);
-  await createNotification(nanoid(), order.user_id, `Đơn đổi **${order.label}** bị từ chối, đã hoàn lại VDX.`, '/redeem');
+  await createNotification(nanoid(), order.user_id, `Đơn đổi **${order.label}** bị từ chối, đã hoàn lại VNC.`, '/redeem');
 }

@@ -60,16 +60,16 @@ export async function updateVietsubSettings(patch: {
 
 export async function requestNovaPurchase(userId: string): Promise<{ orderId: string }> {
   const info = await getVietsubPublicInfo();
-  if (!info.active || !info.priceNova) throw new HttpError(400, 'Vietsub Studio hiện không mở bán bằng VDX');
+  if (!info.active || !info.priceNova) throw new HttpError(400, 'Vietsub Studio hiện không mở bán bằng VNC');
 
   const user = await getUserById(userId);
   if (!user) throw new HttpError(404, 'Không tìm thấy tài khoản');
-  if (user.balance_nova < info.priceNova) throw new HttpError(400, 'Số dư Nova không đủ');
+  if (user.balance_nova < info.priceNova) throw new HttpError(400, 'Số dư VNC không đủ');
 
   const orderId = nanoid();
   await createVietsubOrder(orderId, userId, 'nova', info.priceNova, null, null);
 
-  logToDiscord(`🔑 **${user.username}** yêu cầu mua Vietsub Studio bằng ${info.priceNova} VDX — chờ admin duyệt`);
+  logToDiscord(`🔑 **${user.username}** yêu cầu mua Vietsub Studio bằng ${info.priceNova} VNC — chờ admin duyệt`);
 
   return { orderId };
 }

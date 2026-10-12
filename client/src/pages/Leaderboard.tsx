@@ -74,7 +74,7 @@ export default function Leaderboard() {
           {t('leaderboard.title')}
         </h1>
         <p className="text-xs sm:text-sm text-muted mt-1">
-          Bảng xếp hạng cập nhật liên tục các thành viên kiếm được nhiều VDX nhất toàn mạng lưới.
+          Bảng xếp hạng cập nhật liên tục các thành viên kiếm được nhiều VNC nhất toàn mạng lưới.
         </p>
       </div>
 
@@ -137,7 +137,7 @@ export default function Leaderboard() {
                 <div className="font-mono text-sm sm:text-base font-extrabold text-amber mt-1 flex items-center gap-1">
                   <CurrencyIcon size={16} />
                   <span>{top1.earned}</span>
-                  <span className="text-[10px] text-muted font-normal">VDX</span>
+                  <span className="text-[10px] text-muted font-normal">VNC</span>
                 </div>
                 <div className="text-[10px] font-bold text-amber uppercase mt-0.5">Quán quân</div>
               </div>
@@ -223,7 +223,7 @@ export default function Leaderboard() {
                   <div className="font-mono text-sm sm:text-base font-bold text-amber flex items-center gap-1.5 shrink-0">
                     <CurrencyIcon size={16} />
                     <AnimatedNumber value={r.earned} />
-                    <span className="text-[11px] font-body font-normal text-muted">VDX</span>
+                    <span className="text-[11px] font-body font-normal text-muted">VNC</span>
                   </div>
                 </div>
               );

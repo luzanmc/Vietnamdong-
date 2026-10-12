@@ -36,9 +36,9 @@ webhooksRouter.all('/callback', async (req, res, next) => {
       logToDiscord(`✅ Card2K callback: đơn **${order.id}** đã hoàn tất`);
     } else {
       await credit(order.user_id, order.price_nova, 'admin_adjust', order.id);
-      await markRedeemOrderRejected(order.id, null, 'Card2K callback báo lỗi, đã hoàn VDX');
-      await createNotification(nanoid(), order.user_id, 'Đơn đổi thẻ cào thất bại, đã hoàn lại VDX.', '/redeem');
-      logToDiscord(`❌ Card2K callback: đơn **${order.id}** thất bại (${status}) — đã hoàn VDX`);
+      await markRedeemOrderRejected(order.id, null, 'Card2K callback báo lỗi, đã hoàn VNC');
+      await createNotification(nanoid(), order.user_id, 'Đơn đổi thẻ cào thất bại, đã hoàn lại VNC.', '/redeem');
+      logToDiscord(`❌ Card2K callback: đơn **${order.id}** thất bại (${status}) — đã hoàn VNC`);
     }
 
     res.json({ ok: true });

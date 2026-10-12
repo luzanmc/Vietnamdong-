@@ -54,7 +54,7 @@ export async function completeAttempt(token: string): Promise<{ rewardNova: numb
   await payCreatorBonus(attempt.user_id, task.reward_nova);
 
   const user = await getUserById(attempt.user_id);
-  logToDiscord(`✅ **${user?.username}** hoàn thành **${task.name}** (+${task.reward_nova} VDX)`);
+  logToDiscord(`✅ **${user?.username}** hoàn thành **${task.name}** (+${task.reward_nova} VNC)`);
   checkAndUnlockAchievements(attempt.user_id).catch(() => {});
   flagAndCheckAnomaly(attempt.user_id).catch(() => {});
 
