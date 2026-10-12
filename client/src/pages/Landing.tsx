@@ -26,54 +26,34 @@ function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-interface CountUpProps {
-  end: number;
-  duration?: number;
-  decimals?: number;
-  prefix?: string;
-  suffix?: string;
-  separator?: string;
-  decimalSeparator?: string;
-}
+function useCountUp(
+  end: number,
+  options: {
+    duration?: number;
+    decimals?: number;
+    prefix?: string;
+    suffix?: string;
+    separator?: string;
+    decimalSeparator?: string;
+    trigger?: boolean;
+  } = {}
+) {
+  const {
+    duration = 1800,
+    decimals = 0,
+    prefix = '',
+    suffix = '',
+    separator = '.',
+    decimalSeparator = ',',
+    trigger = true
+  } = options;
 
-function CountUp({
-  end,
-  duration = 1800,
-  decimals = 0,
-  prefix = '',
-  suffix = '',
-  separator = '.',
-  decimalSeparator = ','
-}: CountUpProps) {
   const [displayValue, setDisplayValue] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const [hasStarted, setHasStarted] = useState(false);
   const prevEndRef = useRef(0);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting) {
-            setHasStarted(true);
-            observer.disconnect();
-          }
-        },
-        { threshold: 0.1 }
-      );
-      observer.observe(el);
-      return () => observer.disconnect();
-    } else {
-      setHasStarted(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!hasStarted) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (!trigger) return;
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setDisplayValue(end);
       prevEndRef.current = end;
       return;
@@ -82,7 +62,7 @@ function CountUp({
     const startVal = prevEndRef.current;
     const endVal = end;
     const diff = endVal - startVal;
-    const animDuration = startVal === 0 ? duration : Math.min(duration, 700);
+    const animDuration = startVal === 0 ? duration : Math.min(duration, 600);
     let startTime: number | null = null;
     let frameId: number;
 
@@ -91,7 +71,7 @@ function CountUp({
       const elapsed = timestamp - startTime;
       const progress = Math.min(elapsed / animDuration, 1);
 
-      // Ease-out cubic: lướt nhanh rồi giảm tốc nhẹ nhàng và êm ái
+      // Ease-out cubic: lướt nhanh rồi hãm phanh êm ái
       const ease = 1 - Math.pow(1 - progress, 3);
       const current = startVal + diff * ease;
 
@@ -107,23 +87,15 @@ function CountUp({
 
     frameId = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frameId);
-  }, [hasStarted, end, duration]);
+  }, [trigger, end, duration]);
 
-  const formatted = (() => {
-    const fixed = displayValue.toFixed(decimals);
-    const [intPart, decPart] = fixed.split('.');
-    const intFormatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
-    if (decimals > 0 && decPart !== undefined) {
-      return `${intFormatted}${decimalSeparator}${decPart}`;
-    }
-    return intFormatted;
-  })();
-
-  return (
-    <span ref={ref} className="count-up-num font-mono-nums">
-      {prefix}{formatted}{suffix}
-    </span>
-  );
+  const fixed = displayValue.toFixed(decimals);
+  const [intPart, decPart] = fixed.split('.');
+  const intFormatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+  if (decimals > 0 && decPart !== undefined) {
+    return `${prefix}${intFormatted}${decimalSeparator}${decPart}${suffix}`;
+  }
+  return `${prefix}${intFormatted}${suffix}`;
 }
 
 const REVIEWS = [
@@ -253,6 +225,54 @@ export default function Landing() {
       els.forEach((e) => e.classList.add('in'));
     }
   }, []);
+
+  const statsRef = useRef<HTMLDivElement>(null);
+  const ratesRef = useRef<HTMLDivElement>(null);
+  const mockRef = useRef<HTMLDivElement>(null);
+  const [statsVisible, setStatsVisible] = useState(false);
+  const [ratesVisible, setRatesVisible] = useState(false);
+  const [mockVisible, setMockVisible] = useState(false);
+
+  useEffect(() => {
+    const observeEl = (el: HTMLElement | null, cb: (v: boolean) => void) => {
+      if (!el || !('IntersectionObserver' in window)) {
+        cb(true);
+        return null;
+      }
+      const io = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            cb(true);
+            io.disconnect();
+          }
+        },
+        { threshold: 0.1 }
+      );
+      io.observe(el);
+      return io;
+    };
+
+    const io1 = observeEl(statsRef.current, setStatsVisible);
+    const io2 = observeEl(ratesRef.current, setRatesVisible);
+    const io3 = observeEl(mockRef.current, setMockVisible);
+
+    return () => {
+      io1?.disconnect();
+      io2?.disconnect();
+      io3?.disconnect();
+    };
+  }, []);
+
+  const statsMembers = useCountUp(12480, { separator: '.', trigger: statsVisible });
+  const statsClicks = useCountUp(1.2, { decimals: 1, decimalSeparator: ',', suffix: ' triệu', trigger: statsVisible });
+  const statsPaid = useCountUp(48, { suffix: ' triệu', trigger: statsVisible });
+
+  const rate100 = useCountUp(100, { prefix: '+', trigger: ratesVisible });
+  const rate300 = useCountUp(300, { prefix: '+', trigger: ratesVisible });
+  const rate1000 = useCountUp(1000, { prefix: '+', separator: '.', trigger: ratesVisible });
+
+  const mockPaid = useCountUp(48, { suffix: ' triệu', trigger: mockVisible });
+  const mockClicks = useCountUp(1.2, { decimals: 1, decimalSeparator: ',', suffix: ' triệu', trigger: mockVisible });
 
   const dashboardLink = '/dashboard';
   const loginLink = '/login';
@@ -389,7 +409,7 @@ export default function Landing() {
                 <div className="card-bottom">
                   <span>Ví Xu</span>
                   <span>
-                    <b id="bal"><CountUp end={total} separator="." /></b> Xu
+                    <b id="bal">{fmt(total)}</b> Xu
                   </span>
                 </div>
               </div>
@@ -439,23 +459,17 @@ export default function Landing() {
           </div>
 
           {/* Stats Section */}
-          <div className="stats">
+          <div className="stats" ref={statsRef}>
             <div>
-              <b>
-                <CountUp end={12480} separator="." />
-              </b>
+              <b>{statsMembers}</b>
               <span>Thành viên</span>
             </div>
             <div>
-              <b>
-                <CountUp end={1.2} decimals={1} decimalSeparator="," suffix=" triệu" />
-              </b>
+              <b>{statsClicks}</b>
               <span>Lượt vượt link</span>
             </div>
             <div>
-              <b>
-                <CountUp end={48} suffix=" triệu" />
-              </b>
+              <b>{statsPaid}</b>
               <span>Xu đã chi trả</span>
             </div>
             <div>
