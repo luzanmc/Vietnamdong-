@@ -573,11 +573,11 @@ export default function Landing() {
               <h2>Phần thưởng từng danh mục</h2>
               <p>Giá trị Xu mỗi lượt đang áp dụng cho từng loại link.</p>
             </div>
-            <div className="rates">
+            <div className="rates" ref={ratesRef}>
               <div className="rate">
                 <h3>Danh mục cơ bản</h3>
                 <div className="amt">
-                  <CountUp end={100} prefix="+" /> <small>Xu / lượt</small>
+                  {rate100} <small>Xu / lượt</small>
                 </div>
                 <ul>
                   <li>Link ngắn, vượt nhanh</li>
@@ -591,7 +591,7 @@ export default function Landing() {
               <div className="rate hot">
                 <h3>Danh mục tiêu chuẩn</h3>
                 <div className="amt">
-                  <CountUp end={300} prefix="+" /> <small>Xu / lượt</small>
+                  {rate300} <small>Xu / lượt</small>
                 </div>
                 <ul>
                   <li>Nhiều người chọn nhất</li>
@@ -605,7 +605,7 @@ export default function Landing() {
               <div className="rate">
                 <h3>Danh mục cao cấp</h3>
                 <div className="amt">
-                  <CountUp end={1000} prefix="+" separator="." /> <small>Xu / lượt</small>
+                  {rate1000} <small>Xu / lượt</small>
                 </div>
                 <ul>
                   <li>Thưởng cao, số lượt có hạn</li>
@@ -664,17 +664,13 @@ export default function Landing() {
                   <i />
                   <span>Bảng điều khiển</span>
                 </div>
-                <div className="mock-stats">
+                <div className="mock-stats" ref={mockRef}>
                   <div>
-                    <b>
-                      <CountUp end={48} suffix=" triệu" />
-                    </b>
+                    <b>{mockPaid}</b>
                     <span>Xu đã chi trả</span>
                   </div>
                   <div>
-                    <b>
-                      <CountUp end={1.2} decimals={1} decimalSeparator="," suffix=" triệu" />
-                    </b>
+                    <b>{mockClicks}</b>
                     <span>Lượt vượt link</span>
                   </div>
                 </div>
