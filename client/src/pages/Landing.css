@@ -237,6 +237,52 @@ html:not(.dark) .vnd-landing-page,
   padding: 28px 0 56px;
 }
 
+/* First-load smooth entrance animations */
+@keyframes topbarSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroCopyEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroArtEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(32px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.vnd-landing-page.js .topbar {
+  animation: topbarSlideDown 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.vnd-landing-page.js .hero .copy {
+  animation: heroCopyEntrance 0.95s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+}
+
+.vnd-landing-page.js .hero .art {
+  animation: heroArtEntrance 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both;
+}
+
 .vnd-landing-page .copy {
   width: 100%;
 }
@@ -1145,17 +1191,22 @@ html:not(.dark) .vnd-landing-page,
 
 .vnd-landing-page.js .rv {
   opacity: 0;
-  transform: translateY(26px);
-  transition: opacity .7s ease var(--d, 0s), transform .7s ease var(--d, 0s);
+  transform: translateY(32px);
+  transition: opacity 0.95s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s),
+              transform 0.95s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s);
+  will-change: opacity, transform;
 }
 
 .vnd-landing-page.js .rv.in {
   opacity: 1;
   transform: none;
+  will-change: auto;
 }
 
 .vnd-landing-page.js .qa.rv {
-  transition: opacity .7s ease var(--d, 0s), transform .7s ease var(--d, 0s), border-color .25s, background .25s, box-shadow .25s;
+  transition: opacity 0.95s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s),
+              transform 0.95s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0s),
+              border-color .25s, background .25s, box-shadow .25s;
 }
 
 .vnd-landing-page .pay-grid {

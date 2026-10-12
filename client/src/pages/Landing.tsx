@@ -26,6 +26,106 @@ function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+interface CountUpProps {
+  end: number;
+  duration?: number;
+  decimals?: number;
+  prefix?: string;
+  suffix?: string;
+  separator?: string;
+  decimalSeparator?: string;
+}
+
+function CountUp({
+  end,
+  duration = 1800,
+  decimals = 0,
+  prefix = '',
+  suffix = '',
+  separator = '.',
+  decimalSeparator = ','
+}: CountUpProps) {
+  const [displayValue, setDisplayValue] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const [hasStarted, setHasStarted] = useState(false);
+  const prevEndRef = useRef(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            setHasStarted(true);
+            observer.disconnect();
+          }
+        },
+        { threshold: 0.1 }
+      );
+      observer.observe(el);
+      return () => observer.disconnect();
+    } else {
+      setHasStarted(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hasStarted) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setDisplayValue(end);
+      prevEndRef.current = end;
+      return;
+    }
+
+    const startVal = prevEndRef.current;
+    const endVal = end;
+    const diff = endVal - startVal;
+    const animDuration = startVal === 0 ? duration : Math.min(duration, 700);
+    let startTime: number | null = null;
+    let frameId: number;
+
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / animDuration, 1);
+
+      // Ease-out cubic: lướt nhanh rồi giảm tốc nhẹ nhàng và êm ái
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = startVal + diff * ease;
+
+      setDisplayValue(current);
+
+      if (progress < 1) {
+        frameId = requestAnimationFrame(step);
+      } else {
+        setDisplayValue(endVal);
+        prevEndRef.current = endVal;
+      }
+    };
+
+    frameId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frameId);
+  }, [hasStarted, end, duration]);
+
+  const formatted = (() => {
+    const fixed = displayValue.toFixed(decimals);
+    const [intPart, decPart] = fixed.split('.');
+    const intFormatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+    if (decimals > 0 && decPart !== undefined) {
+      return `${intFormatted}${decimalSeparator}${decPart}`;
+    }
+    return intFormatted;
+  })();
+
+  return (
+    <span ref={ref} className="count-up-num font-mono-nums">
+      {prefix}{formatted}{suffix}
+    </span>
+  );
+}
+
 const REVIEWS = [
   ['Minh Khoa', 'Thành viên 3 tháng', 'Rút thẻ cào lần đầu được xử lý trong ngày, đúng như hệ thống ghi. Mỗi tối mình vượt khoảng 30 link.'],
   ['Trung Hiếu', 'Thành viên mới', 'Giao diện dễ dùng, vượt link xong là Xu cộng ngay vào ví, không phải chờ lâu.'],
@@ -122,12 +222,12 @@ export default function Landing() {
     const root = containerRef.current;
     if (!root) return;
 
-    // Set delay for grid items
+    // Set smooth stagger delay for grid items
     const grids = root.querySelectorAll('.grid3, .rates, .steps, .faq');
     grids.forEach((g) => {
       Array.from(g.children).forEach((c, idx) => {
         (c as HTMLElement).classList.add('rv');
-        (c as HTMLElement).style.setProperty('--d', `${idx * 0.08}s`);
+        (c as HTMLElement).style.setProperty('--d', `${idx * 0.12}s`);
       });
     });
 
@@ -145,7 +245,7 @@ export default function Landing() {
             }
           });
         },
-        { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+        { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
       );
       els.forEach((e) => io.observe(e));
       return () => io.disconnect();
@@ -289,7 +389,7 @@ export default function Landing() {
                 <div className="card-bottom">
                   <span>Ví Xu</span>
                   <span>
-                    <b id="bal">{fmt(total)}</b> Xu
+                    <b id="bal"><CountUp end={total} separator="." /></b> Xu
                   </span>
                 </div>
               </div>
@@ -341,15 +441,21 @@ export default function Landing() {
           {/* Stats Section */}
           <div className="stats">
             <div>
-              <b>12.480</b>
+              <b>
+                <CountUp end={12480} separator="." />
+              </b>
               <span>Thành viên</span>
             </div>
             <div>
-              <b>1,2 triệu</b>
+              <b>
+                <CountUp end={1.2} decimals={1} decimalSeparator="," suffix=" triệu" />
+              </b>
               <span>Lượt vượt link</span>
             </div>
             <div>
-              <b>48 triệu</b>
+              <b>
+                <CountUp end={48} suffix=" triệu" />
+              </b>
               <span>Xu đã chi trả</span>
             </div>
             <div>
@@ -457,7 +563,7 @@ export default function Landing() {
               <div className="rate">
                 <h3>Danh mục cơ bản</h3>
                 <div className="amt">
-                  +100 <small>Xu / lượt</small>
+                  <CountUp end={100} prefix="+" /> <small>Xu / lượt</small>
                 </div>
                 <ul>
                   <li>Link ngắn, vượt nhanh</li>
@@ -471,7 +577,7 @@ export default function Landing() {
               <div className="rate hot">
                 <h3>Danh mục tiêu chuẩn</h3>
                 <div className="amt">
-                  +300 <small>Xu / lượt</small>
+                  <CountUp end={300} prefix="+" /> <small>Xu / lượt</small>
                 </div>
                 <ul>
                   <li>Nhiều người chọn nhất</li>
@@ -485,7 +591,7 @@ export default function Landing() {
               <div className="rate">
                 <h3>Danh mục cao cấp</h3>
                 <div className="amt">
-                  +1.000 <small>Xu / lượt</small>
+                  <CountUp end={1000} prefix="+" separator="." /> <small>Xu / lượt</small>
                 </div>
                 <ul>
                   <li>Thưởng cao, số lượt có hạn</li>
@@ -546,11 +652,15 @@ export default function Landing() {
                 </div>
                 <div className="mock-stats">
                   <div>
-                    <b>48 triệu</b>
+                    <b>
+                      <CountUp end={48} suffix=" triệu" />
+                    </b>
                     <span>Xu đã chi trả</span>
                   </div>
                   <div>
-                    <b>1,2 triệu</b>
+                    <b>
+                      <CountUp end={1.2} decimals={1} decimalSeparator="," suffix=" triệu" />
+                    </b>
                     <span>Lượt vượt link</span>
                   </div>
                 </div>
