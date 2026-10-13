@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import { requireNotLocked } from '../middleware/requireNotLocked.js';
+import { requireNoVpn } from '../middleware/requireNoVpn.js';
 import { verifyTurnstile } from '../services/turnstileService.js';
 import { listTasksForUser, startTaskForUser, completeAttempt } from '../services/taskService.js';
 import { getAttemptByToken } from '../repositories/taskRepository.js';
@@ -15,7 +16,7 @@ tasksRouter.get('/', requireAuth, async (req, res, next) => {
   }
 });
 
-tasksRouter.post('/:id/start', requireAuth, requireNotLocked, async (req, res, next) => {
+tasksRouter.post('/:id/start', requireAuth, requireNotLocked, requireNoVpn, async (req, res, next) => {
   try {
     res.json(await startTaskForUser(req.user!.id, req.params.id));
   } catch (err) {

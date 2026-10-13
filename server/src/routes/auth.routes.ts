@@ -329,6 +329,30 @@ authRouter.post('/logout', (req, res) => {
   res.json({ ok: true });
 });
 
+authRouter.post('/change-password', requireAuth, async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Vui lòng nhập đầy đủ mật khẩu hiện tại và mật khẩu mới' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: 'Mật khẩu mới phải có ít nhất 6 ký tự' });
+    }
+    if (!req.user!.password_hash) {
+      return res.status(400).json({ error: 'Tài khoản đăng nhập qua mạng xã hội không có mật khẩu' });
+    }
+    const match = await comparePassword(currentPassword, req.user!.password_hash);
+    if (!match) {
+      return res.status(400).json({ error: 'Mật khẩu hiện tại không chính xác' });
+    }
+    const newHash = await hashPassword(newPassword);
+    await setUserPasswordHash(req.user!.id, newHash);
+    res.json({ ok: true, message: 'Đổi mật khẩu thành công' });
+  } catch (err) {
+    next(err);
+  }
+});
+
 authRouter.get('/me', requireAuth, (req, res) => {
   const { id, username, avatar_url, role, balance_nova, streak_days, email, email_verified } = req.user!;
   res.json({ id, username, avatar_url, role, balance_nova, streak_days, email, email_verified: Boolean(email_verified) });

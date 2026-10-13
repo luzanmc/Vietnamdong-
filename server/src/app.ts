@@ -24,6 +24,8 @@ import { achievementsRouter } from './routes/achievements.routes.js';
 import { spinRouter } from './routes/spin.routes.js';
 import { questsRouter } from './routes/quests.routes.js';
 import { supportRouter } from './routes/support.routes.js';
+import { giftcodeRouter } from './routes/giftcode.routes.js';
+import { securityRouter } from './routes/security.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -68,6 +70,8 @@ app.use('/api/achievements', achievementsRouter);
 app.use('/api/spin', spinRouter);
 app.use('/api/quests', questsRouter);
 app.use('/api/support', supportRouter);
+app.use('/api/giftcodes', giftcodeRouter);
+app.use('/api/security', securityRouter);
 
 app.use(errorHandler);
 

@@ -32,8 +32,9 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
               <div className="font-semibold text-sm sm:text-base flex items-center gap-2">
                 <span className="truncate">{task.name}</span>
                 {!!task.is_hot && (
-                  <span className="text-[9px] font-bold bg-gradient-to-r from-rose to-amber text-white px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 animate-pulse-soft shadow-sm">
-                    HOT 🔥
+                  <span className="text-[9px] font-bold bg-gradient-to-r from-rose to-amber text-white px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 animate-pulse-soft shadow-sm flex items-center gap-1">
+                    <span>HOT</span>
+                    <i className="bi bi-fire" />
                   </span>
                 )}
               </div>

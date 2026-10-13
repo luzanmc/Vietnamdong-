@@ -79,6 +79,8 @@ export const api = {
     request<{ ok: true; message: string }>('/auth/forgot-password', { method: 'POST', body: JSON.stringify(body) }),
   resetPassword: (body: { token: string; password: string }) =>
     request<{ ok: true }>('/auth/reset-password', { method: 'POST', body: JSON.stringify(body) }),
+  changePassword: (body: { currentPassword: string; newPassword: string }) =>
+    request<{ ok: true; message: string }>('/auth/change-password', { method: 'POST', body: JSON.stringify(body) }),
   logout: () => request('/auth/logout', { method: 'POST' }),
 
   tasks: () => request<Task[]>('/tasks'),
@@ -146,6 +148,14 @@ export const api = {
   markNotificationsRead: () => request('/notifications/read', { method: 'POST' }),
 
   achievements: () => request<Achievement[]>('/achievements'),
+
+  redeemGiftcode: (code: string) =>
+    request<{ ok: true; code: string; reward_nova: number }>('/giftcodes/redeem', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    }),
+
+  networkStatus: () => request<{ ip: string; isVpn: boolean }>('/security/network-status'),
 };
 
 export { ApiError };

@@ -57,10 +57,34 @@ async function migrate(): Promise<void> {
     throw new Error('DATABASE_URL (hoặc SUPABASE_DB_URL) chưa được cấu hình trên server');
   }
 
-  // Fast check: if users table already exists, skip migration
+  // Fast check: if users table already exists, ensure auxiliary tables and return
   try {
     const check = await pool.query('SELECT 1 FROM users LIMIT 1');
-    if (check) return;
+    if (check) {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS giftcodes (
+          id TEXT PRIMARY KEY,
+          code TEXT UNIQUE NOT NULL,
+          reward_nova INTEGER NOT NULL,
+          max_uses INTEGER NOT NULL DEFAULT 1,
+          used_count INTEGER NOT NULL DEFAULT 0,
+          expires_at TIMESTAMPTZ,
+          active INTEGER NOT NULL DEFAULT 1,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        );
+        CREATE INDEX IF NOT EXISTS idx_giftcodes_code ON giftcodes(code);
+        CREATE TABLE IF NOT EXISTS giftcode_redemptions (
+          id TEXT PRIMARY KEY,
+          giftcode_id TEXT NOT NULL REFERENCES giftcodes(id) ON DELETE CASCADE,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          reward_nova INTEGER NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          UNIQUE(giftcode_id, user_id)
+        );
+        CREATE INDEX IF NOT EXISTS idx_giftcode_redemptions_user ON giftcode_redemptions(user_id);
+      `);
+      return;
+    }
   } catch {
     // Table does not exist yet or first run, proceed with migration below
   }

@@ -99,7 +99,10 @@ export default function VerifyLink() {
             <div className="w-14 h-14 mx-auto rounded-full bg-[#0f2418] border border-[#12B76A]/30 flex items-center justify-center mb-3">
               <i className="bi bi-check-circle-fill text-2xl text-[#12B76A]" />
             </div>
-            <div className="font-bold mb-1">🎉 Chúc mừng vượt link thành công!</div>
+            <div className="font-bold mb-1 flex items-center justify-center gap-1.5">
+              <i className="bi bi-award-fill text-amber" />
+              <span>Chúc mừng vượt link thành công!</span>
+            </div>
             <p className="text-sm text-[#8A8A93] mb-3">
               Bạn đã nhận được <span className="font-mono font-semibold text-[#12B76A]">+{result.rewardNova} VNC</span>
             </p>

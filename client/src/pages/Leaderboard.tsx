@@ -106,7 +106,7 @@ export default function Leaderboard() {
             {/* Top 2 - Silver (Left) */}
             {top2 ? (
               <div className="glass-card rounded-2xl p-3 sm:p-4 text-center border-slate-400/40 relative flex flex-col items-center">
-                <div className="text-xl sm:text-2xl mb-1">🥈</div>
+                <i className="bi bi-trophy-fill text-slate-300 text-2xl mb-1" />
                 <UserAvatar url={top2.avatar_url} name={top2.username} size="w-12 h-12 sm:w-14 sm:h-14" />
                 <div className="font-bold text-xs sm:text-sm text-ink truncate w-full mt-2">
                   {top2.username}
@@ -124,7 +124,7 @@ export default function Leaderboard() {
             {/* Top 1 - Gold (Center, Elevated) */}
             {top1 ? (
               <div className="glass-card rounded-2xl p-4 sm:p-5 text-center border-amber/50 shadow-[0_0_30px_rgba(245,165,36,0.2)] relative flex flex-col items-center scale-105 z-10 -translate-y-2">
-                <div className="text-2xl sm:text-3xl mb-1 animate-bounce-subtle">👑</div>
+                <i className="bi bi-crown-fill text-amber text-3xl mb-1 animate-bounce-subtle" />
                 <div className="relative">
                   <UserAvatar url={top1.avatar_url} name={top1.username} size="w-14 h-14 sm:w-16 sm:h-16" text="text-lg" />
                   <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-amber text-black font-bold text-xs flex items-center justify-center border-2 border-surface z-10">
@@ -148,7 +148,7 @@ export default function Leaderboard() {
             {/* Top 3 - Bronze (Right) */}
             {top3 ? (
               <div className="glass-card rounded-2xl p-3 sm:p-4 text-center border-amber-700/40 relative flex flex-col items-center">
-                <div className="text-xl sm:text-2xl mb-1">🥉</div>
+                <i className="bi bi-trophy-fill text-amber-700 text-2xl mb-1" />
                 <UserAvatar url={top3.avatar_url} name={top3.username} size="w-12 h-12 sm:w-14 sm:h-14" />
                 <div className="font-bold text-xs sm:text-sm text-ink truncate w-full mt-2">
                   {top3.username}

@@ -157,8 +157,9 @@ export default function Achievements() {
                     {lang === 'vi' ? a.titleVi : a.titleEn}
                   </h3>
                   {a.unlocked && (
-                    <span className="text-[10px] font-bold text-amber bg-amber/15 px-1.5 py-0.5 rounded-full shrink-0">
-                      ✓ ĐÃ MỞ
+                    <span className="text-[10px] font-bold text-amber bg-amber/15 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
+                      <i className="bi bi-check2-circle" />
+                      <span>ĐÃ MỞ</span>
                     </span>
                   )}
                 </div>

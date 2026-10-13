@@ -117,8 +117,15 @@ export default function Support() {
                 key={m.id}
                 className={`flex flex-col ${isAdmin ? 'items-start' : 'items-end'}`}
               >
-                <div className="text-[10px] text-muted font-medium mb-1 px-1">
-                  {isAdmin ? '🛡️ Quản trị viên hỗ trợ' : 'Bạn'}
+                <div className="text-[10px] text-muted font-medium mb-1 px-1 flex items-center">
+                  {isAdmin ? (
+                    <>
+                      <i className="bi bi-shield-check text-cyan mr-1" />
+                      <span>Quản trị viên hỗ trợ</span>
+                    </>
+                  ) : (
+                    'Bạn'
+                  )}
                 </div>
                 <div
                   className={`rounded-2xl p-4 text-sm max-w-[85%] leading-relaxed ${

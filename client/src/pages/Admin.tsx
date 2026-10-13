@@ -9,7 +9,7 @@ async function adminApi<T>(path: string, opts: RequestInit = {}): Promise<T> {
   return data as T;
 }
 
-type TabKey = 'overview' | 'withdrawals' | 'redeem' | 'creators' | 'tasks' | 'users' | 'vietsub' | 'settings' | 'support';
+type TabKey = 'overview' | 'withdrawals' | 'redeem' | 'creators' | 'tasks' | 'users' | 'vietsub' | 'giftcodes' | 'settings' | 'support';
 
 const TABS: { key: TabKey; labelKey: string; icon: string }[] = [
   { key: 'overview', labelKey: 'admin.tab_overview', icon: 'bi-speedometer2' },
@@ -19,6 +19,7 @@ const TABS: { key: TabKey; labelKey: string; icon: string }[] = [
   { key: 'tasks', labelKey: 'admin.tab_tasks', icon: 'bi-list-check' },
   { key: 'users', labelKey: 'admin.tab_users', icon: 'bi-people' },
   { key: 'vietsub', labelKey: 'admin.tab_vietsub', icon: 'bi-badge-cc' },
+  { key: 'giftcodes', labelKey: 'admin.tab_giftcodes', icon: 'bi-gift' },
   { key: 'support', labelKey: 'admin.tab_support', icon: 'bi-headset' },
   { key: 'settings', labelKey: 'admin.tab_settings', icon: 'bi-sliders' },
 ];
@@ -49,6 +50,7 @@ export default function Admin() {
       {tab === 'tasks' && <Tasks />}
       {tab === 'users' && <Users />}
       {tab === 'vietsub' && <VietsubAdmin />}
+      {tab === 'giftcodes' && <GiftcodesAdmin />}
       {tab === 'settings' && <SiteSettings />}
       {tab === 'support' && <SupportAdmin />}
     </div>
@@ -543,9 +545,217 @@ function VietsubAdmin() {
   );
 }
 
-function SiteSettings() {
-  const [musicUrl, setMusicUrl] = useState('');
+interface GiftcodeRow {
+  id: string;
+  code: string;
+  reward_nova: number;
+  max_uses: number;
+  used_count: number;
+  expires_at: string | null;
+  active: number;
+  created_at: string;
+}
+
+function GiftcodesAdmin() {
+  const [list, setList] = useState<GiftcodeRow[]>([]);
+  const [form, setForm] = useState({ code: '', reward_nova: 10, max_uses: 100, expires_at: '' });
+  const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
+
+  function load() {
+    adminApi<GiftcodeRow[]>('/giftcodes').then(setList).catch(() => {});
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  async function create(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.code.trim()) return;
+    setLoading(true);
+    setMsg('');
+    try {
+      await adminApi('/giftcodes', {
+        method: 'POST',
+        body: JSON.stringify({
+          code: form.code.trim().toUpperCase(),
+          reward_nova: Number(form.reward_nova),
+          max_uses: Number(form.max_uses),
+          expires_at: form.expires_at || null,
+        }),
+      });
+      setForm({ code: '', reward_nova: 10, max_uses: 100, expires_at: '' });
+      setMsg('Tạo mã Giftcode thành công!');
+      load();
+    } catch (err: any) {
+      setMsg(err.message || 'Lỗi tạo giftcode');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function toggle(id: string) {
+    await adminApi(`/giftcodes/${id}/toggle`, { method: 'PATCH' });
+    load();
+  }
+
+  async function remove(id: string) {
+    if (!confirm('Bạn có chắc muốn xóa Giftcode này?')) return;
+    await adminApi(`/giftcodes/${id}`, { method: 'DELETE' });
+    load();
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Create form */}
+      <form onSubmit={create} className="bg-surface border border-line rounded-2xl p-5 space-y-4 max-w-xl">
+        <h2 className="text-sm font-semibold flex items-center gap-2">
+          <i className="bi bi-gift-fill text-amber" /> Tạo mã Giftcode mới
+        </h2>
+        {msg && <p className="text-xs text-cyan">{msg}</p>}
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-[11px] text-muted block mb-1">Mã Giftcode</label>
+            <input
+              value={form.code}
+              onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
+              placeholder="VD: TANTHU50"
+              className="w-full bg-surface2 border border-line rounded-xl px-3 py-2 text-xs sm:text-sm font-mono uppercase"
+              required
+            />
+          </div>
+          <div>
+            <label className="text-[11px] text-muted block mb-1">Phần thưởng (VNC)</label>
+            <input
+              type="number"
+              min="1"
+              value={form.reward_nova}
+              onChange={(e) => setForm({ ...form, reward_nova: Number(e.target.value) })}
+              className="w-full bg-surface2 border border-line rounded-xl px-3 py-2 text-xs sm:text-sm font-mono"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-[11px] text-muted block mb-1">Số lượt dùng tối đa</label>
+            <input
+              type="number"
+              min="1"
+              value={form.max_uses}
+              onChange={(e) => setForm({ ...form, max_uses: Number(e.target.value) })}
+              className="w-full bg-surface2 border border-line rounded-xl px-3 py-2 text-xs sm:text-sm font-mono"
+              required
+            />
+          </div>
+          <div>
+            <label className="text-[11px] text-muted block mb-1">Hạn sử dụng (Để trống = vĩnh viễn)</label>
+            <input
+              type="datetime-local"
+              value={form.expires_at}
+              onChange={(e) => setForm({ ...form, expires_at: e.target.value })}
+              className="w-full bg-surface2 border border-line rounded-xl px-3 py-2 text-xs sm:text-sm"
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-indigo hover:brightness-110 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition btn-press flex items-center gap-1.5"
+        >
+          <i className="bi bi-plus-lg" />
+          <span>Tạo mã ngay</span>
+        </button>
+      </form>
+
+      {/* Giftcode Table */}
+      <div>
+        <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
+          <i className="bi bi-list-ul" /> Danh sách mã Giftcode ({list.length})
+        </h2>
+        <TableWrap>
+          <table className="w-full text-left text-xs">
+            <thead className="bg-surface2 text-muted border-b border-line text-[11px] uppercase">
+              <tr>
+                <th className="px-3 py-2">Mã Code</th>
+                <th className="px-3 py-2">Thưởng VNC</th>
+                <th className="px-3 py-2">Đã dùng / Tối đa</th>
+                <th className="px-3 py-2">Hạn sử dụng</th>
+                <th className="px-3 py-2">Trạng thái</th>
+                <th className="px-3 py-2 text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-line">
+              {list.map((g) => {
+                const expired = g.expires_at && new Date(g.expires_at) < new Date();
+                const outOfUses = g.used_count >= g.max_uses;
+
+                return (
+                  <tr key={g.id} className="hover:bg-surface2/50 transition">
+                    <td className="px-3 py-2.5 font-mono font-bold text-amber">{g.code}</td>
+                    <td className="px-3 py-2.5 font-mono text-cyan">+{g.reward_nova} VNC</td>
+                    <td className="px-3 py-2.5 font-mono">
+                      {g.used_count} / {g.max_uses}
+                    </td>
+                    <td className="px-3 py-2.5 text-muted">
+                      {g.expires_at ? new Date(g.expires_at).toLocaleDateString('vi-VN') : 'Không thời hạn'}
+                    </td>
+                    <td className="px-3 py-2.5">
+                      {expired ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose/15 text-rose border border-rose/30">
+                          Hết hạn
+                        </span>
+                      ) : outOfUses ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber/15 text-amber border border-amber/30">
+                          Hết lượt
+                        </span>
+                      ) : g.active ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                          Hoạt động
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-surface2 text-muted border border-line">
+                          Tạm khóa
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2.5 text-right space-x-1.5">
+                      <button
+                        onClick={() => toggle(g.id)}
+                        className="px-2 py-1 rounded bg-surface2 hover:bg-line border border-line text-muted hover:text-ink transition"
+                      >
+                        {g.active ? 'Khóa' : 'Bật'}
+                      </button>
+                      <button
+                        onClick={() => remove(g.id)}
+                        className="px-2 py-1 rounded bg-rose/15 hover:bg-rose/25 text-rose border border-rose/30 transition"
+                      >
+                        Xóa
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+              {list.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-3 py-6 text-center text-muted">
+                    Chưa có mã Giftcode nào.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </TableWrap>
+      </div>
+    </div>
+  );
+}
+
+function SiteSettings() {
   const [announcements, setAnnouncements] = useState<{ id: string; message: string; active: number; created_at: string }[]>([]);
   const [newAnnouncement, setNewAnnouncement] = useState('');
 
@@ -554,15 +764,8 @@ function SiteSettings() {
   }
 
   useEffect(() => {
-    adminApi<{ music_url: string }>('/settings/music').then((d) => setMusicUrl(d.music_url));
     loadAnnouncements();
   }, []);
-
-  async function save(e: React.FormEvent) {
-    e.preventDefault();
-    await adminApi('/settings/music', { method: 'PATCH', body: JSON.stringify({ music_url: musicUrl }) });
-    setMsg('Đã lưu');
-  }
 
   async function postAnnouncement(e: React.FormEvent) {
     e.preventDefault();
@@ -579,16 +782,6 @@ function SiteSettings() {
 
   return (
     <div className="space-y-5 max-w-md">
-      <form onSubmit={save} className="bg-surface border border-line rounded-xl p-4 space-y-3">
-        <h2 className="text-sm font-semibold">Nhạc nền website</h2>
-        {msg && <p className="text-xs text-cyan">{msg}</p>}
-        <div>
-          <label className="text-[11px] text-muted block mb-1">URL file nhạc (mp3, để trống để tắt)</label>
-          <input value={musicUrl} onChange={(e) => setMusicUrl(e.target.value)} placeholder="https://.../background.mp3" className="w-full bg-surface2 border border-line rounded-lg px-3 py-1.5 text-sm" />
-        </div>
-        <button className="bg-indigo text-white text-xs font-medium px-3 py-2 rounded-lg">Lưu</button>
-      </form>
-
       <div className="bg-surface border border-line rounded-xl p-4 space-y-3">
         <h2 className="text-sm font-semibold">Thông báo chung (banner đầu trang)</h2>
         <form onSubmit={postAnnouncement} className="flex gap-2">

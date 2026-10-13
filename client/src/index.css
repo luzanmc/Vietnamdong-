@@ -3,29 +3,29 @@
 @tailwind utilities;
 
 :root {
-  --color-bg: 10 11 18;
-  --color-surface: 17 18 28;
-  --color-surface2: 26 27 42;
-  --color-line: 38 41 62;
-  --color-ink: 241 245 249;
-  --color-muted: 148 163 184;
-  --color-indigo: 108 99 245;
-  --color-cyan: 34 211 238;
+  --color-bg: 8 11 20;
+  --color-surface: 16 21 34;
+  --color-surface2: 21 29 46;
+  --color-line: 37 45 65;
+  --color-ink: 244 247 255;
+  --color-muted: 155 168 192;
+  --color-indigo: 85 167 255;
+  --color-cyan: 98 240 189;
   --color-amber: 245 165 36;
-  --color-rose: 251 106 138;
+  --color-rose: 244 63 94;
   color-scheme: dark;
 }
 
 :root[data-theme='light'],
 html:not(.dark):root {
-  --color-bg: 248 250 252;
+  --color-bg: 246 247 251;
   --color-surface: 255 255 255;
-  --color-surface2: 241 245 249;
-  --color-line: 226 232 240;
-  --color-ink: 15 23 42;
-  --color-muted: 100 116 139;
-  --color-indigo: 79 70 229;
-  --color-cyan: 8 145 178;
+  --color-surface2: 240 242 248;
+  --color-line: 223 227 238;
+  --color-ink: 14 20 36;
+  --color-muted: 86 97 119;
+  --color-indigo: 47 127 230;
+  --color-cyan: 13 159 115;
   --color-amber: 217 119 6;
   --color-rose: 225 29 72;
   color-scheme: light;
@@ -36,9 +36,8 @@ body {
   color: rgb(var(--color-ink));
   transition: background-color 0.25s ease, color 0.25s ease;
   background-image: 
-    radial-gradient(circle at 15% 15%, rgba(108, 99, 245, 0.08) 0%, transparent 45%),
-    radial-gradient(circle at 85% 25%, rgba(34, 211, 238, 0.06) 0%, transparent 45%),
-    radial-gradient(circle at 50% 80%, rgba(245, 165, 36, 0.05) 0%, transparent 50%);
+    radial-gradient(ellipse at 80% 0, rgba(27, 23, 64, 0.65) 0%, transparent 40%),
+    radial-gradient(circle at 15% 15%, rgba(85, 167, 255, 0.05) 0%, transparent 45%);
   background-attachment: fixed;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -47,9 +46,8 @@ body {
 
 :root[data-theme='light'] body {
   background-image: 
-    radial-gradient(circle at 15% 15%, rgba(79, 70, 229, 0.05) 0%, transparent 45%),
-    radial-gradient(circle at 85% 25%, rgba(8, 145, 178, 0.04) 0%, transparent 45%),
-    radial-gradient(circle at 50% 80%, rgba(217, 119, 6, 0.04) 0%, transparent 50%);
+    radial-gradient(ellipse at 80% 0, rgba(227, 224, 255, 0.7) 0%, transparent 40%),
+    radial-gradient(circle at 15% 15%, rgba(47, 127, 230, 0.04) 0%, transparent 45%);
 }
 
 .font-mono-nums { font-variant-numeric: tabular-nums; }

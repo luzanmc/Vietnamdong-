@@ -4,6 +4,7 @@ import { env } from '../config/env.js';
 import { requireAuth } from '../middleware/auth.js';
 import { requireEmailVerified } from '../middleware/requireEmailVerified.js';
 import { requireNotLocked } from '../middleware/requireNotLocked.js';
+import { requireNoVpn } from '../middleware/requireNoVpn.js';
 import { validateBody } from '../middleware/validate.js';
 import { withdrawSchema, transferSchema } from '../validators/wallet.validators.js';
 import { debit, credit, novaToVnd } from '../services/coinService.js';
@@ -51,7 +52,7 @@ walletRouter.get('/ledger/filtered', requireAuth, async (req, res, next) => {
   }
 });
 
-walletRouter.post('/withdraw', requireAuth, requireNotLocked, requireEmailVerified, validateBody(withdrawSchema), async (req, res, next) => {
+walletRouter.post('/withdraw', requireAuth, requireNotLocked, requireNoVpn, requireEmailVerified, validateBody(withdrawSchema), async (req, res, next) => {
   try {
     const { amount_nova, method, destination } = req.body;
     if (amount_nova < env.economy.minWithdrawNova) {
@@ -63,7 +64,8 @@ walletRouter.post('/withdraw', requireAuth, requireNotLocked, requireEmailVerifi
     await debit(req.user!.id, amount_nova, 'withdraw', id);
     await createWithdrawal(id, req.user!.id, amount_nova, amountVnd, method, destination);
 
-    res.json({ ok: true, id, status: 'pending' });
+    const transferCode = `VNC-RUT-${id.slice(0, 8).toUpperCase()}`;
+    res.json({ ok: true, id, status: 'pending', transfer_code: transferCode });
   } catch (err) {
     next(err);
   }

@@ -62,7 +62,27 @@ export type LedgerReason =
   | 'vietsub_purchase'
   | 'spin_reward'
   | 'quest_reward'
+  | 'giftcode_reward'
   | 'monthly_leaderboard_reward';
+
+export interface Giftcode {
+  id: string;
+  code: string;
+  reward_nova: number;
+  max_uses: number;
+  used_count: number;
+  expires_at: string | null;
+  active: number;
+  created_at: string;
+}
+
+export interface GiftcodeRedemption {
+  id: string;
+  giftcode_id: string;
+  user_id: string;
+  reward_nova: number;
+  created_at: string;
+}
 
 export interface CoinLedgerEntry {
   id: string;

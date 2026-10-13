@@ -24,6 +24,7 @@ import { toCsv } from '../utils/csv.js';
 import { listAnnouncementsAdmin, createAnnouncement, deactivateAnnouncement } from '../repositories/announcementRepository.js';
 import { monthlyTop } from '../repositories/leaderboardRepository.js';
 import { listAllTicketsAdmin, getTicketById, getMessagesForTicket, addMessage, closeTicket, reopenTicket } from '../repositories/supportRepository.js';
+import { getAllGiftcodes, createGiftcode, toggleGiftcodeActive, deleteGiftcode } from '../repositories/giftcodeRepository.js';
 
 export const adminRouter = Router();
 adminRouter.use(requireAuth, requireAdmin);
@@ -208,18 +209,51 @@ adminRouter.post('/users/:id/unlock', async (req, res, next) => {
   }
 });
 
-adminRouter.get('/settings/music', async (req, res, next) => {
+// Giftcodes management
+adminRouter.get('/giftcodes', async (req, res, next) => {
   try {
-    res.json({ music_url: (await getSetting('music_url')) ?? '' });
+    res.json(await getAllGiftcodes());
   } catch (err) {
     next(err);
   }
 });
 
-adminRouter.patch('/settings/music', async (req, res, next) => {
+adminRouter.post('/giftcodes', async (req, res, next) => {
   try {
-    await setSetting('music_url', String(req.body.music_url ?? ''));
-    res.json({ ok: true });
+    const { code, reward_nova, max_uses, expires_at } = req.body;
+    if (!code || !reward_nova) {
+      return res.status(400).json({ error: 'Mã và phần thưởng không được để trống' });
+    }
+    const created = await createGiftcode(
+      nanoid(),
+      String(code).trim().toUpperCase(),
+      Number(reward_nova),
+      Number(max_uses) || 1,
+      expires_at ? new Date(expires_at).toISOString() : null
+    );
+    res.json({ ok: true, giftcode: created });
+  } catch (err: any) {
+    if (err?.code === '23505') {
+      return res.status(400).json({ error: 'Mã Giftcode này đã tồn tại' });
+    }
+    next(err);
+  }
+});
+
+adminRouter.patch('/giftcodes/:id/toggle', async (req, res, next) => {
+  try {
+    const updated = await toggleGiftcodeActive(req.params.id);
+    if (!updated) return res.status(404).json({ error: 'Không tìm thấy giftcode' });
+    res.json({ ok: true, giftcode: updated });
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.delete('/giftcodes/:id', async (req, res, next) => {
+  try {
+    const deleted = await deleteGiftcode(req.params.id);
+    res.json({ ok: deleted });
   } catch (err) {
     next(err);
   }

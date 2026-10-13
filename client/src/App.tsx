@@ -30,6 +30,9 @@ import Security from './pages/Security.js';
 import Legal from './pages/Legal.js';
 import NotFound from './pages/NotFound.js';
 import Landing from './pages/Landing.js';
+import { MusicProvider } from './context/MusicContext.js';
+import SecurityGuard from './components/SecurityGuard.js';
+import Profile from './pages/Profile.js';
 import Shell from './components/Shell.js';
 
 export default function App() {
@@ -38,8 +41,10 @@ export default function App() {
       <LanguageProvider>
         <AuthProvider>
           <SettingsProvider>
-            <ToastProvider>
-              <Routes>
+            <MusicProvider>
+              <ToastProvider>
+                <SecurityGuard />
+                <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/landing" element={<Landing />} />
               <Route path="/r/:username" element={<ReferralCapture />} />
@@ -69,6 +74,7 @@ export default function App() {
                   <Route path="/quests" element={<Quests />} />
                   <Route path="/support" element={<Support />} />
                   <Route path="/security" element={<Security />} />
+                  <Route path="/profile" element={<Profile />} />
                 </Route>
               </Route>
               <Route element={<ProtectedRoute adminOnly />}>
@@ -79,6 +85,7 @@ export default function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
             </ToastProvider>
+            </MusicProvider>
           </SettingsProvider>
         </AuthProvider>
       </LanguageProvider>

@@ -63,7 +63,7 @@ export async function createWithdrawal(
 
 export async function listWithdrawalsForUser(userId: string, client: Queryable = pool): Promise<Partial<Withdrawal>[]> {
   const { rows } = await client.query(
-    `SELECT id, amount_nova, amount_vnd, method, status, created_at FROM withdrawals
+    `SELECT id, amount_nova, amount_vnd, method, destination, status, created_at FROM withdrawals
      WHERE user_id = $1 ORDER BY created_at DESC`,
     [userId]
   );

@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext.js';
 import { useTheme } from '../context/ThemeContext.js';
 import { useSettings } from '../context/SettingsContext.js';
 import BackgroundMusicPlayer from './BackgroundMusicPlayer.js';
+import MusicTab from './MusicTab.js';
 import NotificationBell from './NotificationBell.js';
 import Footer from './Footer.js';
 import CurrencyIcon from './CurrencyIcon.js';
@@ -56,6 +57,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     title: 'Hệ thống',
     items: [
+      { to: '/profile', icon: 'bi-person-circle', labelKey: 'nav.profile' },
       { to: '/achievements', icon: 'bi-award-fill', labelKey: 'nav.achievements' },
       { to: '/faq', icon: 'bi-question-circle-fill', labelKey: 'nav.faq' },
       { to: '/support', icon: 'bi-headset', labelKey: 'nav.support' },
@@ -225,6 +227,9 @@ export default function Shell() {
             </div>
           </Link>
 
+          {/* Music Tab Mini Player */}
+          <MusicTab />
+
           {/* User Status, Balance & Quick Actions */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {me && (
@@ -253,6 +258,16 @@ export default function Shell() {
                 >
                   <i className="bi bi-fire text-rose text-sm animate-pulse-soft" />
                   <span>{me.streak_days}d</span>
+                </Link>
+
+                {/* Profile Link Button */}
+                <Link
+                  to="/profile"
+                  onClick={playClickSound}
+                  title="Hồ sơ & Cài đặt"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-ink hover:bg-surface2 transition btn-press border border-line/60 shrink-0"
+                >
+                  <i className="bi bi-person-fill text-sm" />
                 </Link>
               </>
             )}
@@ -336,7 +351,14 @@ export default function Shell() {
 
               {/* Mobile User Profile Summary */}
               {me && (
-                <div className="p-3.5 rounded-xl bg-surface2/60 border border-line mb-3">
+                <Link
+                  to="/profile"
+                  onClick={() => {
+                    playClickSound();
+                    setMobileOpen(false);
+                  }}
+                  className="block p-3.5 rounded-xl bg-surface2/60 border border-line mb-3 hover:border-indigo/40 transition"
+                >
                   <div className="flex items-center gap-2.5 mb-2.5">
                     {me.avatar_url ? (
                       <img src={me.avatar_url} alt={me.username} className="w-9 h-9 rounded-full object-cover" />
@@ -346,7 +368,10 @@ export default function Shell() {
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
-                      <div className="font-semibold text-sm truncate">{me.username}</div>
+                      <div className="font-semibold text-sm truncate flex items-center justify-between">
+                        <span>{me.username}</span>
+                        <i className="bi bi-gear-fill text-muted text-xs" />
+                      </div>
                       <div className="text-[11px] text-muted flex items-center gap-1.5">
                         <span className="w-2 h-2 rounded-full bg-cyan inline-block animate-pulse" />
                         <span>{me.role === 'admin' ? 'Admin' : 'Thành viên'}</span>
@@ -360,10 +385,13 @@ export default function Shell() {
                     </div>
                     <div className="text-center p-1.5 rounded-lg bg-bg/50">
                       <div className="text-[10px] text-muted">Chuỗi ngày</div>
-                      <div className="font-mono text-xs font-bold text-rose">{me.streak_days} ngày 🔥</div>
+                      <div className="font-mono text-xs font-bold text-rose flex items-center justify-center gap-1">
+                        <span>{me.streak_days} ngày</span>
+                        <i className="bi bi-fire" />
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               )}
 
               {/* Drawer Links */}
