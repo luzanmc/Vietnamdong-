@@ -86,3 +86,25 @@ export async function incrementGiftcodeUsedCount(giftcodeId: string, client: Que
     [giftcodeId]
   );
 }
+
+export interface UserGiftcodeHistoryItem {
+  id: string;
+  giftcode_id: string;
+  code: string;
+  reward_nova: number;
+  created_at: string;
+}
+
+export async function getUserGiftcodeHistory(userId: string): Promise<UserGiftcodeHistoryItem[]> {
+  const { rows } = await pool.query<UserGiftcodeHistoryItem>(
+    `SELECT gr.id, gr.giftcode_id, g.code, gr.reward_nova, gr.created_at
+     FROM giftcode_redemptions gr
+     JOIN giftcodes g ON g.id = gr.giftcode_id
+     WHERE gr.user_id = $1
+     ORDER BY gr.created_at DESC
+     LIMIT 50`,
+    [userId]
+  );
+  return rows;
+}
+

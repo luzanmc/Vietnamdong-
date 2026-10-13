@@ -33,6 +33,7 @@ import Landing from './pages/Landing.js';
 import { MusicProvider } from './context/MusicContext.js';
 import SecurityGuard from './components/SecurityGuard.js';
 import Profile from './pages/Profile.js';
+import Giftcode from './pages/Giftcode.js';
 import Shell from './components/Shell.js';
 
 export default function App() {
@@ -72,6 +73,7 @@ export default function App() {
                   <Route path="/history" element={<TransactionHistory />} />
                   <Route path="/lucky-wheel" element={<LuckyWheel />} />
                   <Route path="/quests" element={<Quests />} />
+                  <Route path="/giftcode" element={<Giftcode />} />
                   <Route path="/support" element={<Support />} />
                   <Route path="/security" element={<Security />} />
                   <Route path="/profile" element={<Profile />} />

@@ -21,7 +21,9 @@ import type {
   Quest,
   SupportTicket,
   SupportMessage,
+  GiftcodeHistoryItem,
 } from '../types.js';
+
 
 const BASE = '/api';
 
@@ -154,8 +156,10 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ code }),
     }),
+  giftcodeHistory: () => request<GiftcodeHistoryItem[]>('/giftcodes/history'),
 
   networkStatus: () => request<{ ip: string; isVpn: boolean }>('/security/network-status'),
 };
+
 
 export { ApiError };

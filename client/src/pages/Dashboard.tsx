@@ -218,7 +218,7 @@ export default function Dashboard() {
 
               <div className="pt-3 border-t border-line/60 flex items-center justify-between text-xs">
                 <Link
-                  to="/profile?tab=giftcode"
+                  to="/giftcode"
                   onClick={playClickSound}
                   className="text-amber hover:underline flex items-center gap-1 text-[11px] font-semibold"
                 >
@@ -256,28 +256,39 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <form onSubmit={handleRedeemGiftcode} className="flex items-center gap-2 w-full md:w-auto">
-          <input
-            type="text"
-            placeholder="Nhập mã Giftcode..."
-            value={giftcode}
-            onChange={(e) => setGiftcode(e.target.value.toUpperCase())}
-            className="flex-1 md:w-64 bg-surface2 border border-line rounded-xl px-3.5 py-2 text-xs font-mono tracking-wider uppercase text-ink focus:outline-none focus:border-indigo"
-          />
-          <button
-            type="submit"
-            disabled={claimingCode || !giftcode.trim()}
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-amber hover:brightness-110 text-black transition btn-press shrink-0 flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed shadow-md"
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <form onSubmit={handleRedeemGiftcode} className="flex items-center gap-2 flex-1 md:flex-initial">
+            <input
+              type="text"
+              placeholder="Nhập mã Giftcode..."
+              value={giftcode}
+              onChange={(e) => setGiftcode(e.target.value.toUpperCase())}
+              className="flex-1 md:w-56 bg-surface2 border border-line rounded-xl px-3.5 py-2 text-xs font-mono tracking-wider uppercase text-ink focus:outline-none focus:border-indigo"
+            />
+            <button
+              type="submit"
+              disabled={claimingCode || !giftcode.trim()}
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-amber hover:brightness-110 text-black transition btn-press shrink-0 flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed shadow-md"
+            >
+              {claimingCode ? (
+                <i className="bi bi-arrow-repeat animate-spin" />
+              ) : (
+                <i className="bi bi-check2" />
+              )}
+              <span>Áp dụng</span>
+            </button>
+          </form>
+          <Link
+            to="/giftcode"
+            onClick={playClickSound}
+            title="Đến trang Giftcode"
+            className="p-2 rounded-xl border border-line bg-surface2 hover:bg-surface2/80 text-muted hover:text-ink text-xs transition shrink-0"
           >
-            {claimingCode ? (
-              <i className="bi bi-arrow-repeat animate-spin" />
-            ) : (
-              <i className="bi bi-check2" />
-            )}
-            <span>Áp dụng</span>
-          </button>
-        </form>
+            <i className="bi bi-box-arrow-up-right" />
+          </Link>
+        </div>
       </div>
+
 
       {giftcodeMsg && (
         <div className="p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center gap-2">

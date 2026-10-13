@@ -193,3 +193,12 @@ export interface SupportMessage {
   message: string;
   created_at: string;
 }
+
+export interface GiftcodeHistoryItem {
+  id: string;
+  giftcode_id: string;
+  code: string;
+  reward_nova: number;
+  created_at: string;
+}
+

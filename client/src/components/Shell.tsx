@@ -34,10 +34,12 @@ const NAV_GROUPS: NavGroup[] = [
       { to: '/chart', icon: 'bi-graph-up', labelKey: 'nav.chart' },
       { to: '/daily-reward', icon: 'bi-gift-fill', labelKey: 'nav.daily', badge: 'HOT', badgeColor: 'bg-rose text-white' },
       { to: '/lucky-wheel', icon: 'bi-stars', labelKey: 'nav.spin', badge: 'FREE', badgeColor: 'bg-amber text-black' },
+      { to: '/giftcode', icon: 'bi-ticket-perforated-fill', labelKey: 'nav.giftcode', badge: 'HOT', badgeColor: 'bg-amber text-black' },
       { to: '/quests', icon: 'bi-list-task', labelKey: 'nav.quests' },
       { to: '/leaderboard', icon: 'bi-trophy-fill', labelKey: 'nav.leaderboard' },
     ],
   },
+
   {
     title: 'Tài chính',
     items: [

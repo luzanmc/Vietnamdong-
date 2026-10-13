@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
 import { useMusic, PRESET_TRACKS, type MusicTrack } from '../context/MusicContext.js';
 import { useTheme } from '../context/ThemeContext.js';
 import { useLanguage } from '../context/LanguageContext.js';
 import { useToast } from '../context/ToastContext.js';
 import { api, type ApiError } from '../api/client.js';
-import { playClickSound, playCoinSound, isSoundEnabled, toggleSound } from '../utils/sound.js';
+import { playClickSound, isSoundEnabled, toggleSound } from '../utils/sound.js';
 import CurrencyIcon from '../components/CurrencyIcon.js';
 
 export default function Profile() {
   const { me, refresh } = useAuth();
+  const navigate = useNavigate();
   const {
     enabled: musicEnabled,
     isPlaying,
@@ -30,19 +31,23 @@ export default function Profile() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') || 'music';
-  const [activeTab, setActiveTab] = useState<'info' | 'music' | 'giftcode' | 'appearance'>(
-    initialTab as any
+  const [activeTab, setActiveTab] = useState<'info' | 'music' | 'appearance'>(
+    initialTab === 'giftcode' ? 'music' : (initialTab as any)
   );
 
-  // Sync tab with URL query parameter
+  // Sync tab with URL query parameter, redirect giftcode tab to /giftcode
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab && ['info', 'music', 'giftcode', 'appearance'].includes(tab)) {
+    if (tab === 'giftcode') {
+      navigate('/giftcode', { replace: true });
+      return;
+    }
+    if (tab && ['info', 'music', 'appearance'].includes(tab)) {
       setActiveTab(tab as any);
     }
-  }, [searchParams]);
+  }, [searchParams, navigate]);
 
-  function switchTab(t: 'info' | 'music' | 'giftcode' | 'appearance') {
+  function switchTab(t: 'info' | 'music' | 'appearance') {
     playClickSound();
     setActiveTab(t);
     setSearchParams({ tab: t });
@@ -50,11 +55,6 @@ export default function Profile() {
 
   // Music form state
   const [customInputUrl, setCustomInputUrl] = useState('');
-
-  // Giftcode state
-  const [giftcode, setGiftcode] = useState('');
-  const [claimingGiftcode, setClaimingGiftcode] = useState(false);
-  const [giftcodeResult, setGiftcodeResult] = useState<string | null>(null);
 
   // Password change state
   const [currentPassword, setCurrentPassword] = useState('');
@@ -71,27 +71,6 @@ export default function Profile() {
     if (next) playClickSound();
   }
 
-  async function handleClaimGiftcode(e: React.FormEvent) {
-    e.preventDefault();
-    if (!giftcode.trim()) return;
-    playClickSound();
-    setClaimingGiftcode(true);
-    setGiftcodeResult(null);
-
-    try {
-      const res = await api.redeemGiftcode(giftcode.trim());
-      playCoinSound();
-      toastSuccess(`Chúc mừng! Bạn đã nhận được +${res.reward_nova} VNC từ mã quà tặng`, 'Đổi mã thành công');
-      setGiftcodeResult(`Kích hoạt thành công mã "${res.code}": Nhận +${res.reward_nova} VNC vào tài khoản!`);
-      setGiftcode('');
-      await refresh();
-    } catch (err) {
-      const msg = (err as ApiError).message;
-      toastError(msg, 'Không thể nhận giftcode');
-    } finally {
-      setClaimingGiftcode(false);
-    }
-  }
 
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
@@ -219,19 +198,8 @@ export default function Profile() {
         </button>
 
         <button
-          onClick={() => switchTab('giftcode')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition btn-press whitespace-nowrap border ${
-            activeTab === 'giftcode'
-              ? 'bg-indigo text-white border-indigo shadow-md shadow-indigo/25'
-              : 'bg-surface border-line text-muted hover:text-ink hover:bg-surface2'
-          }`}
-        >
-          <i className="bi bi-gift-fill" />
-          <span>Nhập Giftcode</span>
-        </button>
-
-        <button
           onClick={() => switchTab('info')}
+
           className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition btn-press whitespace-nowrap border ${
             activeTab === 'info'
               ? 'bg-indigo text-white border-indigo shadow-md shadow-indigo/25'
@@ -428,78 +396,9 @@ export default function Profile() {
         </div>
       )}
 
-      {/* Tab 2: Giftcode */}
-      {activeTab === 'giftcode' && (
-        <div className="space-y-6 animate-fade-in-up">
-          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-line space-y-6">
-            <div>
-              <h2 className="font-display text-lg font-bold text-ink flex items-center gap-2">
-                <i className="bi bi-gift-fill text-amber" /> Kích hoạt Giftcode nhận VNC
-              </h2>
-              <p className="text-xs text-muted mt-1">
-                Nhập mã quà tặng từ sự kiện, livestream hoặc fanpage để nhận ngay VNC miễn phí vào ví
-              </p>
-            </div>
-
-            {giftcodeResult && (
-              <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs sm:text-sm font-semibold flex items-center gap-2">
-                <i className="bi bi-check-circle-fill text-base shrink-0" />
-                <span>{giftcodeResult}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleClaimGiftcode} className="space-y-4 max-w-lg">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-muted">Mã quà tặng (Giftcode)</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="VD: VIETNAMDONG2026, TANTHU50..."
-                    value={giftcode}
-                    onChange={(e) => setGiftcode(e.target.value.toUpperCase())}
-                    className="w-full bg-surface2 border border-line rounded-xl px-4 py-3 text-sm font-mono tracking-wider text-ink focus:outline-none focus:border-indigo uppercase pl-11"
-                  />
-                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
-                    <i className="bi bi-ticket-perforated-fill text-base text-amber" />
-                  </div>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={claimingGiftcode || !giftcode.trim()}
-                className="w-full py-3.5 rounded-xl font-display font-bold text-sm bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:brightness-110 text-white shadow-lg shadow-amber-500/20 transition-all btn-press flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {claimingGiftcode ? (
-                  <>
-                    <i className="bi bi-arrow-repeat animate-spin text-base" />
-                    <span>Đang kiểm tra mã...</span>
-                  </>
-                ) : (
-                  <>
-                    <i className="bi bi-gift text-base" />
-                    <span>Nhận thưởng ngay</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="p-4 rounded-2xl bg-surface2/50 border border-line text-xs text-muted space-y-1.5">
-              <div className="font-semibold text-ink flex items-center gap-1.5">
-                <i className="bi bi-info-circle text-cyan" /> Lưu ý khi nhập Giftcode:
-              </div>
-              <ul className="list-disc list-inside space-y-1 pl-1">
-                <li>Mỗi mã quà tặng chỉ có thể sử dụng một lần cho mỗi tài khoản.</li>
-                <li>Một số mã có giới hạn số lượt kích hoạt hoặc thời hạn áp dụng cụ thể.</li>
-                <li>VNC nhận được sẽ được cộng ngay lập tức vào số dư ví của bạn.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Tab 3: Security & Password */}
+      {/* Tab 2: Security & Password */}
       {activeTab === 'info' && (
+
         <div className="space-y-6 animate-fade-in-up">
           <div className="glass-card rounded-3xl p-6 sm:p-8 border border-line space-y-6">
             <div>
