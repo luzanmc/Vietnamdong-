@@ -181,11 +181,15 @@ authRouter.post('/login', validateBody(loginSchema), async (req, res, next) => {
     const captchaOk = await verifyTurnstile(captchaToken, req.ip);
     if (!captchaOk) return res.status(400).json({ error: 'Xác thực Captcha thất bại, vui lòng thử lại' });
 
-    const user = await getUserByEmail(email);
-    if (!user || !user.password_hash) return res.status(401).json({ error: 'Email hoặc mật khẩu không đúng' });
+    const identifier = String(email || '').trim();
+    const user = identifier.includes('@')
+      ? await getUserByEmail(identifier)
+      : (await getUserByUsername(identifier)) || (await getUserByEmail(identifier));
+
+    if (!user || !user.password_hash) return res.status(401).json({ error: 'Tài khoản hoặc mật khẩu không đúng' });
 
     const valid = await comparePassword(password, user.password_hash);
-    if (!valid) return res.status(401).json({ error: 'Email hoặc mật khẩu không đúng' });
+    if (!valid) return res.status(401).json({ error: 'Tài khoản hoặc mật khẩu không đúng' });
 
     const totp = await getTotp(user.id);
     if (totp?.enabled === 1) {
