@@ -5,6 +5,7 @@ import { ThemeProvider } from './context/ThemeContext.js';
 import { SettingsProvider } from './context/SettingsContext.js';
 import { ToastProvider } from './context/ToastContext.js';
 import ProtectedRoute from './components/ProtectedRoute.js';
+import GuestRoute from './components/GuestRoute.js';
 import Login from './pages/Login.js';
 import ForgotPassword from './pages/ForgotPassword.js';
 import ResetPassword from './pages/ResetPassword.js';
@@ -52,10 +53,12 @@ export default function App() {
               <Route path="/terms" element={<Legal kind="terms" />} />
               <Route path="/privacy" element={<Legal kind="privacy" />} />
               <Route path="/about" element={<Legal kind="about" />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Login />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route element={<GuestRoute />}>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Login />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+              </Route>
               <Route path="/vuotlinkthanhcong/:token" element={<VerifyLink />} />
               <Route element={<ProtectedRoute />}>
                 <Route element={<Shell />}>

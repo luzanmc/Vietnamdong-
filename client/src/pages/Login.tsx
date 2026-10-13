@@ -1,10 +1,11 @@
-import { useEffect, useState, useRef } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams, Link, Navigate } from 'react-router-dom';
 import { api, ApiError } from '../api/client.js';
 import { useAuth } from '../context/AuthContext.js';
 import { useLanguage } from '../context/LanguageContext.js';
 import { useTheme } from '../context/ThemeContext.js';
 import TurnstileWidget from '../components/TurnstileWidget.js';
+import LoadingScreen from '../components/LoadingScreen.js';
 import { playClickSound } from '../utils/sound.js';
 import './Login.css';
 
@@ -31,7 +32,7 @@ function fmt(n: number) {
 
 export default function Login() {
   const navigate = useNavigate();
-  const { me, refresh } = useAuth();
+  const { me, loading, refresh } = useAuth();
   const { lang, t } = useLanguage();
   const { theme, toggle: toggleTheme } = useTheme();
   const [params] = useSearchParams();
@@ -266,6 +267,14 @@ export default function Login() {
     setError(null);
     setCaptchaToken('');
     setCaptchaReset((n) => n + 1);
+  }
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  if (me) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   // 2FA Modal View
