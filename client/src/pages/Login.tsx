@@ -30,78 +30,6 @@ function fmt(n: number) {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 
-function useCountUp(
-  end: number,
-  options: {
-    duration?: number;
-    decimals?: number;
-    prefix?: string;
-    suffix?: string;
-    separator?: string;
-    decimalSeparator?: string;
-    trigger?: boolean;
-  } = {}
-) {
-  const {
-    duration = 1800,
-    decimals = 0,
-    prefix = '',
-    suffix = '',
-    separator = '.',
-    decimalSeparator = ',',
-    trigger = true,
-  } = options;
-
-  const [displayValue, setDisplayValue] = useState(0);
-  const prevEndRef = useRef(0);
-
-  useEffect(() => {
-    if (!trigger) return;
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setDisplayValue(end);
-      prevEndRef.current = end;
-      return;
-    }
-
-    const startVal = prevEndRef.current;
-    const endVal = end;
-    const diff = endVal - startVal;
-    const animDuration = startVal === 0 ? duration : Math.min(duration, 600);
-    let startTime: number | null = null;
-    let frameId: number;
-
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const elapsed = timestamp - startTime;
-      const progress = Math.min(elapsed / animDuration, 1);
-
-      // Ease-out cubic: lướt nhanh rồi hãm phanh êm ái
-      const ease = 1 - Math.pow(1 - progress, 3);
-      const current = startVal + diff * ease;
-
-      setDisplayValue(current);
-
-      if (progress < 1) {
-        frameId = requestAnimationFrame(step);
-      } else {
-        setDisplayValue(endVal);
-        prevEndRef.current = endVal;
-      }
-    };
-
-    frameId = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frameId);
-  }, [trigger, end, duration]);
-
-  const fixed = displayValue.toFixed(decimals);
-  const [intPart, decPart] = fixed.split('.');
-  const intFormatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
-  if (decimals > 0 && decPart !== undefined) {
-    return `${prefix}${intFormatted}${decimalSeparator}${decPart}${suffix}`;
-  }
-  return `${prefix}${intFormatted}${suffix}`;
-}
-
 export default function Login() {
   const navigate = useNavigate();
   const { me, loading, refresh } = useAuth();
@@ -136,7 +64,6 @@ export default function Login() {
 
   // Live balance simulation for VNC Card - synchronized with LandingPage
   const [vncBalance, setVncBalance] = useState(() => (me?.balance_nova !== undefined ? me.balance_nova : 128450));
-  const animatedBalance = useCountUp(vncBalance, { separator: '.' });
 
   // Sync if balance changes
   useEffect(() => {
@@ -191,8 +118,9 @@ export default function Login() {
     if (params.get('error') === 'oauth_failed') setError(t('login.discord_failed'));
   }, [params, t]);
 
-  // 4. Live VNC Balance ticker animation
+  // 4. Live VNC Balance ticker animation - synchronized with LandingPage
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const gains = [100, 300, 100, 1000, 300];
     const timer = setInterval(() => {
       setVncBalance((prev) => prev + gains[Math.floor(Math.random() * gains.length)]);
@@ -498,7 +426,7 @@ export default function Login() {
               <div className="card-bottom">
                 <span>Ví Xu</span>
                 <span>
-                  <b id="bal">{animatedBalance}</b> Xu
+                  <b id="bal">{fmt(vncBalance)}</b> Xu
                 </span>
               </div>
             </div>
