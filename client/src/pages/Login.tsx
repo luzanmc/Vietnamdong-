@@ -32,7 +32,7 @@ function fmt(n: number) {
 export default function Login() {
   const navigate = useNavigate();
   const { me, refresh } = useAuth();
-  const { lang, toggle: toggleLang, t } = useLanguage();
+  const { lang, t } = useLanguage();
   const { theme, toggle: toggleTheme } = useTheme();
   const [params] = useSearchParams();
 
@@ -381,16 +381,6 @@ export default function Login() {
             title="Đổi giao diện Sáng/Tối"
           >
             <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'}`} />
-          </button>
-
-          {/* Language switch */}
-          <button
-            onClick={() => { playClickSound(); toggleLang(); }}
-            aria-label="Switch language"
-            className="btn-icon"
-            title="Đổi ngôn ngữ VI/EN"
-          >
-            <span style={{ fontSize: '11px', fontWeight: 700 }}>{lang === 'vi' ? 'VI' : 'EN'}</span>
           </button>
 
           {/* Back to Home */}
@@ -768,6 +758,78 @@ export default function Login() {
           </p>
         </section>
       </main>
+
+      {/* Footer */}
+      <footer>
+        <div className="wrap">
+          <div className="f-top">
+            <div className="f-brand">
+              <Link to="/" onClick={playClickSound} className="brand">
+                <span className="brand-mark">
+                  <img src="/logo-dark.png" alt="VietnamDong Logo" className="brand-logo-img" />
+                </span>
+                VIETNAMDONG
+              </Link>
+              <p>
+                Nền tảng kiếm Xu bằng vượt link, giới thiệu bạn bè và nhiệm vụ mỗi ngày. Mọi yêu cầu rút tiền đều do admin duyệt, luôn sẵn sàng phục vụ bạn.
+              </p>
+            </div>
+
+            <div className="f-col">
+              <h4>Thông tin chung</h4>
+              <Link to="/about" onClick={playClickSound}>Về chúng tôi</Link>
+              <Link to="/terms" onClick={playClickSound}>Điều khoản dịch vụ</Link>
+              <Link to="/privacy" onClick={playClickSound}>Điều khoản bảo mật</Link>
+            </div>
+
+            <div className="f-col">
+              <h4>Hỗ trợ khách hàng</h4>
+              <Link to="/support" onClick={playClickSound}>Trung tâm hỗ trợ</Link>
+              <Link to="/#faq" onClick={playClickSound}>Hỏi đáp thường gặp</Link>
+              <Link to={me ? '/redeem' : '/login'} onClick={playClickSound}>Rút tiền</Link>
+              <Link to={me ? '/redeem' : '/login'} onClick={playClickSound}>Đổi thưởng</Link>
+              <Link to={me ? '/referral' : '/login'} onClick={playClickSound}>Theo dõi Affiliate</Link>
+            </div>
+
+            <div className="f-col f-contact">
+              <h4>Liên hệ</h4>
+              <Link to="/support" onClick={playClickSound}>
+                <i className="bi bi-headset" />
+                Gửi ticket hỗ trợ
+              </Link>
+            </div>
+          </div>
+
+          {/* Vietnamese Flag - Synchronized with Dashboard Footer */}
+          <div className="f-flag">
+            <span className="flag">
+              <i className="bi bi-star-fill text-[#ffcd00]" />
+            </span>
+            <span>Hoàng Sa &amp; Trường Sa là của Việt Nam!</span>
+          </div>
+
+          <div className="f-bottom">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <button
+                className="btn theme-toggle-footer-btn"
+                onClick={() => {
+                  playClickSound();
+                  toggleTheme();
+                }}
+                aria-label="Chuyển chế độ sáng/tối"
+              >
+                <i className={`bi ${theme === 'dark' ? 'bi-sun-fill text-amber-400' : 'bi-moon-stars-fill text-indigo-400'}`} />
+                <span>{theme === 'dark' ? 'Giao diện Sáng' : 'Giao diện Tối'}</span>
+              </button>
+              <span className="ver">
+                <i className="bi bi-tag" />
+                1.0.0
+              </span>
+            </div>
+            <span>© {new Date().getFullYear()} VietnamDong. Bảo lưu mọi quyền.</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

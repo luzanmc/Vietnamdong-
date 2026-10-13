@@ -105,7 +105,8 @@ html:not(.dark) .vnd-auth-page,
   padding: 4px;
 }
 
-.vnd-auth-page .brand-logo {
+.vnd-auth-page .brand-logo,
+.vnd-auth-page .brand-logo-img {
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -191,8 +192,8 @@ html:not(.dark) .vnd-auth-page,
 /* Auth Layout */
 .vnd-auth-page .auth {
   display: grid;
-  grid-template-columns: 1fr 470px;
-  gap: 64px;
+  grid-template-columns: minmax(0, 1fr) minmax(350px, 470px);
+  gap: clamp(24px, 4vw, 56px);
   align-items: center;
   max-width: 1120px;
   margin: 0 auto;
@@ -785,9 +786,147 @@ html:not(.dark) .vnd-auth-page,
   box-shadow: 0 0 0 4px rgba(79, 123, 255, 0.15);
 }
 
+/* Footer Styles - Synchronized with Landing Page */
+.vnd-auth-page footer {
+  border-top: 1px solid var(--line);
+  padding: 48px 0 36px;
+  color: var(--muted);
+  font-size: 14px;
+  background: var(--bg);
+  width: 100%;
+}
+
+.vnd-auth-page footer .wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.vnd-auth-page .f-top {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 36px;
+}
+
+.vnd-auth-page footer .brand {
+  color: var(--text);
+  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vnd-auth-page .f-brand p {
+  margin: 14px 0 0;
+  max-width: 400px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.vnd-auth-page .f-col {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.vnd-auth-page .f-col h4 {
+  margin: 0 0 6px;
+  color: var(--text);
+  font: 700 14px 'Space Grotesk', sans-serif;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.vnd-auth-page .f-col a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  transition: color 0.2s;
+}
+
+.vnd-auth-page .f-col a:hover {
+  color: var(--text);
+}
+
+.vnd-auth-page .f-col i {
+  color: var(--blue);
+  font-size: 16px;
+}
+
+/* Vietnamese Flag in Footer */
+.vnd-auth-page .f-flag {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 40px 0 28px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.vnd-auth-page .flag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #da251d;
+  flex-shrink: 0;
+  box-shadow: 0 0 14px rgba(218, 37, 29, 0.35);
+}
+
+.vnd-auth-page .flag i.bi-star-fill {
+  color: #ffcd00;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.vnd-auth-page .f-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.vnd-auth-page .theme-toggle-footer-btn {
+  min-height: 32px;
+  padding: 0 14px;
+  border-radius: 99px;
+  font-size: 12px;
+  gap: 6px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.vnd-auth-page .theme-toggle-footer-btn:hover {
+  border-color: var(--blue);
+}
+
+.vnd-auth-page .ver {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: 5px 14px;
+  font-family: ui-monospace, Menlo, monospace;
+  color: var(--text);
+}
+
+.vnd-auth-page .ver i {
+  font-size: 13px;
+}
+
 /* Responsive Behavior */
-/* IMPORTANT: Show Card VNC on Desktop AND Mobile Desktop Mode (when viewport width >= 1024px) */
-@media (max-width: 1024px) {
+/* IMPORTANT: Show Card VNC on Desktop AND Mobile Desktop Mode (when viewport width >= 861px) */
+@media (max-width: 860px) {
   .vnd-auth-page .auth {
     grid-template-columns: 1fr;
     max-width: 520px;
@@ -810,6 +949,22 @@ html:not(.dark) .vnd-auth-page,
   }
   .vnd-auth-page h1 {
     font-size: 23px;
+  }
+  .vnd-auth-page .f-top {
+    grid-template-columns: 1fr 1fr;
+  }
+  .vnd-auth-page .f-brand,
+  .vnd-auth-page .f-contact {
+    grid-column: 1 / -1;
+  }
+  .vnd-auth-page footer .wrap {
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  .vnd-auth-page .f-top {
+    grid-template-columns: 1fr;
   }
 }
 
