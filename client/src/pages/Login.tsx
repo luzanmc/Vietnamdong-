@@ -427,19 +427,19 @@ export default function Login() {
               <span>
                 <i className="bi bi-link-45deg" />
               </span>
-              <span>Vượt link và nhận Xu ngay vào ví</span>
+              Vượt link và nhận Xu ngay vào ví
             </li>
             <li>
               <span>
                 <i className="bi bi-cash-stack" />
               </span>
-              <span>Rút tiền hoặc đổi thẻ cào linh hoạt</span>
+              Rút tiền hoặc đổi thẻ cào linh hoạt
             </li>
             <li>
               <span>
                 <i className="bi bi-shield-check" />
               </span>
-              <span>Bảo mật tài khoản, theo dõi minh bạch</span>
+              Bảo mật tài khoản, theo dõi minh bạch
             </li>
           </ul>
         </aside>

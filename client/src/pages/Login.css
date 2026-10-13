@@ -379,7 +379,7 @@ html:not(.dark) .vnd-auth-page,
   font-size: 14px;
 }
 
-.vnd-auth-page .points span {
+.vnd-auth-page .points li > span:first-child {
   display: grid;
   place-items: center;
   width: 38px;
