@@ -31,6 +31,7 @@ import {
   countUsersFromIpToday,
   setUserPasswordHash,
   markEmailVerified,
+  updateUserAvatar,
 } from '../repositories/userRepository.js';
 import {
   createPasswordReset,
@@ -348,6 +349,24 @@ authRouter.post('/change-password', requireAuth, async (req, res, next) => {
     const newHash = await hashPassword(newPassword);
     await setUserPasswordHash(req.user!.id, newHash);
     res.json({ ok: true, message: 'Đổi mật khẩu thành công' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+authRouter.post('/avatar', requireAuth, async (req, res, next) => {
+  try {
+    const { avatar_url } = req.body;
+    let finalUrl: string | null = null;
+    if (typeof avatar_url === 'string' && avatar_url.trim()) {
+      const trimmed = avatar_url.trim();
+      if (trimmed.length > 500_000) {
+        return res.status(400).json({ error: 'Dung lượng ảnh đại diện quá lớn (tối đa 500KB)' });
+      }
+      finalUrl = trimmed;
+    }
+    await updateUserAvatar(req.user!.id, finalUrl);
+    res.json({ ok: true, avatar_url: finalUrl });
   } catch (err) {
     next(err);
   }

@@ -1,7 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
-import { useMusic, PRESET_TRACKS, type MusicTrack } from '../context/MusicContext.js';
+import {
+  useMusic,
+  PRESET_TRACKS,
+  type MusicTrack,
+  detectTrackType,
+  extractYouTubeId,
+  extractSpotifyEmbedUrl,
+  fetchTrackMetadata,
+} from '../context/MusicContext.js';
 import { useTheme } from '../context/ThemeContext.js';
 import { useLanguage } from '../context/LanguageContext.js';
 import { useToast } from '../context/ToastContext.js';
@@ -9,19 +17,34 @@ import { api, type ApiError } from '../api/client.js';
 import { playClickSound, isSoundEnabled, toggleSound } from '../utils/sound.js';
 import CurrencyIcon from '../components/CurrencyIcon.js';
 
+const AVATAR_PRESETS = [
+  { label: 'Cyber Cat', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Lucky' },
+  { label: 'Mecha Bot', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Cyber' },
+  { label: 'Hero Felix', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Felix' },
+  { label: 'Warrior Aria', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=Aria' },
+  { label: 'Shadow Micah', url: 'https://api.dicebear.com/7.x/micah/svg?seed=Shadow' },
+  { label: 'Luna Elf', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=Luna' },
+  { label: 'Pixel Gamer', url: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=Gamer' },
+  { label: 'Crypto VNC', url: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=VNC' },
+];
+
 export default function Profile() {
   const { me, refresh } = useAuth();
   const navigate = useNavigate();
   const {
     enabled: musicEnabled,
     isPlaying,
-    trackTitle,
-    url: currentMusicUrl,
+    currentTrack,
+    tracks,
     volume,
     togglePlay,
     setVolume,
     setTrack,
-    setCustomUrl,
+    addTrack,
+    removeTrack,
+    resetTracks,
+    nextTrack,
+    prevTrack,
     toggleEnabled: toggleMusicEnabled,
   } = useMusic();
 
@@ -53,10 +76,178 @@ export default function Profile() {
     setSearchParams({ tab: t });
   }
 
-  // Music form state
-  const [customInputUrl, setCustomInputUrl] = useState('');
+  // --- Avatar Edit State ---
+  const [avatarModalOpen, setAvatarModalOpen] = useState(false);
+  const [previewAvatar, setPreviewAvatar] = useState<string | null>(me?.avatar_url || null);
+  const [customAvatarInput, setCustomAvatarInput] = useState('');
+  const [savingAvatar, setSavingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Password change state
+  // Sync preview when me changes
+  useEffect(() => {
+    if (me) {
+      setPreviewAvatar(me.avatar_url);
+    }
+  }, [me?.avatar_url]);
+
+  function handleOpenAvatarModal() {
+    playClickSound();
+    setPreviewAvatar(me?.avatar_url || null);
+    setCustomAvatarInput(me?.avatar_url && !me.avatar_url.startsWith('data:') ? me.avatar_url : '');
+    setAvatarModalOpen(true);
+  }
+
+  function handleSelectPreset(presetUrl: string) {
+    playClickSound();
+    setPreviewAvatar(presetUrl);
+    setCustomAvatarInput(presetUrl);
+  }
+
+  function handleCustomUrlChange(url: string) {
+    setCustomAvatarInput(url);
+    if (url.trim()) {
+      setPreviewAvatar(url.trim());
+    } else {
+      setPreviewAvatar(me?.avatar_url || null);
+    }
+  }
+
+  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toastError('Vui lòng chọn tệp hình ảnh (.png, .jpg, .webp)', 'Lỗi chọn ảnh');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 256;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          const minDim = Math.min(img.width, img.height);
+          const sx = (img.width - minDim) / 2;
+          const sy = (img.height - minDim) / 2;
+          ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, 256, 256);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          setPreviewAvatar(dataUrl);
+          setCustomAvatarInput('');
+          toastSuccess('Ảnh đã được tải lên và sẵn sàng lưu', 'Chọn ảnh thành công');
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleResetAvatar() {
+    playClickSound();
+    setPreviewAvatar(null);
+    setCustomAvatarInput('');
+  }
+
+  async function handleSaveAvatar() {
+    playClickSound();
+    setSavingAvatar(true);
+    try {
+      await api.updateAvatar(previewAvatar);
+      await refresh();
+      toastSuccess('Ảnh đại diện đã được cập nhật thành công!', 'Avatar Profile');
+      setAvatarModalOpen(false);
+    } catch (err) {
+      toastError((err as ApiError).message, 'Không thể cập nhật ảnh đại diện');
+    } finally {
+      setSavingAvatar(false);
+    }
+  }
+
+  // --- Music form state ---
+  const [newMusicUrl, setNewMusicUrl] = useState('');
+  const [newMusicTitle, setNewMusicTitle] = useState('');
+  const [newMusicArtist, setNewMusicArtist] = useState('');
+  const [fetchingMeta, setFetchingMeta] = useState(false);
+  const [detectedType, setDetectedType] = useState<'youtube' | 'spotify' | 'audio'>('audio');
+  const [previewThumbnail, setPreviewThumbnail] = useState<string | null>(null);
+
+  // Auto fetch metadata when pasting URL
+  async function handleUrlInput(val: string) {
+    setNewMusicUrl(val);
+    const trimmed = val.trim();
+    if (!trimmed) {
+      setPreviewThumbnail(null);
+      return;
+    }
+
+    const type = detectTrackType(trimmed);
+    setDetectedType(type);
+
+    if (type === 'youtube' || type === 'spotify') {
+      setFetchingMeta(true);
+      try {
+        const meta = await fetchTrackMetadata(trimmed);
+        setNewMusicTitle(meta.title);
+        setNewMusicArtist(meta.artist);
+        setPreviewThumbnail(meta.thumbnail || null);
+      } catch {
+        // Fallback
+      } finally {
+        setFetchingMeta(false);
+      }
+    } else {
+      const meta = await fetchTrackMetadata(trimmed);
+      if (!newMusicTitle) setNewMusicTitle(meta.title);
+      if (!newMusicArtist) setNewMusicArtist(meta.artist);
+      setPreviewThumbnail(null);
+    }
+  }
+
+  function handleAddMusic(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = newMusicUrl.trim();
+    if (!trimmed) {
+      toastError('Vui lòng nhập đường link bài hát hợp lệ', 'Thiếu đường link');
+      return;
+    }
+
+    playClickSound();
+    const type = detectTrackType(trimmed);
+    const title = newMusicTitle.trim() || (type === 'youtube' ? 'YouTube Track' : type === 'spotify' ? 'Spotify Track' : 'Bài hát mới');
+    const artist = newMusicArtist.trim() || (type === 'youtube' ? 'YouTube' : type === 'spotify' ? 'Spotify' : 'Tự tải lên');
+
+    const added = addTrack({
+      title,
+      artist,
+      url: trimmed,
+      type,
+      thumbnail: previewThumbnail || undefined,
+      youtubeId: extractYouTubeId(trimmed) || undefined,
+      spotifyEmbedUrl: extractSpotifyEmbedUrl(trimmed) || undefined,
+    });
+
+    toastSuccess(`Đã thêm "${added.title}" vào danh sách phát!`, 'Thêm nhạc thành công');
+    setNewMusicUrl('');
+    setNewMusicTitle('');
+    setNewMusicArtist('');
+    setPreviewThumbnail(null);
+  }
+
+  function handleDeleteTrack(id: string, title: string) {
+    playClickSound();
+    removeTrack(id);
+    toastSuccess(`Đã xóa bài hát "${title}" khỏi danh sách`, 'Đã xóa bài nhạc');
+  }
+
+  function handleResetDefaultTracks() {
+    playClickSound();
+    resetTracks();
+    toastSuccess('Đã khôi phục danh sách bài nhạc mặc định', 'Khôi phục danh sách');
+  }
+
+  // --- Password change state ---
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -70,7 +261,6 @@ export default function Profile() {
     setSoundOn(next);
     if (next) playClickSound();
   }
-
 
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
@@ -98,15 +288,6 @@ export default function Profile() {
     }
   }
 
-  function handleSaveCustomMusic(e: React.FormEvent) {
-    e.preventDefault();
-    if (!customInputUrl.trim()) return;
-    playClickSound();
-    setCustomUrl(customInputUrl.trim(), 'Nhạc tự tải lên');
-    toastSuccess('Đã cập nhật liên kết bài nhạc của bạn', 'Nhạc nền');
-    setCustomInputUrl('');
-  }
-
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header Banner */}
@@ -116,20 +297,38 @@ export default function Profile() {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
           <div className="flex items-center gap-4">
-            {me?.avatar_url ? (
-              <img
-                src={me.avatar_url}
-                alt={me.username}
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-indigo/40 shadow-md"
-              />
-            ) : (
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-indigo to-cyan text-white flex items-center justify-center font-display font-bold text-2xl sm:text-3xl shadow-lg shadow-indigo/20">
-                {me?.username?.slice(0, 2).toUpperCase() || 'VN'}
+            {/* Interactive Avatar with Edit Trigger */}
+            <div
+              onClick={handleOpenAvatarModal}
+              className="relative group cursor-pointer shrink-0"
+              title="Nhấn để chỉnh sửa ảnh đại diện"
+            >
+              {me?.avatar_url ? (
+                <img
+                  src={me.avatar_url}
+                  alt={me.username}
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-indigo/40 shadow-md group-hover:opacity-85 transition"
+                />
+              ) : (
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-indigo to-cyan text-white flex items-center justify-center font-display font-bold text-2xl sm:text-3xl shadow-lg shadow-indigo/20 group-hover:opacity-85 transition">
+                  {me?.username?.slice(0, 2).toUpperCase() || 'VN'}
+                </div>
+              )}
+              {/* Camera Hover Overlay */}
+              <div className="absolute inset-0 rounded-2xl bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[11px] font-semibold gap-0.5">
+                <i className="bi bi-camera-fill text-lg" />
+                <span>Đổi ảnh</span>
               </div>
-            )}
+              <button
+                type="button"
+                className="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-indigo text-white flex items-center justify-center shadow border border-white/20 text-xs hover:brightness-110"
+              >
+                <i className="bi bi-pencil-fill text-[9px]" />
+              </button>
+            </div>
 
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink">
                   {me?.username}
                 </h1>
@@ -142,9 +341,16 @@ export default function Profile() {
                     Thành viên
                   </span>
                 )}
+                <button
+                  onClick={handleOpenAvatarModal}
+                  className="px-2.5 py-1 rounded-xl text-xs font-semibold bg-surface2/80 hover:bg-surface2 border border-line text-ink transition btn-press flex items-center gap-1.5"
+                >
+                  <i className="bi bi-image" />
+                  <span>Đổi avatar</span>
+                </button>
               </div>
 
-              <div className="text-xs text-muted mt-1 flex items-center gap-2 flex-wrap">
+              <div className="text-xs text-muted mt-1.5 flex items-center gap-2 flex-wrap">
                 <span className="flex items-center gap-1">
                   <i className="bi bi-envelope text-muted" /> {me?.email || 'Chưa cập nhật email'}
                 </span>
@@ -194,12 +400,11 @@ export default function Profile() {
           }`}
         >
           <i className="bi bi-music-note-beamed" />
-          <span>Nghe nhạc trên web</span>
+          <span>Nghe nhạc trên web ({tracks.length})</span>
         </button>
 
         <button
           onClick={() => switchTab('info')}
-
           className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition btn-press whitespace-nowrap border ${
             activeTab === 'info'
               ? 'bg-indigo text-white border-indigo shadow-md shadow-indigo/25'
@@ -207,7 +412,7 @@ export default function Profile() {
           }`}
         >
           <i className="bi bi-shield-lock-fill" />
-          <span>Mật khẩu & Bảo mật</span>
+          <span>Hồ sơ & Bảo mật</span>
         </button>
 
         <button
@@ -223,7 +428,7 @@ export default function Profile() {
         </button>
       </div>
 
-      {/* Tab 1: Music Player Settings */}
+      {/* Tab 1: Music Player Settings & Playlist Management */}
       {activeTab === 'music' && (
         <div className="space-y-6 animate-fade-in-up">
           {/* Main Music Control Card */}
@@ -234,7 +439,7 @@ export default function Profile() {
                   <i className="bi bi-music-player text-cyan" /> Trình phát nhạc nền cá nhân
                 </h2>
                 <p className="text-xs text-muted mt-0.5">
-                  Tùy chỉnh bài nhạc yêu thích phát liên tục trên thanh tab điều hướng khi lướt web
+                  Phát nhạc liên tục khi lướt web. Hỗ trợ YouTube, Spotify và link trực tiếp MP3.
                 </p>
               </div>
 
@@ -262,144 +467,426 @@ export default function Profile() {
             </div>
 
             {/* Now Playing Widget */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-surface2/70 border border-line/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5 min-w-0">
-                <div
-                  className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${
-                    isPlaying
-                      ? 'bg-indigo text-white border-indigo shadow-[0_0_20px_rgba(85,167,255,0.35)]'
-                      : 'bg-surface border-line text-muted'
-                  }`}
-                >
-                  <i className={`bi text-xl ${isPlaying ? 'bi-soundwave animate-pulse' : 'bi-music-note-beamed'}`} />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[11px] font-semibold text-muted uppercase tracking-wider">
-                    {isPlaying ? 'Đang phát' : 'Tạm dừng'}
-                  </div>
-                  <div className="font-display font-bold text-base text-ink truncate mt-0.5">
-                    {trackTitle || 'Chưa chọn bài hát'}
-                  </div>
-                </div>
-              </div>
-
-              {/* Play/Pause & Volume Controls */}
-              <div className="flex items-center gap-4 sm:justify-end">
-                <button
-                  onClick={() => {
-                    playClickSound();
-                    togglePlay();
-                  }}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo to-cyan text-white hover:brightness-110 transition btn-press flex items-center gap-1.5 shadow-md shadow-indigo/20"
-                >
-                  <i className={`bi ${isPlaying ? 'bi-pause-fill' : 'bi-play-fill'} text-base`} />
-                  <span>{isPlaying ? 'Tạm dừng' : 'Phát nhạc'}</span>
-                </button>
-
-                <div className="flex items-center gap-2">
-                  <i className={`bi ${volume === 0 ? 'bi-volume-mute-fill text-rose' : 'bi-volume-up-fill text-muted'} text-sm`} />
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.05"
-                    value={volume}
-                    onChange={(e) => setVolume(parseFloat(e.target.value))}
-                    className="w-24 sm:w-28 accent-indigo cursor-pointer h-1.5 bg-surface rounded-lg"
-                    aria-label="Âm lượng"
-                  />
-                  <span className="font-mono text-xs text-muted w-8">{Math.round(volume * 100)}%</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Preset Chill Playlist */}
-            <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
-                <i className="bi bi-collection-play-fill text-indigo" /> Danh sách bài nhạc Chill có sẵn
-              </h3>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {PRESET_TRACKS.map((track) => {
-                  const isCurrent = currentMusicUrl === track.url;
-                  return (
+            <div className="p-4 sm:p-5 rounded-2xl bg-surface2/70 border border-line/80 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5 min-w-0">
+                  {/* Thumbnail or animated equalizer */}
+                  {currentTrack?.thumbnail && currentTrack.type !== 'spotify' ? (
+                    <img
+                      src={currentTrack.thumbnail}
+                      alt={currentTrack.title}
+                      className="w-14 h-14 rounded-2xl object-cover shrink-0 border border-line shadow-md"
+                    />
+                  ) : (
                     <div
-                      key={track.id}
-                      onClick={() => {
-                        playClickSound();
-                        setTrack(track);
-                      }}
-                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 group ${
-                        isCurrent
-                          ? 'bg-indigo/10 border-indigo/50 shadow-md'
-                          : 'bg-surface hover:bg-surface2 border-line hover:border-line/90'
+                      className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border ${
+                        isPlaying
+                          ? 'bg-indigo text-white border-indigo shadow-[0_0_20px_rgba(85,167,255,0.35)]'
+                          : 'bg-surface border-line text-muted'
                       }`}
                     >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${
-                            isCurrent
-                              ? 'bg-indigo text-white border-indigo'
-                              : 'bg-surface2 text-muted border-line group-hover:text-ink'
-                          }`}
-                        >
-                          <i className={`bi ${isCurrent && isPlaying ? 'bi-soundwave' : 'bi-play-fill'} text-base`} />
-                        </div>
-                        <div className="min-w-0">
-                          <div className={`font-semibold text-xs sm:text-sm truncate ${isCurrent ? 'text-indigo' : 'text-ink'}`}>
-                            {track.title}
-                          </div>
-                          <div className="text-[11px] text-muted truncate mt-0.5">{track.artist}</div>
-                        </div>
-                      </div>
-
-                      {isCurrent ? (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo/20 text-indigo border border-indigo/40 shrink-0">
-                          Đang chọn
-                        </span>
-                      ) : (
-                        <span className="text-xs text-muted group-hover:text-ink transition shrink-0">
-                          <i className="bi bi-chevron-right" />
-                        </span>
-                      )}
+                      <i className={`bi text-2xl ${isPlaying ? 'bi-soundwave animate-pulse' : 'bi-music-note-beamed'}`} />
                     </div>
-                  );
-                })}
+                  )}
+
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border">
+                        {currentTrack?.type === 'youtube' && (
+                          <span className="text-red-500 border-red-500/30 flex items-center gap-1">
+                            <i className="bi bi-youtube" /> YouTube
+                          </span>
+                        )}
+                        {currentTrack?.type === 'spotify' && (
+                          <span className="text-emerald-400 border-emerald-400/30 flex items-center gap-1">
+                            <i className="bi bi-spotify" /> Spotify
+                          </span>
+                        )}
+                        {currentTrack?.type === 'audio' && (
+                          <span className="text-indigo border-indigo/30 flex items-center gap-1">
+                            <i className="bi bi-file-earmark-music" /> MP3 Audio
+                          </span>
+                        )}
+                      </span>
+                      <span className="text-[11px] font-semibold text-muted">
+                        {isPlaying ? 'Đang phát' : 'Tạm dừng'}
+                      </span>
+                    </div>
+
+                    <div className="font-display font-bold text-base text-ink truncate mt-1">
+                      {currentTrack?.title || 'Chưa chọn bài hát'}
+                    </div>
+                    <div className="text-xs text-muted truncate mt-0.5">
+                      {currentTrack?.artist || 'Không rõ nghệ sĩ'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Controls */}
+                <div className="flex items-center gap-3 sm:justify-end flex-wrap">
+                  <button
+                    onClick={() => {
+                      playClickSound();
+                      prevTrack();
+                    }}
+                    title="Bài trước"
+                    className="p-2 rounded-xl border border-line bg-surface hover:bg-surface2 text-muted hover:text-ink transition btn-press"
+                  >
+                    <i className="bi bi-skip-backward-fill text-sm" />
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      playClickSound();
+                      togglePlay();
+                    }}
+                    className="px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo to-cyan text-white hover:brightness-110 transition btn-press flex items-center gap-1.5 shadow-md shadow-indigo/20"
+                  >
+                    <i className={`bi ${isPlaying ? 'bi-pause-fill' : 'bi-play-fill'} text-base`} />
+                    <span>{isPlaying ? 'Tạm dừng' : 'Phát nhạc'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      playClickSound();
+                      nextTrack();
+                    }}
+                    title="Bài tiếp theo"
+                    className="p-2 rounded-xl border border-line bg-surface hover:bg-surface2 text-muted hover:text-ink transition btn-press"
+                  >
+                    <i className="bi bi-skip-forward-fill text-sm" />
+                  </button>
+
+                  {/* Volume */}
+                  <div className="flex items-center gap-2 pl-2 border-l border-line">
+                    <i className={`bi ${volume === 0 ? 'bi-volume-mute-fill text-rose' : 'bi-volume-up-fill text-muted'} text-sm`} />
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.05"
+                      value={volume}
+                      onChange={(e) => setVolume(parseFloat(e.target.value))}
+                      className="w-20 sm:w-24 accent-indigo cursor-pointer h-1.5 bg-surface rounded-lg"
+                      aria-label="Âm lượng"
+                    />
+                    <span className="font-mono text-xs text-muted w-7">{Math.round(volume * 100)}%</span>
+                  </div>
+                </div>
               </div>
+
+              {/* If current track is Spotify: render inline player */}
+              {currentTrack?.type === 'spotify' && currentTrack.spotifyEmbedUrl && (
+                <div className="pt-2">
+                  <iframe
+                    src={currentTrack.spotifyEmbedUrl}
+                    width="100%"
+                    height="152"
+                    frameBorder="0"
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                    loading="lazy"
+                    className="rounded-2xl w-full border border-line shadow-sm"
+                    title="Spotify Embed"
+                  />
+                </div>
+              )}
             </div>
 
-            {/* Custom MP3 URL */}
-            <form onSubmit={handleSaveCustomMusic} className="space-y-2 pt-2 border-t border-line">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
-                <i className="bi bi-link-45deg text-cyan" /> Dán link nhạc MP3 tùy chỉnh của bạn
-              </h3>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <input
-                  type="url"
-                  placeholder="https://example.com/audio/my-favorite-song.mp3"
-                  value={customInputUrl}
-                  onChange={(e) => setCustomInputUrl(e.target.value)}
-                  className="flex-1 bg-surface2 border border-line rounded-xl px-4 py-2.5 text-xs sm:text-sm text-ink focus:outline-none focus:border-indigo"
-                />
+            {/* Form: Thêm bài nhạc từ link YouTube / Spotify / MP3 */}
+            <form onSubmit={handleAddMusic} className="p-5 rounded-2xl bg-surface border border-line space-y-4">
+              <div>
+                <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+                  <i className="bi bi-plus-circle-fill text-indigo" /> Thêm bài nhạc từ link YouTube hoặc Spotify
+                </h3>
+                <p className="text-xs text-muted mt-0.5">
+                  Dán đường dẫn YouTube (video/shorts), Spotify (bài hát/album/playlist) hoặc link file MP3
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {/* Link input */}
+                <div className="relative">
+                  <input
+                    type="url"
+                    placeholder="https://www.youtube.com/watch?v=... hoặc https://open.spotify.com/track/..."
+                    value={newMusicUrl}
+                    onChange={(e) => handleUrlInput(e.target.value)}
+                    required
+                    className="w-full bg-surface2 border border-line rounded-xl pl-4 pr-10 py-2.5 text-xs sm:text-sm text-ink focus:outline-none focus:border-indigo"
+                  />
+                  {fetchingMeta && (
+                    <div className="absolute right-3 top-3 text-indigo">
+                      <i className="bi bi-arrow-repeat animate-spin text-sm" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Live detected preview card */}
+                {previewThumbnail && (
+                  <div className="p-3 rounded-xl bg-surface2/60 border border-line/80 flex items-center gap-3">
+                    <img
+                      src={previewThumbnail}
+                      alt="Preview"
+                      className="w-12 h-12 rounded-lg object-cover border border-line shrink-0"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-muted">
+                        {detectedType === 'youtube' && <span className="text-red-500 flex items-center gap-1"><i className="bi bi-youtube" /> YouTube phát hiện</span>}
+                        {detectedType === 'spotify' && <span className="text-emerald-400 flex items-center gap-1"><i className="bi bi-spotify" /> Spotify phát hiện</span>}
+                      </div>
+                      <div className="text-xs font-semibold text-ink truncate mt-0.5">{newMusicTitle}</div>
+                      <div className="text-[11px] text-muted truncate">{newMusicArtist}</div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Optional Custom Title & Artist inputs */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-medium text-muted block mb-1">Tên bài hát (tùy chỉnh)</label>
+                    <input
+                      type="text"
+                      placeholder="VD: Lofi Chill Melodies"
+                      value={newMusicTitle}
+                      onChange={(e) => setNewMusicTitle(e.target.value)}
+                      className="w-full bg-surface2 border border-line rounded-xl px-3 py-2 text-xs text-ink focus:outline-none focus:border-indigo"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-medium text-muted block mb-1">Nghệ sĩ / Kênh (tùy chỉnh)</label>
+                    <input
+                      type="text"
+                      placeholder="VD: Lofi Girl"
+                      value={newMusicArtist}
+                      onChange={(e) => setNewMusicArtist(e.target.value)}
+                      className="w-full bg-surface2 border border-line rounded-xl px-3 py-2 text-xs text-ink focus:outline-none focus:border-indigo"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-1">
+                  <div className="text-[11px] text-muted flex items-center gap-3">
+                    <span className="flex items-center gap-1 text-red-400"><i className="bi bi-youtube" /> YouTube</span>
+                    <span className="flex items-center gap-1 text-emerald-400"><i className="bi bi-spotify" /> Spotify</span>
+                    <span className="flex items-center gap-1 text-indigo"><i className="bi bi-filetype-mp3" /> MP3 Audio</span>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={!newMusicUrl.trim()}
+                    className="px-5 py-2.5 rounded-xl font-bold text-xs bg-indigo hover:brightness-110 text-white transition btn-press flex items-center gap-1.5 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <i className="bi bi-plus-lg" />
+                    <span>Thêm vào danh sách & Phát</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            {/* Playlist List with Delete Controls */}
+            <div className="space-y-3 pt-2 border-t border-line">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
+                  <i className="bi bi-collection-play-fill text-indigo" /> Danh sách bài hát của bạn ({tracks.length})
+                </h3>
+
                 <button
-                  type="submit"
-                  className="px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-white bg-indigo hover:brightness-110 transition btn-press shrink-0 flex items-center justify-center gap-1.5"
+                  onClick={handleResetDefaultTracks}
+                  title="Khôi phục lại danh sách bài nhạc có sẵn ban đầu"
+                  className="text-xs text-muted hover:text-ink hover:underline flex items-center gap-1 transition"
                 >
-                  <i className="bi bi-play-circle" />
-                  <span>Lưu & Phát ngay</span>
+                  <i className="bi bi-arrow-counterclockwise" /> Khôi phục mặc định
                 </button>
               </div>
-              <p className="text-[11px] text-muted">
-                Hỗ trợ đường dẫn trực tiếp đến file âm thanh định dạng .mp3 hoặc luồng phát trực tuyến.
-              </p>
-            </form>
+
+              {tracks.length === 0 ? (
+                <div className="p-8 text-center text-muted border border-dashed border-line rounded-2xl">
+                  <i className="bi bi-music-note text-3xl mb-1 block opacity-50" />
+                  <p className="text-xs">Chưa có bài hát nào trong danh sách.</p>
+                  <button
+                    onClick={handleResetDefaultTracks}
+                    className="mt-3 px-4 py-1.5 rounded-xl text-xs font-semibold bg-indigo text-white hover:brightness-110"
+                  >
+                    Khôi phục bài hát mẫu
+                  </button>
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {tracks.map((track) => {
+                    const isCurrent = currentTrack?.id === track.id;
+                    return (
+                      <div
+                        key={track.id}
+                        className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 group relative ${
+                          isCurrent
+                            ? 'bg-indigo/10 border-indigo/50 shadow-md ring-1 ring-indigo/40'
+                            : 'bg-surface hover:bg-surface2 border-line hover:border-line/90'
+                        }`}
+                      >
+                        {/* Play trigger */}
+                        <div
+                          onClick={() => {
+                            playClickSound();
+                            setTrack(track);
+                          }}
+                          className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+                        >
+                          {/* Thumbnail / Source icon */}
+                          {track.thumbnail && track.type !== 'spotify' ? (
+                            <img
+                              src={track.thumbnail}
+                              alt={track.title}
+                              className="w-10 h-10 rounded-xl object-cover shrink-0 border border-line"
+                            />
+                          ) : (
+                            <div
+                              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+                                isCurrent
+                                  ? 'bg-indigo text-white border-indigo'
+                                  : 'bg-surface2 text-muted border-line group-hover:text-ink'
+                              }`}
+                            >
+                              {track.type === 'youtube' ? (
+                                <i className="bi bi-youtube text-red-500 text-lg" />
+                              ) : track.type === 'spotify' ? (
+                                <i className="bi bi-spotify text-emerald-400 text-lg" />
+                              ) : (
+                                <i className={`bi ${isCurrent && isPlaying ? 'bi-soundwave' : 'bi-play-fill'} text-base`} />
+                              )}
+                            </div>
+                          )}
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className={`font-semibold text-xs truncate ${
+                                  isCurrent ? 'text-indigo' : 'text-ink'
+                                }`}
+                              >
+                                {track.title}
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-muted truncate mt-0.5 flex items-center gap-1.5">
+                              <span>{track.artist}</span>
+                              <span className="text-[9px] px-1 rounded uppercase tracking-wider font-bold bg-surface2 border border-line">
+                                {track.type}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Actions: Status & Delete button */}
+                        <div className="flex items-center gap-2 shrink-0">
+                          {isCurrent ? (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo/20 text-indigo border border-indigo/40">
+                              Đang phát
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                playClickSound();
+                                setTrack(track);
+                              }}
+                              className="p-1.5 rounded-lg text-muted hover:text-ink hover:bg-surface2 transition text-xs"
+                              title="Phát bài này"
+                            >
+                              <i className="bi bi-play-circle text-sm" />
+                            </button>
+                          )}
+
+                          {/* Delete Track button */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteTrack(track.id, track.title);
+                            }}
+                            title={`Xóa bài hát "${track.title}"`}
+                            className="p-1.5 rounded-lg text-muted hover:text-rose hover:bg-rose/10 transition text-xs"
+                          >
+                            <i className="bi bi-trash3 text-sm" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
 
-      {/* Tab 2: Security & Password */}
+      {/* Tab 2: Security & Password & Avatar Card */}
       {activeTab === 'info' && (
-
         <div className="space-y-6 animate-fade-in-up">
+          {/* Avatar Profile Management Card */}
+          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-line space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-line">
+              <div>
+                <h2 className="font-display text-lg font-bold text-ink flex items-center gap-2">
+                  <i className="bi bi-person-bounding-box text-indigo" /> Ảnh đại diện hồ sơ (Avatar)
+                </h2>
+                <p className="text-xs text-muted mt-1">
+                  Tùy chỉnh ảnh đại diện của bạn hiển thị trên bảng xếp hạng và toàn hệ thống
+                </p>
+              </div>
+
+              <button
+                onClick={handleOpenAvatarModal}
+                className="px-4 py-2.5 rounded-xl font-bold text-xs bg-indigo hover:brightness-110 text-white transition btn-press flex items-center gap-2 self-start sm:self-auto shadow-md"
+              >
+                <i className="bi bi-pencil-square" />
+                <span>Chỉnh sửa Avatar</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-4">
+              {me?.avatar_url ? (
+                <img
+                  src={me.avatar_url}
+                  alt={me.username}
+                  className="w-16 h-16 rounded-2xl object-cover border-2 border-indigo/40 shadow-md"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo to-cyan text-white flex items-center justify-center font-display font-bold text-2xl shadow-lg">
+                  {me?.username?.slice(0, 2).toUpperCase() || 'VN'}
+                </div>
+              )}
+
+              <div className="space-y-1">
+                <div className="font-bold text-sm text-ink">{me?.username}</div>
+                <div className="text-xs text-muted">
+                  {me?.avatar_url ? 'Đang sử dụng ảnh đại diện tùy chỉnh' : 'Đang sử dụng ảnh chữ cái mặc định'}
+                </div>
+                <div className="pt-1 flex items-center gap-2">
+                  <button
+                    onClick={handleOpenAvatarModal}
+                    className="text-xs text-indigo hover:underline font-semibold"
+                  >
+                    Đổi sang ảnh khác
+                  </button>
+                  {me?.avatar_url && (
+                    <>
+                      <span className="text-muted text-xs">•</span>
+                      <button
+                        onClick={async () => {
+                          playClickSound();
+                          await api.updateAvatar(null);
+                          await refresh();
+                          toastSuccess('Đã gỡ avatar và trở về mặc định', 'Avatar');
+                        }}
+                        className="text-xs text-rose hover:underline font-medium"
+                      >
+                        Gỡ avatar
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Password Change Card */}
           <div className="glass-card rounded-3xl p-6 sm:p-8 border border-line space-y-6">
             <div>
               <h2 className="font-display text-lg font-bold text-ink flex items-center gap-2">
@@ -489,7 +976,7 @@ export default function Profile() {
         </div>
       )}
 
-      {/* Tab 4: Appearance & System */}
+      {/* Tab 3: Appearance & System */}
       {activeTab === 'appearance' && (
         <div className="space-y-6 animate-fade-in-up">
           <div className="glass-card rounded-3xl p-6 sm:p-8 border border-line space-y-6">
@@ -572,6 +1059,168 @@ export default function Profile() {
                   <span>{lang === 'vi' ? 'Tiếng Việt' : 'English'}</span>
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- AVATAR EDIT MODAL --- */}
+      {avatarModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-lg rounded-3xl bg-surface border border-line p-6 sm:p-7 shadow-2xl space-y-6 animate-scale-in max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-line">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-indigo/20 text-indigo flex items-center justify-center">
+                  <i className="bi bi-camera-fill text-base" />
+                </div>
+                <div>
+                  <h3 className="font-display font-bold text-base text-ink">Chỉnh sửa Ảnh đại diện</h3>
+                  <p className="text-xs text-muted">Tùy biến avatar cho tài khoản {me?.username}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setAvatarModalOpen(false)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-ink hover:bg-surface2 transition"
+              >
+                <i className="bi bi-x-lg text-sm" />
+              </button>
+            </div>
+
+            {/* Preview Banner */}
+            <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-surface2/60 border border-line/80 space-y-3">
+              <div className="relative">
+                {previewAvatar ? (
+                  <img
+                    src={previewAvatar}
+                    alt="Preview"
+                    className="w-24 h-24 rounded-3xl object-cover border-4 border-indigo/40 shadow-xl"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-indigo to-cyan text-white flex items-center justify-center font-display font-bold text-4xl shadow-xl">
+                    {me?.username?.slice(0, 2).toUpperCase() || 'VN'}
+                  </div>
+                )}
+              </div>
+              <div className="text-center">
+                <div className="text-xs font-bold text-ink">{me?.username}</div>
+                <div className="text-[11px] text-muted">
+                  {previewAvatar ? 'Xem trước ảnh đại diện mới' : 'Avatar chữ cái mặc định'}
+                </div>
+              </div>
+            </div>
+
+            {/* Presets Grid */}
+            <div className="space-y-2.5">
+              <div className="text-xs font-bold text-ink uppercase tracking-wider flex items-center justify-between">
+                <span>Chọn mẫu avatar có sẵn</span>
+                <span className="text-[10px] text-muted font-normal">8 kiểu độc đáo</span>
+              </div>
+              <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                {AVATAR_PRESETS.map((preset, idx) => {
+                  const isSelected = previewAvatar === preset.url;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleSelectPreset(preset.url)}
+                      title={preset.label}
+                      className={`p-1 rounded-2xl border transition-all btn-press ${
+                        isSelected
+                          ? 'border-indigo bg-indigo/15 ring-2 ring-indigo shadow-md scale-105'
+                          : 'border-line bg-surface hover:border-line/80 hover:bg-surface2'
+                      }`}
+                    >
+                      <img src={preset.url} alt={preset.label} className="w-full h-auto rounded-xl" />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Upload or Custom URL */}
+            <div className="space-y-3 pt-2 border-t border-line">
+              <div className="flex flex-col sm:flex-row gap-3">
+                {/* Upload from device */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex-1 py-2.5 px-3 rounded-xl border border-dashed border-indigo/50 bg-indigo/5 hover:bg-indigo/10 text-indigo text-xs font-semibold flex items-center justify-center gap-2 transition btn-press"
+                >
+                  <i className="bi bi-cloud-arrow-up-fill text-base" />
+                  <span>Tải ảnh từ máy tính / điện thoại</span>
+                </button>
+
+                {/* Reset to default */}
+                <button
+                  type="button"
+                  onClick={handleResetAvatar}
+                  className="py-2.5 px-3 rounded-xl border border-line bg-surface2 hover:bg-line text-muted hover:text-ink text-xs font-semibold flex items-center justify-center gap-1.5 transition btn-press"
+                  title="Dùng avatar chữ cái mặc định"
+                >
+                  <i className="bi bi-arrow-counterclockwise" />
+                  <span>Dùng avatar mặc định</span>
+                </button>
+              </div>
+
+              {/* Direct Image URL input */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-medium text-muted">Hoặc dán liên kết ảnh trực tiếp (URL)</label>
+                <div className="relative">
+                  <input
+                    type="url"
+                    placeholder="https://example.com/avatar.jpg"
+                    value={customAvatarInput}
+                    onChange={(e) => handleCustomUrlChange(e.target.value)}
+                    className="w-full bg-surface2 border border-line rounded-xl px-3.5 py-2 text-xs text-ink focus:outline-none focus:border-indigo"
+                  />
+                  {customAvatarInput && (
+                    <button
+                      type="button"
+                      onClick={() => handleCustomUrlChange('')}
+                      className="absolute right-2.5 top-2 text-muted hover:text-ink text-xs"
+                    >
+                      <i className="bi bi-x-circle-fill" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-line">
+              <button
+                type="button"
+                onClick={() => setAvatarModalOpen(false)}
+                className="px-4 py-2.5 rounded-xl border border-line text-xs font-semibold text-muted hover:text-ink hover:bg-surface2 transition"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveAvatar}
+                disabled={savingAvatar}
+                className="px-6 py-2.5 rounded-xl text-xs font-bold bg-indigo hover:brightness-110 text-white transition btn-press flex items-center gap-1.5 shadow-md shadow-indigo/25 disabled:opacity-50"
+              >
+                {savingAvatar ? (
+                  <>
+                    <i className="bi bi-arrow-repeat animate-spin" />
+                    <span>Đang lưu...</span>
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-check-lg text-sm" />
+                    <span>Lưu ảnh đại diện</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

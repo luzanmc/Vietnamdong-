@@ -267,9 +267,13 @@ export default function Shell() {
                   to="/profile"
                   onClick={playClickSound}
                   title="Hồ sơ & Cài đặt"
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-ink hover:bg-surface2 transition btn-press border border-line/60 shrink-0"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-ink hover:bg-surface2 transition btn-press border border-line/60 shrink-0 overflow-hidden"
                 >
-                  <i className="bi bi-person-fill text-sm" />
+                  {me.avatar_url ? (
+                    <img src={me.avatar_url} alt={me.username} className="w-full h-full object-cover" />
+                  ) : (
+                    <i className="bi bi-person-fill text-sm" />
+                  )}
                 </Link>
               </>
             )}

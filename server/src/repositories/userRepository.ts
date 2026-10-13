@@ -80,6 +80,14 @@ export async function updateUserFromDiscord(
   await client.query('UPDATE users SET username = $1, avatar_url = $2 WHERE id = $3', [username, avatarUrl, id]);
 }
 
+export async function updateUserAvatar(
+  userId: string,
+  avatarUrl: string | null,
+  client: Queryable = pool
+): Promise<void> {
+  await client.query('UPDATE users SET avatar_url = $1 WHERE id = $2', [avatarUrl, userId]);
+}
+
 export async function createUserFromGoogle(
   id: string,
   googleSub: string,

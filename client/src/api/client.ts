@@ -83,6 +83,11 @@ export const api = {
     request<{ ok: true }>('/auth/reset-password', { method: 'POST', body: JSON.stringify(body) }),
   changePassword: (body: { currentPassword: string; newPassword: string }) =>
     request<{ ok: true; message: string }>('/auth/change-password', { method: 'POST', body: JSON.stringify(body) }),
+  updateAvatar: (avatar_url: string | null) =>
+    request<{ ok: true; avatar_url: string | null }>('/auth/avatar', {
+      method: 'POST',
+      body: JSON.stringify({ avatar_url }),
+    }),
   logout: () => request('/auth/logout', { method: 'POST' }),
 
   tasks: () => request<Task[]>('/tasks'),

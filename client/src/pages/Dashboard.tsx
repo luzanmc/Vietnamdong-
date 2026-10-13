@@ -6,7 +6,7 @@ import TaskCard from '../components/TaskCard.js';
 import Alert from '../components/Alert.js';
 import { StatCardSkeleton, TaskCardSkeleton, Skeleton } from '../components/Skeleton.js';
 import { useToast } from '../context/ToastContext.js';
-import { playClickSound, playCoinSound } from '../utils/sound.js';
+import { playClickSound } from '../utils/sound.js';
 import CurrencyIcon from '../components/CurrencyIcon.js';
 import type { Me, Wallet, Task } from '../types.js';
 
@@ -18,12 +18,7 @@ export default function Dashboard() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Quick Giftcode on Dashboard
-  const [giftcode, setGiftcode] = useState('');
-  const [claimingCode, setClaimingCode] = useState(false);
-  const [giftcodeMsg, setGiftcodeMsg] = useState<string | null>(null);
-
-  const { error: toastError, success: toastSuccess } = useToast();
+  const { error: toastError } = useToast();
 
   async function load() {
     try {
@@ -56,26 +51,6 @@ export default function Dashboard() {
       toastError(msg, 'Không thể mở nhiệm vụ');
     } finally {
       setBusyId(null);
-    }
-  }
-
-  async function handleRedeemGiftcode(e: React.FormEvent) {
-    e.preventDefault();
-    if (!giftcode.trim()) return;
-    playClickSound();
-    setClaimingCode(true);
-    setGiftcodeMsg(null);
-    try {
-      const res = await api.redeemGiftcode(giftcode.trim());
-      playCoinSound();
-      toastSuccess(`Đã nhận +${res.reward_nova} VNC vào ví!`, 'Nhận Giftcode thành công');
-      setGiftcodeMsg(`+${res.reward_nova} VNC đã được cộng vào tài khoản của bạn!`);
-      setGiftcode('');
-      load();
-    } catch (err) {
-      toastError((err as ApiError).message, 'Không thể nhận giftcode');
-    } finally {
-      setClaimingCode(false);
     }
   }
 
@@ -236,66 +211,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
-      {/* Quick Giftcode Banner */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-surface border border-line shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-amber/15 border border-amber/30 text-amber flex items-center justify-center shrink-0">
-            <i className="bi bi-gift-fill text-lg" />
-          </div>
-          <div>
-            <div className="font-semibold text-sm text-ink flex items-center gap-2">
-              <span>Bạn có mã Giftcode quà tặng?</span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose/15 text-rose border border-rose/30">
-                NHẬN VNC
-              </span>
-            </div>
-            <div className="text-xs text-muted">
-              Nhập mã code để nhận VNC miễn phí trực tiếp vào ví
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <form onSubmit={handleRedeemGiftcode} className="flex items-center gap-2 flex-1 md:flex-initial">
-            <input
-              type="text"
-              placeholder="Nhập mã Giftcode..."
-              value={giftcode}
-              onChange={(e) => setGiftcode(e.target.value.toUpperCase())}
-              className="flex-1 md:w-56 bg-surface2 border border-line rounded-xl px-3.5 py-2 text-xs font-mono tracking-wider uppercase text-ink focus:outline-none focus:border-indigo"
-            />
-            <button
-              type="submit"
-              disabled={claimingCode || !giftcode.trim()}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-amber hover:brightness-110 text-black transition btn-press shrink-0 flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed shadow-md"
-            >
-              {claimingCode ? (
-                <i className="bi bi-arrow-repeat animate-spin" />
-              ) : (
-                <i className="bi bi-check2" />
-              )}
-              <span>Áp dụng</span>
-            </button>
-          </form>
-          <Link
-            to="/giftcode"
-            onClick={playClickSound}
-            title="Đến trang Giftcode"
-            className="p-2 rounded-xl border border-line bg-surface2 hover:bg-surface2/80 text-muted hover:text-ink text-xs transition shrink-0"
-          >
-            <i className="bi bi-box-arrow-up-right" />
-          </Link>
-        </div>
-      </div>
-
-
-      {giftcodeMsg && (
-        <div className="p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center gap-2">
-          <i className="bi bi-check-circle-fill text-base" />
-          <span>{giftcodeMsg}</span>
-        </div>
-      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
