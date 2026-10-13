@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
 import {
@@ -89,6 +90,26 @@ export default function Profile() {
       setPreviewAvatar(me.avatar_url);
     }
   }, [me?.avatar_url]);
+
+  // Prevent background scroll and allow ESC key to close modal
+  useEffect(() => {
+    if (!avatarModalOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setAvatarModalOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [avatarModalOpen]);
 
   function handleOpenAvatarModal() {
     playClickSound();
@@ -1065,137 +1086,153 @@ export default function Profile() {
       )}
 
       {/* --- AVATAR EDIT MODAL --- */}
-      {avatarModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-lg rounded-3xl bg-surface border border-line p-6 sm:p-7 shadow-2xl space-y-6 animate-scale-in max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-line">
+      {avatarModalOpen && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setAvatarModalOpen(false);
+            }
+          }}
+        >
+          <div
+            className="w-full max-w-lg rounded-3xl bg-surface border border-line shadow-2xl animate-scale-in flex flex-col max-h-[calc(100dvh-2rem)] sm:max-h-[88vh] overflow-hidden"
+            role="dialog"
+            aria-modal="true"
+          >
+            {/* Modal Header (Fixed at top) */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-line shrink-0 bg-surface">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-indigo/20 text-indigo flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-indigo/20 text-indigo flex items-center justify-center shrink-0">
                   <i className="bi bi-camera-fill text-base" />
                 </div>
-                <div>
-                  <h3 className="font-display font-bold text-base text-ink">Chỉnh sửa Ảnh đại diện</h3>
-                  <p className="text-xs text-muted">Tùy biến avatar cho tài khoản {me?.username}</p>
+                <div className="min-w-0">
+                  <h3 className="font-display font-bold text-base text-ink truncate">Chỉnh sửa Ảnh đại diện</h3>
+                  <p className="text-xs text-muted truncate">Tùy biến avatar cho tài khoản {me?.username}</p>
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => setAvatarModalOpen(false)}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-ink hover:bg-surface2 transition"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-ink hover:bg-surface2 transition shrink-0"
+                aria-label="Đóng"
               >
                 <i className="bi bi-x-lg text-sm" />
               </button>
             </div>
 
-            {/* Preview Banner */}
-            <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-surface2/60 border border-line/80 space-y-3">
-              <div className="relative">
-                {previewAvatar ? (
-                  <img
-                    src={previewAvatar}
-                    alt="Preview"
-                    className="w-24 h-24 rounded-3xl object-cover border-4 border-indigo/40 shadow-xl"
-                  />
-                ) : (
-                  <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-indigo to-cyan text-white flex items-center justify-center font-display font-bold text-4xl shadow-xl">
-                    {me?.username?.slice(0, 2).toUpperCase() || 'VN'}
-                  </div>
-                )}
-              </div>
-              <div className="text-center">
-                <div className="text-xs font-bold text-ink">{me?.username}</div>
-                <div className="text-[11px] text-muted">
-                  {previewAvatar ? 'Xem trước ảnh đại diện mới' : 'Avatar chữ cái mặc định'}
-                </div>
-              </div>
-            </div>
-
-            {/* Presets Grid */}
-            <div className="space-y-2.5">
-              <div className="text-xs font-bold text-ink uppercase tracking-wider flex items-center justify-between">
-                <span>Chọn mẫu avatar có sẵn</span>
-                <span className="text-[10px] text-muted font-normal">8 kiểu độc đáo</span>
-              </div>
-              <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-                {AVATAR_PRESETS.map((preset, idx) => {
-                  const isSelected = previewAvatar === preset.url;
-                  return (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => handleSelectPreset(preset.url)}
-                      title={preset.label}
-                      className={`p-1 rounded-2xl border transition-all btn-press ${
-                        isSelected
-                          ? 'border-indigo bg-indigo/15 ring-2 ring-indigo shadow-md scale-105'
-                          : 'border-line bg-surface hover:border-line/80 hover:bg-surface2'
-                      }`}
-                    >
-                      <img src={preset.url} alt={preset.label} className="w-full h-auto rounded-xl" />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Upload or Custom URL */}
-            <div className="space-y-3 pt-2 border-t border-line">
-              <div className="flex flex-col sm:flex-row gap-3">
-                {/* Upload from device */}
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileUpload}
-                  accept="image/*"
-                  className="hidden"
-                />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex-1 py-2.5 px-3 rounded-xl border border-dashed border-indigo/50 bg-indigo/5 hover:bg-indigo/10 text-indigo text-xs font-semibold flex items-center justify-center gap-2 transition btn-press"
-                >
-                  <i className="bi bi-cloud-arrow-up-fill text-base" />
-                  <span>Tải ảnh từ máy tính / điện thoại</span>
-                </button>
-
-                {/* Reset to default */}
-                <button
-                  type="button"
-                  onClick={handleResetAvatar}
-                  className="py-2.5 px-3 rounded-xl border border-line bg-surface2 hover:bg-line text-muted hover:text-ink text-xs font-semibold flex items-center justify-center gap-1.5 transition btn-press"
-                  title="Dùng avatar chữ cái mặc định"
-                >
-                  <i className="bi bi-arrow-counterclockwise" />
-                  <span>Dùng avatar mặc định</span>
-                </button>
-              </div>
-
-              {/* Direct Image URL input */}
-              <div className="space-y-1">
-                <label className="text-[11px] font-medium text-muted">Hoặc dán liên kết ảnh trực tiếp (URL)</label>
+            {/* Modal Body (Scrollable) */}
+            <div className="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1">
+              {/* Preview Banner */}
+              <div className="flex flex-col items-center justify-center p-4 sm:p-5 rounded-2xl bg-surface2/60 border border-line/80 space-y-2.5">
                 <div className="relative">
-                  <input
-                    type="url"
-                    placeholder="https://example.com/avatar.jpg"
-                    value={customAvatarInput}
-                    onChange={(e) => handleCustomUrlChange(e.target.value)}
-                    className="w-full bg-surface2 border border-line rounded-xl px-3.5 py-2 text-xs text-ink focus:outline-none focus:border-indigo"
-                  />
-                  {customAvatarInput && (
-                    <button
-                      type="button"
-                      onClick={() => handleCustomUrlChange('')}
-                      className="absolute right-2.5 top-2 text-muted hover:text-ink text-xs"
-                    >
-                      <i className="bi bi-x-circle-fill" />
-                    </button>
+                  {previewAvatar ? (
+                    <img
+                      src={previewAvatar}
+                      alt="Preview"
+                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl object-cover border-4 border-indigo/40 shadow-xl"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-br from-indigo to-cyan text-white flex items-center justify-center font-display font-bold text-3xl sm:text-4xl shadow-xl">
+                      {me?.username?.slice(0, 2).toUpperCase() || 'VN'}
+                    </div>
                   )}
                 </div>
+                <div className="text-center">
+                  <div className="text-xs font-bold text-ink">{me?.username}</div>
+                  <div className="text-[11px] text-muted">
+                    {previewAvatar ? 'Xem trước ảnh đại diện mới' : 'Avatar chữ cái mặc định'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Presets Grid */}
+              <div className="space-y-2">
+                <div className="text-xs font-bold text-ink uppercase tracking-wider flex items-center justify-between">
+                  <span>Chọn mẫu avatar có sẵn</span>
+                  <span className="text-[10px] text-muted font-normal">8 kiểu độc đáo</span>
+                </div>
+                <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                  {AVATAR_PRESETS.map((preset, idx) => {
+                    const isSelected = previewAvatar === preset.url;
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleSelectPreset(preset.url)}
+                        title={preset.label}
+                        className={`p-1 rounded-2xl border transition-all btn-press ${
+                          isSelected
+                            ? 'border-indigo bg-indigo/15 ring-2 ring-indigo shadow-md scale-105'
+                            : 'border-line bg-surface hover:border-line/80 hover:bg-surface2'
+                        }`}
+                      >
+                        <img src={preset.url} alt={preset.label} className="w-full h-auto rounded-xl" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Upload or Custom URL */}
+              <div className="space-y-3 pt-2 border-t border-line">
+                <div className="flex flex-col sm:flex-row gap-2.5">
+                  {/* Upload from device */}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex-1 py-2.5 px-3 rounded-xl border border-dashed border-indigo/50 bg-indigo/5 hover:bg-indigo/10 text-indigo text-xs font-semibold flex items-center justify-center gap-2 transition btn-press"
+                  >
+                    <i className="bi bi-cloud-arrow-up-fill text-base" />
+                    <span>Tải ảnh từ máy tính / điện thoại</span>
+                  </button>
+
+                  {/* Reset to default */}
+                  <button
+                    type="button"
+                    onClick={handleResetAvatar}
+                    className="py-2.5 px-3 rounded-xl border border-line bg-surface2 hover:bg-line text-muted hover:text-ink text-xs font-semibold flex items-center justify-center gap-1.5 transition btn-press"
+                    title="Dùng avatar chữ cái mặc định"
+                  >
+                    <i className="bi bi-arrow-counterclockwise" />
+                    <span>Dùng avatar mặc định</span>
+                  </button>
+                </div>
+
+                {/* Direct Image URL input */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-medium text-muted">Hoặc dán liên kết ảnh trực tiếp (URL)</label>
+                  <div className="relative">
+                    <input
+                      type="url"
+                      placeholder="https://example.com/avatar.jpg"
+                      value={customAvatarInput}
+                      onChange={(e) => handleCustomUrlChange(e.target.value)}
+                      className="w-full bg-surface2 border border-line rounded-xl px-3.5 py-2 text-xs text-ink focus:outline-none focus:border-indigo"
+                    />
+                    {customAvatarInput && (
+                      <button
+                        type="button"
+                        onClick={() => handleCustomUrlChange('')}
+                        className="absolute right-2.5 top-2 text-muted hover:text-ink text-xs"
+                      >
+                        <i className="bi bi-x-circle-fill" />
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Modal Actions */}
-            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-line">
+            {/* Modal Actions (Fixed at bottom) */}
+            <div className="flex items-center justify-end gap-2.5 px-5 py-4 border-t border-line shrink-0 bg-surface/90 backdrop-blur-sm">
               <button
                 type="button"
                 onClick={() => setAvatarModalOpen(false)}
@@ -1223,7 +1260,8 @@ export default function Profile() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
