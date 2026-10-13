@@ -386,7 +386,7 @@ export default function Login() {
           {/* Back to Home */}
           <Link className="btn" to="/" onClick={playClickSound}>
             <i className="bi bi-arrow-left" />
-            <span className="hidden sm:inline">Về trang chủ</span>
+            <span>Về trang chủ</span>
           </Link>
         </div>
       </header>
