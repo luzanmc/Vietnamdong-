@@ -36,13 +36,13 @@ export default function StatCard({
         </div>
       </div>
 
-      <div className="font-mono font-mono-nums text-xl sm:text-2xl md:text-3xl font-bold tracking-tight flex items-baseline gap-1.5 relative z-10 min-w-0 flex-wrap">
+      <div className="font-mono font-mono-nums text-lg sm:text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-1.5 relative z-10 min-w-0">
         {suffix === 'VNC' && (
-          <span className="self-center shrink-0">
-            <CurrencyIcon size={20} />
+          <span className="shrink-0">
+            <CurrencyIcon size={18} />
           </span>
         )}
-        <span className="text-ink truncate">
+        <span className="text-ink truncate min-w-0">
           {typeof value === 'number' ? <AnimatedNumber value={value} /> : value}
         </span>
         {suffix && suffix !== 'VNC' && (

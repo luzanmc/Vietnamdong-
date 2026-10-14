@@ -22,7 +22,7 @@ export default function BackgroundMusicPlayer() {
     <>
       {/* Floating Mini-Player for Spotify & Audio / Controls (when showMiniPlayer is active) */}
       {showMiniPlayer && (
-        <div className="fixed bottom-24 right-4 z-40 w-80 max-w-[calc(100vw-32px)] rounded-3xl bg-surface/95 border border-line p-3 shadow-2xl backdrop-blur-xl animate-scale-in">
+        <div className="fixed bottom-20 sm:bottom-24 right-3 sm:right-4 z-40 w-80 max-w-[calc(100vw-24px)] max-h-[82vh] overflow-y-auto rounded-3xl bg-surface/95 border border-line p-3 shadow-2xl backdrop-blur-xl animate-scale-in">
           <div className="flex items-center justify-between pb-2 mb-2 border-b border-line text-xs">
             <div className="flex items-center gap-1.5 font-semibold text-ink truncate">
               {sourceType === 'youtube' && <i className="bi bi-youtube text-red-500" />}
@@ -120,47 +120,49 @@ export default function BackgroundMusicPlayer() {
         </div>
       )}
 
-      {/* Floating Action Button (Mobile always, Desktop if mini-player closed) */}
-      <div className="fixed bottom-20 right-4 z-40 flex items-center gap-2">
-        {(sourceType === 'youtube' || sourceType === 'spotify') && !showMiniPlayer && (
+      {/* Floating Action Button (Mobile only since desktop has header MusicTab, hidden when mini-player is open) */}
+      {!showMiniPlayer && (
+        <div className="fixed bottom-20 right-3.5 z-40 flex items-center gap-2 md:hidden">
+          {(sourceType === 'youtube' || sourceType === 'spotify') && (
+            <button
+              onClick={() => {
+                playClickSound();
+                setShowMiniPlayer(true);
+              }}
+              title="Mở màn hình nhỏ"
+              className="w-9 h-9 rounded-full bg-surface2/90 border border-line text-muted hover:text-ink shadow-lg flex items-center justify-center transition btn-press backdrop-blur-md"
+            >
+              <i className="bi bi-pip text-xs" />
+            </button>
+          )}
+
           <button
             onClick={() => {
               playClickSound();
-              setShowMiniPlayer(true);
+              togglePlay();
             }}
-            title="Mở màn hình nhỏ"
-            className="w-9 h-9 rounded-full bg-surface2/90 border border-line text-muted hover:text-ink shadow-lg flex items-center justify-center transition btn-press backdrop-blur-md"
-          >
-            <i className="bi bi-pip text-xs" />
-          </button>
-        )}
-
-        <button
-          onClick={() => {
-            playClickSound();
-            togglePlay();
-          }}
-          aria-label={isPlaying ? 'Tắt nhạc nền' : 'Bật nhạc nền'}
-          title={isPlaying ? `Đang phát: ${currentTrack.title}` : 'Bật nhạc nền'}
-          className={`w-10 h-10 rounded-full text-white shadow-xl flex items-center justify-center transition btn-press border border-line ${
-            isPlaying
-              ? 'bg-gradient-to-tr from-indigo to-cyan shadow-[0_0_20px_rgba(85,167,255,0.4)] animate-pulse-soft'
-              : 'bg-surface2/90 text-muted hover:text-ink hover:bg-surface2'
-          }`}
-        >
-          <i
-            className={`bi text-sm ${
+            aria-label={isPlaying ? 'Tắt nhạc nền' : 'Bật nhạc nền'}
+            title={isPlaying ? `Đang phát: ${currentTrack.title}` : 'Bật nhạc nền'}
+            className={`w-10 h-10 rounded-full text-white shadow-xl flex items-center justify-center transition btn-press border border-line ${
               isPlaying
-                ? sourceType === 'youtube'
-                  ? 'bi-youtube text-red-400'
-                  : sourceType === 'spotify'
-                  ? 'bi-spotify text-emerald-400'
-                  : 'bi-music-note-beamed text-white'
-                : 'bi-music-note text-muted'
+                ? 'bg-gradient-to-tr from-indigo to-cyan shadow-[0_0_20px_rgba(85,167,255,0.4)] animate-pulse-soft'
+                : 'bg-surface2/90 text-muted hover:text-ink hover:bg-surface2'
             }`}
-          />
-        </button>
-      </div>
+          >
+            <i
+              className={`bi text-sm ${
+                isPlaying
+                  ? sourceType === 'youtube'
+                    ? 'bi-youtube text-red-400'
+                    : sourceType === 'spotify'
+                    ? 'bi-spotify text-emerald-400'
+                    : 'bi-music-note-beamed text-white'
+                  : 'bi-music-note text-muted'
+              }`}
+            />
+          </button>
+        </div>
+      )}
     </>
   );
 }

@@ -99,7 +99,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
       {/* Hero Banner styled in harmony with Landing Page */}
-      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-line bg-gradient-to-br from-surface2 via-surface to-surface shadow-2xl">
+      <div className="relative overflow-hidden rounded-3xl p-4 sm:p-8 border border-line bg-gradient-to-br from-surface2 via-surface to-surface shadow-2xl">
         {/* Ambient radial glows */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-indigo/10 rounded-full blur-3xl -z-10 pointer-events-none" />
         <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-cyan/10 rounded-full blur-3xl -z-10 pointer-events-none" />
@@ -118,7 +118,7 @@ export default function Dashboard() {
               </span>
             </div>
 
-            <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-ink leading-tight">
+            <h1 className="font-display text-xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-ink leading-tight">
               Chào mừng trở lại,{' '}
               <span className="gradient-text-indigo">{me.username}</span>
             </h1>
@@ -128,41 +128,41 @@ export default function Dashboard() {
             </p>
 
             {/* Quick Action Shortcuts */}
-            <div className="flex flex-wrap items-center gap-2.5 pt-2">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 pt-2">
               <Link
                 to="/daily-reward"
                 onClick={playClickSound}
-                className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-rose/20 to-rose/10 hover:from-rose/30 hover:to-rose/20 border border-rose/30 text-rose shadow-sm transition btn-press"
+                className="flex items-center justify-center sm:justify-start gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-rose/20 to-rose/10 hover:from-rose/30 hover:to-rose/20 border border-rose/30 text-rose shadow-sm transition btn-press"
               >
-                <i className="bi bi-gift-fill text-sm" />
-                <span>Điểm danh</span>
+                <i className="bi bi-gift-fill text-sm shrink-0" />
+                <span className="truncate">Điểm danh</span>
               </Link>
 
               <Link
                 to="/lucky-wheel"
                 onClick={playClickSound}
-                className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-amber/20 to-amber/10 hover:from-amber/30 hover:to-amber/20 border border-amber/30 text-amber shadow-sm transition btn-press"
+                className="flex items-center justify-center sm:justify-start gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-amber/20 to-amber/10 hover:from-amber/30 hover:to-amber/20 border border-amber/30 text-amber shadow-sm transition btn-press"
               >
-                <i className="bi bi-stars text-sm" />
-                <span>Quay thưởng</span>
+                <i className="bi bi-stars text-sm shrink-0" />
+                <span className="truncate">Quay thưởng</span>
               </Link>
 
               <Link
                 to="/wallet"
                 onClick={playClickSound}
-                className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan/20 to-cyan/10 hover:from-cyan/30 hover:to-cyan/20 border border-cyan/30 text-cyan shadow-sm transition btn-press"
+                className="flex items-center justify-center sm:justify-start gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan/20 to-cyan/10 hover:from-cyan/30 hover:to-cyan/20 border border-cyan/30 text-cyan shadow-sm transition btn-press"
               >
-                <i className="bi bi-wallet2 text-sm" />
-                <span>Rút tiền</span>
+                <i className="bi bi-wallet2 text-sm shrink-0" />
+                <span className="truncate">Rút tiền</span>
               </Link>
 
               <Link
                 to="/referral"
                 onClick={playClickSound}
-                className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo/20 to-indigo/10 hover:from-indigo/30 hover:to-indigo/20 border border-indigo/30 text-indigo shadow-sm transition btn-press"
+                className="flex items-center justify-center sm:justify-start gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo/20 to-indigo/10 hover:from-indigo/30 hover:to-indigo/20 border border-indigo/30 text-indigo shadow-sm transition btn-press"
               >
-                <i className="bi bi-people-fill text-sm" />
-                <span>Hoa hồng 20%</span>
+                <i className="bi bi-people-fill text-sm shrink-0" />
+                <span className="truncate">Hoa hồng 20%</span>
               </Link>
             </div>
           </div>
@@ -262,7 +262,7 @@ export default function Dashboard() {
           </div>
 
           {/* Task Filter Chips */}
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-surface2/80 border border-line self-start sm:self-auto">
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-surface2/80 border border-line self-start sm:self-auto overflow-x-auto max-w-full no-scrollbar">
             <button
               onClick={() => {
                 playClickSound();

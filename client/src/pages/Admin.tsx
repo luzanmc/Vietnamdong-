@@ -678,8 +678,7 @@ function GiftcodesAdmin() {
           <i className="bi bi-list-ul" /> Danh sách mã Giftcode ({list.length})
         </h2>
         <TableWrap>
-          <table className="w-full text-left text-xs">
-            <thead className="bg-surface2 text-muted border-b border-line text-[11px] uppercase">
+          <thead className="bg-surface2 text-muted border-b border-line text-[11px] uppercase">
               <tr>
                 <th className="px-3 py-2">Mã Code</th>
                 <th className="px-3 py-2">Thưởng VNC</th>
@@ -748,7 +747,6 @@ function GiftcodesAdmin() {
                 </tr>
               )}
             </tbody>
-          </table>
         </TableWrap>
       </div>
     </div>

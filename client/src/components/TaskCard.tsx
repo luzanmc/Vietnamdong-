@@ -77,21 +77,21 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
       </div>
 
       {/* Action button */}
-      <div className="mt-4 pt-3 border-t border-line/40 flex items-center justify-between">
-        <span className="text-[11px] text-muted">
+      <div className="mt-4 pt-3 border-t border-line/40 flex items-center justify-between gap-2.5">
+        <span className="text-[11px] text-muted min-w-0 truncate">
           {atLimit ? (
             <span className="text-amber flex items-center gap-1">
-              <i className="bi bi-check2-circle text-xs" /> Đã hoàn thành hôm nay
+              <i className="bi bi-check2-circle text-xs shrink-0" /> <span className="truncate">Đã hoàn thành hôm nay</span>
             </span>
           ) : (
-            <span>Còn {task.daily_limit - task.done_today} lượt khả dụng</span>
+            <span className="truncate">Còn {task.daily_limit - task.done_today} lượt khả dụng</span>
           )}
         </span>
 
         <button
           onClick={handleClick}
           disabled={busy || atLimit}
-          className={`flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl transition-all btn-press shadow-md ${
+          className={`flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl transition-all btn-press shadow-md shrink-0 ${
             atLimit
               ? 'bg-surface2 text-muted border border-line cursor-not-allowed opacity-60'
               : 'bg-gradient-to-r from-indigo to-indigo/90 hover:from-indigo hover:to-cyan text-white hover:shadow-[0_0_20px_rgba(108,99,245,0.4)]'

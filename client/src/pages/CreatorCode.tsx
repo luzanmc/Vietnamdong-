@@ -61,7 +61,7 @@ export default function CreatorCode() {
       </div>
 
       {loading && (
-        <div className="glass-card rounded-2xl p-6 space-y-3">
+        <div className="glass-card rounded-2xl p-4 sm:p-6 space-y-3">
           <Skeleton className="h-4 w-28" />
           <Skeleton className="h-8 w-44" />
           <div className="grid grid-cols-2 gap-3 pt-2">
@@ -72,33 +72,33 @@ export default function CreatorCode() {
       )}
 
       {mine?.owns_code && (
-        <div className="glass-panel rounded-3xl p-6 border border-amber/40 shadow-xl space-y-4">
+        <div className="glass-panel rounded-3xl p-4 sm:p-6 border border-amber/40 shadow-xl space-y-4">
           <div className="flex items-center justify-between">
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="text-[11px] font-semibold uppercase text-muted tracking-wider">
                 {t('creator.your_code')}
               </div>
-              <div className="font-mono text-2xl font-extrabold text-amber mt-0.5 tracking-wider">
+              <div className="font-mono text-xl sm:text-2xl font-extrabold text-amber mt-0.5 tracking-wider truncate">
                 {mine.code}
               </div>
             </div>
-            <div className="w-10 h-10 rounded-2xl bg-amber/20 border border-amber/40 flex items-center justify-center text-amber text-lg">
+            <div className="w-10 h-10 rounded-2xl bg-amber/20 border border-amber/40 flex items-center justify-center text-amber text-lg shrink-0">
               <i className="bi bi-stars" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3 pt-2 border-t border-line/60">
-            <div className="glass-card rounded-2xl p-3.5 text-center">
+            <div className="glass-card rounded-2xl p-3 sm:p-3.5 text-center min-w-0">
               <div className="text-[11px] text-muted">{t('creator.used_by')}</div>
-              <div className="font-mono text-xl font-bold text-ink mt-0.5">
+              <div className="font-mono text-lg sm:text-xl font-bold text-ink mt-0.5 truncate">
                 {mine.used_by_count} <span className="text-xs font-body font-normal text-muted">{t('creator.used_by_suffix')}</span>
               </div>
             </div>
-            <div className="glass-card rounded-2xl p-3.5 text-center">
+            <div className="glass-card rounded-2xl p-3 sm:p-3.5 text-center min-w-0">
               <div className="text-[11px] text-muted">{t('creator.total_earned')}</div>
-              <div className="font-mono text-xl font-bold text-amber mt-0.5 flex items-center justify-center gap-1">
+              <div className="font-mono text-lg sm:text-xl font-bold text-amber mt-0.5 flex items-center justify-center gap-1 min-w-0">
                 <CurrencyIcon size={16} />
-                <span>{mine.total_earned_nova} VNC</span>
+                <span className="truncate">{mine.total_earned_nova} VNC</span>
               </div>
             </div>
           </div>
@@ -108,7 +108,7 @@ export default function CreatorCode() {
       {/* Enter code form */}
       <form
         onSubmit={apply}
-        className="glass-card rounded-3xl p-6 border border-line shadow-xl space-y-4"
+        className="glass-card rounded-3xl p-4 sm:p-6 border border-line shadow-xl space-y-4"
       >
         <div>
           <h2 className="font-display font-bold text-base text-ink">

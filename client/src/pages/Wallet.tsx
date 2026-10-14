@@ -342,15 +342,15 @@ export default function Wallet() {
                         playClickSound();
                         setMethod(m.id);
                       }}
-                      className={`p-3 rounded-2xl border text-center transition-all btn-press flex flex-col items-center justify-center ${
+                      className={`p-2.5 sm:p-3 rounded-2xl border text-center transition-all btn-press flex flex-col items-center justify-center ${
                         active
                           ? `${m.bg} shadow-md`
                           : 'bg-surface2/60 border-line hover:border-line/80 text-muted'
                       }`}
                     >
                       <i className={`bi ${m.icon} ${m.color} text-lg mb-1`} />
-                      <div className="font-semibold text-xs text-ink">{m.label}</div>
-                      <div className="text-[10px] text-muted truncate">{m.desc}</div>
+                      <div className="font-semibold text-xs text-ink truncate w-full">{m.label}</div>
+                      <div className="text-[10px] text-muted truncate w-full hidden xs:block">{m.desc}</div>
                     </button>
                   );
                 })}
@@ -601,8 +601,8 @@ export default function Wallet() {
 
       {/* Confirmation & Transfer Code Modal */}
       {successModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in-up">
-          <div className="max-w-md w-full bg-surface border border-indigo/40 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 text-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in-up">
+          <div className="max-w-md w-full max-h-[90dvh] overflow-y-auto bg-surface border border-indigo/40 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 text-center">
             <div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-lg">
               <i className="bi bi-check-circle-fill text-3xl" />
             </div>
@@ -680,8 +680,8 @@ export default function Wallet() {
               <div className="text-sm">Bạn chưa có yêu cầu rút tiền nào.</div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+            <div className="overflow-x-auto table-responsive no-scrollbar">
+              <table className="w-full text-left text-sm min-w-[700px] whitespace-nowrap">
                 <thead>
                   <tr className="border-b border-line bg-surface2/40 text-[11px] uppercase tracking-wider text-muted">
                     <th className="px-5 py-3">Mã đơn</th>

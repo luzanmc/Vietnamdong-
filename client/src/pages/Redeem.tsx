@@ -182,13 +182,13 @@ export default function Redeem() {
                       )}
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-line/50 flex items-center justify-between">
-                      <span className="text-[11px] text-muted truncate max-w-[120px]">
+                    <div className="mt-4 pt-3 border-t border-line/50 flex items-center justify-between gap-2">
+                      <span className="text-[11px] text-muted truncate max-w-[140px]">
                         {item.field_label || 'Nhập thông tin'}
                       </span>
                       <button
                         onClick={() => openOrder(item)}
-                        className="px-4 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo to-indigo/90 hover:brightness-110 text-white shadow-sm transition btn-press"
+                        className="px-4 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo to-indigo/90 hover:brightness-110 text-white shadow-sm transition btn-press shrink-0"
                       >
                         {t('redeem.redeem_button')}
                       </button>
@@ -203,10 +203,10 @@ export default function Redeem() {
 
       {/* Confirmation Modal */}
       {activeItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/70 backdrop-blur-md animate-slide-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-md animate-slide-in">
           <form
             onSubmit={submitOrder}
-            className="glass-panel rounded-3xl p-6 sm:p-7 max-w-md w-full border border-indigo/40 shadow-2xl space-y-4"
+            className="glass-panel rounded-3xl p-6 sm:p-7 max-w-md w-full max-h-[90dvh] overflow-y-auto border border-indigo/40 shadow-2xl space-y-4"
           >
             <div className="flex items-center justify-between pb-3 border-b border-line">
               <div className="flex items-center gap-2">

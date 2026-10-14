@@ -125,7 +125,7 @@ export default function LuckyWheel() {
       </div>
 
       {/* Wheel Stage */}
-      <div className="relative w-80 h-80 sm:w-96 sm:h-96 mx-auto mb-8 flex items-center justify-center">
+      <div className="relative w-[280px] h-[280px] xs:w-80 xs:h-80 sm:w-96 sm:h-96 max-w-[calc(100vw-2.5rem)] max-h-[calc(100vw-2.5rem)] mx-auto mb-8 flex items-center justify-center">
         {/* Glowing backdrop halo */}
         <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-indigo/25 via-amber/20 to-cyan/25 blur-2xl -z-10 pointer-events-none animate-pulse-soft" />
 
@@ -285,8 +285,8 @@ export default function LuckyWheel() {
 
       {/* Won Prize Celebration Modal */}
       {wonPrize && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/70 backdrop-blur-md animate-slide-in">
-          <div className="glass-panel rounded-3xl p-6 sm:p-8 max-w-sm w-full border border-amber/40 shadow-2xl text-center relative overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-md animate-slide-in">
+          <div className="glass-panel rounded-3xl p-6 sm:p-8 max-w-sm w-full max-h-[90dvh] overflow-y-auto border border-amber/40 shadow-2xl text-center relative">
             {/* Ambient gold glow */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-amber/20 rounded-full blur-2xl -z-10 pointer-events-none" />
 

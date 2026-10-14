@@ -108,30 +108,30 @@ export default function Quests() {
                 </div>
 
                 {/* Footer action */}
-                <div className="mt-4 pt-3 border-t border-line/40 flex items-center justify-between">
-                  <span className="text-[11px] text-muted">
+                <div className="mt-4 pt-3 border-t border-line/40 flex items-center justify-between gap-2.5">
+                  <span className="text-[11px] text-muted min-w-0 truncate">
                     {q.claimed ? (
                       <span className="text-cyan flex items-center gap-1">
-                        <i className="bi bi-check-circle-fill text-xs" /> Đã hoàn thành
+                        <i className="bi bi-check-circle-fill text-xs shrink-0" /> <span className="truncate">Đã hoàn thành</span>
                       </span>
                     ) : q.canClaim ? (
                       <span className="text-amber flex items-center gap-1 animate-pulse">
-                        <i className="bi bi-gift-fill text-xs" /> Sẵn sàng nhận quà!
+                        <i className="bi bi-gift-fill text-xs shrink-0" /> <span className="truncate">Sẵn sàng nhận quà!</span>
                       </span>
                     ) : (
-                      <span>Cần thêm {q.target - q.progress} lượt để mở khóa</span>
+                      <span className="truncate">Cần thêm {q.target - q.progress} lượt để mở khóa</span>
                     )}
                   </span>
 
                   {q.claimed ? (
-                    <span className="text-xs font-semibold text-muted bg-surface2 px-3 py-1.5 rounded-lg border border-line">
+                    <span className="text-xs font-semibold text-muted bg-surface2 px-3 py-1.5 rounded-lg border border-line shrink-0">
                       {t('quests.claimed')}
                     </span>
                   ) : (
                     <button
                       onClick={() => claim(q.code)}
                       disabled={!q.canClaim || isBusy}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition btn-press flex items-center gap-1.5 shadow-sm ${
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition btn-press flex items-center gap-1.5 shadow-sm shrink-0 ${
                         q.canClaim
                           ? 'bg-gradient-to-r from-amber to-amber-600 hover:brightness-110 text-black shadow-amber/20 hover:shadow-[0_0_20px_rgba(245,165,36,0.4)]'
                           : 'bg-surface2 text-muted border border-line opacity-50 cursor-not-allowed'

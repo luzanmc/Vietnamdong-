@@ -12,6 +12,9 @@ export default {
   darkMode: ['selector', '[data-theme="dark"]'],
   theme: {
     extend: {
+      screens: {
+        xs: '420px',
+      },
       colors: {
         bg: withOpacity('--color-bg'),
         surface: withOpacity('--color-surface'),

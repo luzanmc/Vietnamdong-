@@ -71,7 +71,7 @@ export default function Giftcode() {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Hero Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-line bg-gradient-to-br from-surface2 via-surface to-surface shadow-2xl">
+      <div className="relative overflow-hidden rounded-3xl p-4 sm:p-8 border border-line bg-gradient-to-br from-surface2 via-surface to-surface shadow-2xl">
         <div className="absolute top-0 right-0 w-80 h-80 bg-amber/15 rounded-full blur-3xl -z-10 pointer-events-none" />
         <div className="absolute bottom-0 left-1/4 w-72 h-72 bg-indigo/15 rounded-full blur-3xl -z-10 pointer-events-none" />
 
@@ -92,7 +92,7 @@ export default function Giftcode() {
           </div>
 
           {/* Quick Balance Indicator Card */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-surface border border-line/80 shadow-lg min-w-[200px] shrink-0 text-center sm:text-right">
+          <div className="p-4 sm:p-5 rounded-2xl bg-surface border border-line/80 shadow-lg w-full sm:w-auto min-w-0 sm:min-w-[200px] shrink-0 text-center sm:text-right">
             <div className="text-[11px] uppercase tracking-wider text-muted font-medium">Số dư hiện tại</div>
             <div className="font-mono text-2xl sm:text-3xl font-bold text-amber tracking-tight flex items-center justify-center sm:justify-end gap-1.5 mt-1">
               <CurrencyIcon size={22} />
@@ -115,7 +115,7 @@ export default function Giftcode() {
         {/* Left Column (7 cols) */}
         <div className="lg:col-span-7 space-y-6">
           {/* Card: Enter Giftcode */}
-          <div className="glass-card rounded-3xl p-6 sm:p-7 border border-line space-y-5">
+          <div className="glass-card rounded-3xl p-4 sm:p-7 border border-line space-y-5">
             <div className="flex items-center justify-between border-b border-line/70 pb-3">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-amber/15 text-amber flex items-center justify-center border border-amber/30">
@@ -212,7 +212,7 @@ export default function Giftcode() {
           </div>
 
           {/* Card: History of Redeemed Codes */}
-          <div className="glass-card rounded-3xl p-6 sm:p-7 border border-line space-y-4">
+          <div className="glass-card rounded-3xl p-4 sm:p-7 border border-line space-y-4">
             <div className="flex items-center justify-between border-b border-line/70 pb-3">
               <div className="flex items-center gap-2">
                 <i className="bi bi-clock-history text-indigo text-lg" />
@@ -247,16 +247,16 @@ export default function Giftcode() {
                     key={item.id}
                     className="py-3 flex items-center justify-between gap-3 hover:bg-surface2/30 px-2 rounded-xl transition"
                   >
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-xs sm:text-sm text-ink bg-surface2 px-2.5 py-0.5 rounded-lg border border-line">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono font-bold text-xs sm:text-sm text-ink bg-surface2 px-2.5 py-0.5 rounded-lg border border-line truncate max-w-[140px] sm:max-w-none">
                           {item.code}
                         </span>
-                        <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                        <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 shrink-0">
                           Thành công
                         </span>
                       </div>
-                      <div className="text-[11px] text-muted mt-1">
+                      <div className="text-[11px] text-muted mt-1 truncate">
                         {new Date(item.created_at).toLocaleString('vi-VN')}
                       </div>
                     </div>
@@ -275,7 +275,7 @@ export default function Giftcode() {
         {/* Right Column (5 cols) */}
         <div className="lg:col-span-5 space-y-6">
           {/* Card: Community Channels where giftcodes drop */}
-          <div className="glass-card rounded-3xl p-6 sm:p-7 border border-line space-y-4">
+          <div className="glass-card rounded-3xl p-4 sm:p-7 border border-line space-y-4">
             <h3 className="font-display text-base font-bold text-ink flex items-center gap-2">
               <i className="bi bi-broadcast text-cyan text-lg" />
               <span>Săn Giftcode ở đâu?</span>
@@ -318,7 +318,7 @@ export default function Giftcode() {
           </div>
 
           {/* Card: Important Notes */}
-          <div className="glass-card rounded-3xl p-6 sm:p-7 border border-line space-y-3">
+          <div className="glass-card rounded-3xl p-4 sm:p-7 border border-line space-y-3">
             <h3 className="font-display text-sm font-bold text-ink flex items-center gap-2">
               <i className="bi bi-info-circle-fill text-amber" />
               <span>Lưu ý khi sử dụng</span>
@@ -332,7 +332,7 @@ export default function Giftcode() {
           </div>
 
           {/* Card: Need Support */}
-          <div className="p-5 rounded-3xl bg-gradient-to-br from-indigo/10 via-surface to-surface border border-indigo/25 space-y-2">
+          <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-indigo/10 via-surface to-surface border border-indigo/25 space-y-2">
             <div className="flex items-center gap-2 text-indigo font-bold text-xs">
               <i className="bi bi-headset text-sm" />
               <span>Gặp sự cố với mã quà tặng?</span>

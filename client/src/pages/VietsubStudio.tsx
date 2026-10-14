@@ -107,7 +107,7 @@ export default function VietsubStudio() {
   return (
     <div className="max-w-xl mx-auto py-4 space-y-6">
       {/* Product Card */}
-      <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-line shadow-xl space-y-5">
+      <div className="glass-panel rounded-3xl p-4 sm:p-7 border border-line shadow-xl space-y-5">
         <div className="flex items-center gap-4">
           {info.logoUrl ? (
             <img

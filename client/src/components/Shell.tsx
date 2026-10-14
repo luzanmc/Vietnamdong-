@@ -262,12 +262,12 @@ export default function Shell() {
                   <span>{me.streak_days}d</span>
                 </Link>
 
-                {/* Profile Link Button */}
+                {/* Profile Link Button (Shown on sm+ to prevent header overcrowding on small phones) */}
                 <Link
                   to="/profile"
                   onClick={playClickSound}
                   title="Hồ sơ & Cài đặt"
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-ink hover:bg-surface2 transition btn-press border border-line/60 shrink-0 overflow-hidden"
+                  className="hidden sm:flex w-8 h-8 rounded-lg items-center justify-center text-muted hover:text-ink hover:bg-surface2 transition btn-press border border-line/60 shrink-0 overflow-hidden"
                 >
                   {me.avatar_url ? (
                     <img src={me.avatar_url} alt={me.username} className="w-full h-full object-cover" />
@@ -284,7 +284,9 @@ export default function Shell() {
               <LanguageToggle />
             </div>
 
-            <ThemeToggle />
+            <div className="hidden sm:flex items-center">
+              <ThemeToggle />
+            </div>
             <NotificationBell />
 
             {/* Desktop Logout button */}
@@ -432,7 +434,7 @@ export default function Shell() {
         {/* Page Outlet */}
         <main
           key={pathname}
-          className="page-enter flex-1 px-3.5 sm:px-8 py-6 pb-24 lg:pb-8 min-w-0 max-w-full overflow-x-hidden"
+          className="page-enter flex-1 px-3 sm:px-8 py-5 sm:py-6 pb-32 sm:pb-28 lg:pb-8 min-w-0 max-w-full overflow-x-hidden"
         >
           <Outlet />
         </main>

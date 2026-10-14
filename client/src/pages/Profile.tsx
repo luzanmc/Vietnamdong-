@@ -312,12 +312,12 @@ export default function Profile() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-line bg-gradient-to-br from-surface2 via-surface to-surface shadow-xl">
+      <div className="relative overflow-hidden rounded-3xl p-4 sm:p-8 border border-line bg-gradient-to-br from-surface2 via-surface to-surface shadow-xl">
         <div className="absolute top-0 right-0 w-80 h-80 bg-indigo/10 rounded-full blur-3xl -z-10 pointer-events-none" />
         <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-cyan/10 rounded-full blur-3xl -z-10 pointer-events-none" />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative z-10">
+          <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
             {/* Interactive Avatar with Edit Trigger */}
             <div
               onClick={handleOpenAvatarModal}
@@ -348,23 +348,23 @@ export default function Profile() {
               </button>
             </div>
 
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink">
+                <h1 className="font-display text-xl sm:text-3xl font-bold text-ink truncate max-w-[200px] sm:max-w-none">
                   {me?.username}
                 </h1>
                 {me?.role === 'admin' ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo/20 text-indigo border border-indigo/40 uppercase">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo/20 text-indigo border border-indigo/40 uppercase shrink-0">
                     Admin
                   </span>
                 ) : (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-cyan/15 text-cyan border border-cyan/30">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-cyan/15 text-cyan border border-cyan/30 shrink-0">
                     Thành viên
                   </span>
                 )}
                 <button
                   onClick={handleOpenAvatarModal}
-                  className="px-2.5 py-1 rounded-xl text-xs font-semibold bg-surface2/80 hover:bg-surface2 border border-line text-ink transition btn-press flex items-center gap-1.5"
+                  className="px-2.5 py-1 rounded-xl text-xs font-semibold bg-surface2/80 hover:bg-surface2 border border-line text-ink transition btn-press flex items-center gap-1.5 shrink-0"
                 >
                   <i className="bi bi-image" />
                   <span>Đổi avatar</span>
@@ -372,15 +372,16 @@ export default function Profile() {
               </div>
 
               <div className="text-xs text-muted mt-1.5 flex items-center gap-2 flex-wrap">
-                <span className="flex items-center gap-1">
-                  <i className="bi bi-envelope text-muted" /> {me?.email || 'Chưa cập nhật email'}
+                <span className="flex items-center gap-1 truncate max-w-full">
+                  <i className="bi bi-envelope text-muted shrink-0" />
+                  <span className="truncate">{me?.email || 'Chưa cập nhật email'}</span>
                 </span>
                 {me?.email_verified ? (
-                  <span className="text-emerald-400 font-medium flex items-center gap-1">
+                  <span className="text-emerald-400 font-medium flex items-center gap-1 shrink-0">
                     <i className="bi bi-patch-check-fill" /> Đã xác thực
                   </span>
                 ) : (
-                  <span className="text-amber font-medium flex items-center gap-1">
+                  <span className="text-amber font-medium flex items-center gap-1 shrink-0">
                     <i className="bi bi-exclamation-circle" /> Chưa xác thực
                   </span>
                 )}
@@ -389,8 +390,8 @@ export default function Profile() {
           </div>
 
           {/* Quick Stats Pill */}
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-surface border border-line/80 text-center min-w-[100px]">
+          <div className="grid grid-cols-2 gap-2.5 w-full sm:w-auto sm:flex sm:items-center">
+            <div className="p-3 rounded-2xl bg-surface border border-line/80 text-center sm:min-w-[100px] flex-1">
               <div className="text-[10px] uppercase tracking-wider text-muted font-semibold">Số dư ví</div>
               <div className="font-mono text-base sm:text-lg font-bold text-amber flex items-center justify-center gap-1 mt-0.5">
                 <CurrencyIcon size={16} />
@@ -399,7 +400,7 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="p-3 rounded-2xl bg-surface border border-line/80 text-center min-w-[90px]">
+            <div className="p-3 rounded-2xl bg-surface border border-line/80 text-center sm:min-w-[90px] flex-1">
               <div className="text-[10px] uppercase tracking-wider text-muted font-semibold">Chuỗi ngày</div>
               <div className="font-mono text-base sm:text-lg font-bold text-rose flex items-center justify-center gap-1 mt-0.5">
                 <i className="bi bi-fire" />
@@ -411,7 +412,7 @@ export default function Profile() {
       </div>
 
       {/* Tabs Navigation */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar scrollbar-none">
         <button
           onClick={() => switchTab('music')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold transition btn-press whitespace-nowrap border ${
@@ -685,8 +686,8 @@ export default function Profile() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-1">
-                  <div className="text-[11px] text-muted flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                  <div className="text-[11px] text-muted flex items-center gap-3 flex-wrap">
                     <span className="flex items-center gap-1 text-red-400"><i className="bi bi-youtube" /> YouTube</span>
                     <span className="flex items-center gap-1 text-emerald-400"><i className="bi bi-spotify" /> Spotify</span>
                     <span className="flex items-center gap-1 text-indigo"><i className="bi bi-filetype-mp3" /> MP3 Audio</span>
@@ -695,7 +696,7 @@ export default function Profile() {
                   <button
                     type="submit"
                     disabled={!newMusicUrl.trim()}
-                    className="px-5 py-2.5 rounded-xl font-bold text-xs bg-indigo hover:brightness-110 text-white transition btn-press flex items-center gap-1.5 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl font-bold text-xs bg-indigo hover:brightness-110 text-white transition btn-press flex items-center justify-center gap-1.5 shadow-md disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                   >
                     <i className="bi bi-plus-lg" />
                     <span>Thêm vào danh sách & Phát</span>
@@ -1012,13 +1013,13 @@ export default function Profile() {
 
             <div className="space-y-4 max-w-xl">
               {/* Theme selector */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-surface2/60 border border-line">
-                <div>
+              <div className="flex items-center justify-between gap-3.5 p-4 rounded-2xl bg-surface2/60 border border-line">
+                <div className="min-w-0 flex-1">
                   <div className="font-semibold text-sm text-ink flex items-center gap-2">
-                    <i className={`bi ${theme === 'dark' ? 'bi-moon-stars-fill text-indigo' : 'bi-sun-fill text-amber'}`} />
-                    <span>Chế độ giao diện (Dark / Light)</span>
+                    <i className={`bi ${theme === 'dark' ? 'bi-moon-stars-fill text-indigo' : 'bi-sun-fill text-amber'} shrink-0`} />
+                    <span className="truncate">Chế độ giao diện (Dark / Light)</span>
                   </div>
-                  <div className="text-xs text-muted mt-0.5">
+                  <div className="text-xs text-muted mt-0.5 truncate">
                     Hiện tại: {theme === 'dark' ? 'Giao diện Tối (Khuyên dùng)' : 'Giao diện Sáng'}
                   </div>
                 </div>
@@ -1027,7 +1028,7 @@ export default function Profile() {
                     playClickSound();
                     toggleTheme();
                   }}
-                  className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-surface border border-line text-ink hover:border-indigo transition btn-press flex items-center gap-1.5"
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-surface border border-line text-ink hover:border-indigo transition btn-press flex items-center gap-1.5 shrink-0"
                 >
                   <i className="bi bi-arrow-repeat text-indigo" />
                   <span>Đổi giao diện</span>
@@ -1035,19 +1036,19 @@ export default function Profile() {
               </div>
 
               {/* Sound effects */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-surface2/60 border border-line">
-                <div>
+              <div className="flex items-center justify-between gap-3.5 p-4 rounded-2xl bg-surface2/60 border border-line">
+                <div className="min-w-0 flex-1">
                   <div className="font-semibold text-sm text-ink flex items-center gap-2">
-                    <i className={`bi ${soundOn ? 'bi-volume-up-fill text-cyan' : 'bi-volume-mute-fill text-muted'}`} />
-                    <span>Hiệu ứng âm thanh click & nhận quà</span>
+                    <i className={`bi ${soundOn ? 'bi-volume-up-fill text-cyan' : 'bi-volume-mute-fill text-muted'} shrink-0`} />
+                    <span className="truncate">Hiệu ứng âm thanh click & nhận quà</span>
                   </div>
-                  <div className="text-xs text-muted mt-0.5">
+                  <div className="text-xs text-muted mt-0.5 leading-relaxed">
                     Âm thanh phản hồi khi bấm nút, hoàn thành nhiệm vụ và nhận VNC
                   </div>
                 </div>
                 <button
                   onClick={handleToggleSound}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition btn-press flex items-center gap-1.5 ${
+                  className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition btn-press flex items-center gap-1.5 shrink-0 ${
                     soundOn
                       ? 'bg-cyan/15 border-cyan/40 text-cyan'
                       : 'bg-surface border-line text-muted'
@@ -1059,13 +1060,13 @@ export default function Profile() {
               </div>
 
               {/* Language toggle */}
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-surface2/60 border border-line">
-                <div>
+              <div className="flex items-center justify-between gap-3.5 p-4 rounded-2xl bg-surface2/60 border border-line">
+                <div className="min-w-0 flex-1">
                   <div className="font-semibold text-sm text-ink flex items-center gap-2">
-                    <i className="bi bi-translate text-indigo" />
-                    <span>Ngôn ngữ hiển thị</span>
+                    <i className="bi bi-translate text-indigo shrink-0" />
+                    <span className="truncate">Ngôn ngữ hiển thị</span>
                   </div>
-                  <div className="text-xs text-muted mt-0.5">
+                  <div className="text-xs text-muted mt-0.5 truncate">
                     Đổi giữa Tiếng Việt và English
                   </div>
                 </div>
@@ -1074,7 +1075,7 @@ export default function Profile() {
                     playClickSound();
                     toggleLanguage();
                   }}
-                  className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-surface border border-line text-ink hover:border-indigo transition btn-press flex items-center gap-1.5"
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-surface border border-line text-ink hover:border-indigo transition btn-press flex items-center gap-1.5 shrink-0"
                 >
                   <i className="bi bi-globe" />
                   <span>{lang === 'vi' ? 'Tiếng Việt' : 'English'}</span>
