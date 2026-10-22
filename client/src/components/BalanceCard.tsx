@@ -381,14 +381,14 @@ export function BalanceCardModal() {
   if (!isCustomizerOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-fade-in">
       <div
         className="fixed inset-0"
         onClick={closeCustomizer}
         aria-hidden="true"
       />
 
-      <div className="relative w-full max-w-lg bg-[#0a0a0a] border border-line rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col gap-4 p-5 max-h-[92vh] overflow-y-auto">
+      <div className="relative w-full max-w-lg bg-surface border border-line text-ink rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col gap-4 p-5 max-h-[92vh] overflow-y-auto">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-indigo animate-pulse" />
