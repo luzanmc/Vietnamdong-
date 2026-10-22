@@ -706,18 +706,21 @@ export default function Profile() {
             </form>
 
             {/* Playlist List with Delete Controls */}
-            <div className="space-y-3 pt-2 border-t border-line">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
-                  <i className="bi bi-collection-play-fill text-indigo" /> Danh sách bài hát của bạn ({tracks.length})
+            <div className="space-y-3 pt-2 border-t border-line min-w-0">
+              <div className="flex items-center justify-between gap-2 min-w-0">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5 min-w-0">
+                  <i className="bi bi-collection-play-fill text-indigo shrink-0" />
+                  <span className="truncate">Danh sách bài hát ({tracks.length})</span>
                 </h3>
 
                 <button
                   onClick={handleResetDefaultTracks}
                   title="Khôi phục lại danh sách bài nhạc có sẵn ban đầu"
-                  className="text-xs text-muted hover:text-ink hover:underline flex items-center gap-1 transition"
+                  aria-label="Khôi phục mặc định"
+                  className="min-h-[40px] min-w-[40px] px-2.5 sm:px-3 rounded-xl text-xs text-muted hover:text-ink hover:bg-surface2 flex items-center justify-center gap-1.5 transition shrink-0 border border-line/60"
                 >
-                  <i className="bi bi-arrow-counterclockwise" /> Khôi phục mặc định
+                  <i className="bi bi-arrow-counterclockwise text-sm shrink-0" />
+                  <span className="hidden sm:inline">Khôi phục mặc định</span>
                 </button>
               </div>
 
@@ -727,19 +730,20 @@ export default function Profile() {
                   <p className="text-xs">Chưa có bài hát nào trong danh sách.</p>
                   <button
                     onClick={handleResetDefaultTracks}
-                    className="mt-3 px-4 py-1.5 rounded-xl text-xs font-semibold bg-indigo text-white hover:brightness-110"
+                    className="mt-3 px-4 py-2 min-h-[40px] rounded-xl text-xs font-semibold bg-indigo text-white hover:brightness-110 flex items-center gap-1.5 mx-auto"
                   >
-                    Khôi phục bài hát mẫu
+                    <i className="bi bi-arrow-counterclockwise" />
+                    <span>Khôi phục bài hát mẫu</span>
                   </button>
                 </div>
               ) : (
-                <div className="grid sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
                   {tracks.map((track) => {
                     const isCurrent = currentTrack?.id === track.id;
                     return (
                       <div
                         key={track.id}
-                        className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 group relative ${
+                        className={`p-2.5 sm:p-3 rounded-2xl border transition-all flex items-center justify-between gap-2 min-w-0 w-full group relative ${
                           isCurrent
                             ? 'bg-indigo/10 border-indigo/50 shadow-md ring-1 ring-indigo/40'
                             : 'bg-surface hover:bg-surface2 border-line hover:border-line/90'
@@ -751,7 +755,7 @@ export default function Profile() {
                             playClickSound();
                             setTrack(track);
                           }}
-                          className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+                          className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer"
                         >
                           {/* Thumbnail / Source icon */}
                           {track.thumbnail && track.type !== 'spotify' ? (
@@ -773,24 +777,25 @@ export default function Profile() {
                               ) : track.type === 'spotify' ? (
                                 <i className="bi bi-spotify text-emerald-400 text-lg" />
                               ) : (
-                                <i className={`bi ${isCurrent && isPlaying ? 'bi-soundwave' : 'bi-play-fill'} text-base`} />
+                                <i className={`bi ${isCurrent && isPlaying ? 'bi-soundwave' : 'bi-file-earmark-music'} text-base`} />
                               )}
                             </div>
                           )}
 
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-center min-w-0">
                               <span
-                                className={`font-semibold text-xs truncate ${
+                                className={`font-semibold text-xs truncate block w-full ${
                                   isCurrent ? 'text-indigo' : 'text-ink'
                                 }`}
+                                title={track.title}
                               >
                                 {track.title}
                               </span>
                             </div>
-                            <div className="text-[11px] text-muted truncate mt-0.5 flex items-center gap-1.5">
-                              <span>{track.artist}</span>
-                              <span className="text-[9px] px-1 rounded uppercase tracking-wider font-bold bg-surface2 border border-line">
+                            <div className="text-[11px] text-muted truncate mt-0.5 flex items-center gap-1.5 min-w-0">
+                              <span className="truncate">{track.artist}</span>
+                              <span className="text-[9px] px-1 rounded uppercase tracking-wider font-bold bg-surface2 border border-line shrink-0">
                                 {track.type}
                               </span>
                             </div>
@@ -798,21 +803,30 @@ export default function Profile() {
                         </div>
 
                         {/* Actions: Status & Delete button */}
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-1 shrink-0">
                           {isCurrent ? (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo/20 text-indigo border border-indigo/40">
-                              Đang phát
-                            </span>
+                            <button
+                              onClick={() => {
+                                playClickSound();
+                                togglePlay();
+                              }}
+                              className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl bg-indigo/20 text-indigo border border-indigo/40 flex items-center justify-center shrink-0 transition hover:bg-indigo/30"
+                              title={isPlaying ? 'Đang phát (Nhấn để tạm dừng)' : 'Tạm dừng (Nhấn để phát)'}
+                              aria-label={isPlaying ? 'Đang phát' : 'Tạm dừng'}
+                            >
+                              <i className={`bi ${isPlaying ? 'bi-soundwave animate-pulse text-base' : 'bi-pause-fill text-base'}`} />
+                            </button>
                           ) : (
                             <button
                               onClick={() => {
                                 playClickSound();
                                 setTrack(track);
                               }}
-                              className="p-1.5 rounded-lg text-muted hover:text-ink hover:bg-surface2 transition text-xs"
+                              className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl text-muted hover:text-ink hover:bg-surface2 flex items-center justify-center transition shrink-0"
                               title="Phát bài này"
+                              aria-label="Phát bài này"
                             >
-                              <i className="bi bi-play-circle text-sm" />
+                              <i className="bi bi-play-circle text-base" />
                             </button>
                           )}
 
@@ -823,9 +837,10 @@ export default function Profile() {
                               handleDeleteTrack(track.id, track.title);
                             }}
                             title={`Xóa bài hát "${track.title}"`}
-                            className="p-1.5 rounded-lg text-muted hover:text-rose hover:bg-rose/10 transition text-xs"
+                            aria-label={`Xóa bài hát "${track.title}"`}
+                            className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl text-muted hover:text-rose hover:bg-rose/10 flex items-center justify-center transition shrink-0"
                           >
-                            <i className="bi bi-trash3 text-sm" />
+                            <i className="bi bi-trash text-base" />
                           </button>
                         </div>
                       </div>
