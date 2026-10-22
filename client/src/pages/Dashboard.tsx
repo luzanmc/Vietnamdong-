@@ -172,8 +172,8 @@ export default function Dashboard() {
           <div className="md:col-span-5 flex flex-col items-center md:items-end justify-center gap-3">
             <div className="w-full max-w-sm">
               <BalanceCard
-                amount={wallet?.balance_vnd}
-                currency="₫"
+                novaAmount={wallet?.balance_nova}
+                vndAmount={wallet?.balance_vnd}
                 label="Số dư khả dụng"
                 cardId={me?.card_id || undefined}
               />

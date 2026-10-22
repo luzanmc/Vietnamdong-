@@ -4,21 +4,27 @@ import { useCardTheme, CARD_PRESETS } from '../context/CardContext.js';
 import { api } from '../api/client.js';
 
 interface BalanceCardProps {
+  novaAmount?: number;
+  vndAmount?: number;
   amount?: number | string;
   currency?: '₫' | 'VNC';
   label?: string;
   cardId?: string;
   interactive?: boolean;
   className?: string;
+  showEditButton?: boolean;
 }
 
 export default function BalanceCard({
+  novaAmount,
+  vndAmount,
   amount,
   currency,
   label = 'Số dư khả dụng',
   cardId: customCardId,
   interactive = true,
   className = '',
+  showEditButton = false,
 }: BalanceCardProps) {
   const { me } = useAuth();
   const { effectiveBackground, openCustomizer } = useCardTheme();
@@ -26,10 +32,12 @@ export default function BalanceCard({
   // Balance determination
   const [balanceNova, setBalanceNova] = useState<number>(0);
   const [balanceVnd, setBalanceVnd] = useState<number>(0);
-  const [showVnd, setShowVnd] = useState<boolean>(currency ? currency === '₫' : true);
+  // Default to VNC: showVnd is false
+  const [showVnd, setShowVnd] = useState<boolean>(false);
 
-  // Fetch wallet balance if amount prop not explicitly provided
+  // Fetch wallet balance if amounts not explicitly provided
   useEffect(() => {
+    if (novaAmount !== undefined && vndAmount !== undefined) return;
     if (amount !== undefined) return;
     if (me) {
       api.wallet()
@@ -42,20 +50,28 @@ export default function BalanceCard({
           setBalanceVnd((me.balance_nova ?? 0) * 1000);
         });
     }
-  }, [me, amount]);
+  }, [me, novaAmount, vndAmount, amount]);
+
+  const activeNova = novaAmount !== undefined ? novaAmount : balanceNova;
+  const activeVnd = vndAmount !== undefined ? vndAmount : (balanceVnd || activeNova * 1000);
 
   // Determine display amount and currency unit
   let displayAmount: string;
   let displayCurrency: string;
 
-  if (amount !== undefined) {
-    displayAmount = typeof amount === 'number' ? amount.toLocaleString('vi-VN') : String(amount);
-    displayCurrency = currency || '₫';
+  if (amount !== undefined && novaAmount === undefined && vndAmount === undefined) {
+    if (showVnd) {
+      displayAmount = typeof amount === 'number' ? (amount * 1000).toLocaleString('vi-VN') : String(amount);
+      displayCurrency = '₫';
+    } else {
+      displayAmount = typeof amount === 'number' ? amount.toLocaleString('vi-VN') : String(amount);
+      displayCurrency = currency || 'VNC';
+    }
   } else if (showVnd) {
-    displayAmount = balanceVnd ? balanceVnd.toLocaleString('vi-VN') : '0';
+    displayAmount = activeVnd.toLocaleString('vi-VN');
     displayCurrency = '₫';
   } else {
-    displayAmount = balanceNova ? balanceNova.toLocaleString('vi-VN') : '0';
+    displayAmount = activeNova.toLocaleString('vi-VN');
     displayCurrency = 'VNC';
   }
 
@@ -162,14 +178,14 @@ export default function BalanceCard({
         <div className="info vnc-info">
           <span className="label vnc-label">{label}</span>
           <span
-            className="amount vnc-amount cursor-pointer select-none"
+            className="amount vnc-amount cursor-pointer select-none active:opacity-80 transition-opacity"
             onClick={(e) => {
-              if (interactive && !currency) {
+              if (interactive) {
                 e.stopPropagation();
                 setShowVnd((prev) => !prev);
               }
             }}
-            title={!currency ? 'Bấm để chuyển đổi giữa VND và VNC' : undefined}
+            title="Nhấn để chuyển đổi giữa VNC và VND"
           >
             {displayAmount}
             <small>{displayCurrency}</small>
@@ -188,8 +204,8 @@ export default function BalanceCard({
           </span>
         </div>
 
-        {/* Quick Customize Action button for discoverability */}
-        {interactive && (
+        {/* Quick Customize Action button (only shown if showEditButton is true) */}
+        {showEditButton && (
           <button
             type="button"
             onClick={(e) => {

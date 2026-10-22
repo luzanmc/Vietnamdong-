@@ -253,8 +253,8 @@ export default function Wallet() {
         <div className="md:col-span-2 space-y-4">
           <div className="w-full">
             <BalanceCard
-              amount={wallet?.balance_vnd}
-              currency="₫"
+              novaAmount={wallet?.balance_nova}
+              vndAmount={wallet?.balance_vnd}
               label="Số dư khả dụng"
               cardId={me?.card_id || undefined}
             />
