@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react';
-import { playClickSound } from '../utils/sound.js';
 
 export type MusicSourceType = 'audio' | 'youtube' | 'spotify';
 
@@ -448,23 +447,21 @@ export function MusicProvider({ children }: { children: ReactNode }) {
   }
 
   function removeTrack(id: string) {
-    const isRemovingCurrent = currentTrack?.id === id;
-    const oldIdx = tracks.findIndex((t) => t.id === id);
-    const filtered = tracks.filter((t) => t.id !== id);
-
-    setTracks(filtered);
-
-    if (isRemovingCurrent) {
-      if (filtered.length > 0) {
-        const nextIdx = oldIdx >= 0 ? oldIdx % filtered.length : 0;
-        const nextT = filtered[nextIdx] || filtered[0];
-        setTrack(nextT);
-      } else {
-        pause();
-        setCurrentTrack(null);
-        setShowMiniPlayer(false);
+    setTracks((prev) => {
+      const filtered = prev.filter((t) => t.id !== id);
+      if (currentTrack?.id === id) {
+        if (filtered.length > 0) {
+          const oldIdx = prev.findIndex((t) => t.id === id);
+          const nextT = filtered[oldIdx % filtered.length] || filtered[0];
+          setTrack(nextT);
+        } else {
+          pause();
+          setCurrentTrack(null);
+          setShowMiniPlayer(false);
+        }
       }
-    }
+      return filtered;
+    });
   }
 
   function resetTracks() {
@@ -552,34 +549,30 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       {/* Persistent YouTube Iframe container - active in DOM */}
       <div
         id="vnd-yt-player-shell"
-        className={`fixed right-3 sm:right-4 rounded-2xl overflow-hidden border border-line bg-black shadow-2xl transition-all duration-200 ${
-          showMiniPlayer && currentTrack?.type === 'youtube'
-            ? 'z-40 opacity-100 pointer-events-auto'
-            : 'opacity-0 pointer-events-none'
-        }`}
         style={{
           position: 'fixed',
-          bottom:
-            showMiniPlayer && currentTrack?.type === 'youtube'
-              ? 'calc(var(--vnd-music-panel-height, 120px) + var(--vnd-music-panel-bottom, 80px) + 8px)'
-              : '-9999px',
+          bottom: showMiniPlayer && currentTrack?.type === 'youtube' ? 'calc(5rem + 7.5rem)' : '-9999px',
+          right: '12px',
           width: 'min(320px, calc(100vw - 24px))',
           aspectRatio: '16 / 9',
-          maxHeight: '38vh',
+          zIndex: showMiniPlayer && currentTrack?.type === 'youtube' ? 45 : -10,
+          opacity: showMiniPlayer && currentTrack?.type === 'youtube' ? 1 : 0.001,
+          pointerEvents: showMiniPlayer && currentTrack?.type === 'youtube' ? 'auto' : 'none',
+          borderRadius: '16px',
+          overflow: 'hidden',
+          boxShadow: '0 12px 30px rgba(0,0,0,0.5)',
+          transition: 'opacity 0.2s ease, transform 0.2s ease',
         }}
+        className="border border-line bg-black relative"
       >
-        {/* Floating hide/close button at top-right of YouTube frame */}
         {showMiniPlayer && currentTrack?.type === 'youtube' && (
           <button
-            onClick={() => {
-              playClickSound();
-              setShowMiniPlayer(false);
-            }}
+            onClick={() => setShowMiniPlayer(false)}
             aria-label="Ẩn video"
-            title="Ẩn video YouTube"
-            className="absolute top-2 right-2 z-20 w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-black/75 hover:bg-black/95 text-white flex items-center justify-center transition shadow-lg border border-white/20 backdrop-blur-md cursor-pointer hover:scale-105 active:scale-95"
+            title="Ẩn video"
+            className="absolute top-2 right-2 z-20 w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-black/70 hover:bg-black/90 text-white flex items-center justify-center transition"
           >
-            <i className="bi bi-chevron-down text-base" />
+            <i className="bi bi-x-lg" />
           </button>
         )}
         <div id="vnd-yt-player-host" className="w-full h-full" />

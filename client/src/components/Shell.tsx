@@ -434,7 +434,7 @@ export default function Shell() {
         {/* Page Outlet */}
         <main
           key={pathname}
-          className="page-enter flex-1 px-3 sm:px-8 py-5 sm:py-6 pb-32 sm:pb-28 lg:pb-8 min-w-0 max-w-full overflow-x-hidden"
+          className="page-enter flex-1 px-3 sm:px-8 py-5 sm:py-6 pb-40 sm:pb-28 lg:pb-8 min-w-0 max-w-full overflow-x-hidden"
         >
           <Outlet />
         </main>

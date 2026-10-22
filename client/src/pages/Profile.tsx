@@ -454,7 +454,7 @@ export default function Profile() {
       {activeTab === 'music' && (
         <div className="space-y-6 animate-fade-in-up">
           {/* Main Music Control Card */}
-          <div className="glass-card rounded-3xl p-6 border border-line space-y-6">
+          <div className="glass-card rounded-3xl p-4 sm:p-6 border border-line space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-line">
               <div>
                 <h2 className="font-display text-lg font-bold text-ink flex items-center gap-2">
@@ -489,7 +489,7 @@ export default function Profile() {
             </div>
 
             {/* Now Playing Widget */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-surface2/70 border border-line/80 space-y-4">
+            <div className="p-4 sm:p-5 rounded-2xl bg-surface2/70 border border-line/80 space-y-4 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3.5 min-w-0">
                   {/* Thumbnail or animated equalizer */}
@@ -615,7 +615,7 @@ export default function Profile() {
             </div>
 
             {/* Form: Thêm bài nhạc từ link YouTube / Spotify / MP3 */}
-            <form onSubmit={handleAddMusic} className="p-5 rounded-2xl bg-surface border border-line space-y-4">
+            <form onSubmit={handleAddMusic} className="p-4 sm:p-5 rounded-2xl bg-surface border border-line space-y-4 min-w-0">
               <div>
                 <h3 className="text-sm font-bold text-ink flex items-center gap-2">
                   <i className="bi bi-plus-circle-fill text-indigo" /> Thêm bài nhạc từ link YouTube hoặc Spotify
@@ -810,11 +810,12 @@ export default function Profile() {
                                 playClickSound();
                                 togglePlay();
                               }}
-                              className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl bg-indigo/20 text-indigo border border-indigo/40 flex items-center justify-center shrink-0 transition hover:bg-indigo/30"
+                              className="h-10 min-h-[40px] px-2.5 rounded-xl bg-indigo/20 text-indigo border border-indigo/40 flex items-center justify-center gap-1.5 shrink-0 transition hover:bg-indigo/30"
                               title={isPlaying ? 'Đang phát (Nhấn để tạm dừng)' : 'Tạm dừng (Nhấn để phát)'}
                               aria-label={isPlaying ? 'Đang phát' : 'Tạm dừng'}
                             >
-                              <i className={`bi ${isPlaying ? 'bi-soundwave animate-pulse text-base' : 'bi-pause-fill text-base'}`} />
+                              <i className={`bi ${isPlaying ? 'bi-soundwave animate-pulse text-base' : 'bi-pause-fill text-base'} shrink-0`} />
+                              <span className="text-[10px] font-bold hidden sm:inline">Đang phát</span>
                             </button>
                           ) : (
                             <button

@@ -13,15 +13,7 @@
   --color-cyan: 98 240 189;
   --color-amber: 245 165 36;
   --color-rose: 244 63 94;
-  --vnd-music-panel-bottom: 80px;
-  --vnd-music-panel-height: 120px;
   color-scheme: dark;
-}
-
-@media (min-width: 640px) {
-  :root {
-    --vnd-music-panel-bottom: 96px;
-  }
 }
 
 :root[data-theme='light'],
