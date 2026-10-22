@@ -16,6 +16,9 @@ CREATE TABLE IF NOT EXISTS users (
   streak_last_date TEXT,
   registered_ip TEXT,
   locked INTEGER NOT NULL DEFAULT 0,
+  card_id TEXT UNIQUE,
+  card_bg TEXT,
+  card_show_wm INTEGER NOT NULL DEFAULT 1,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

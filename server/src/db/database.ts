@@ -82,6 +82,10 @@ async function migrate(): Promise<void> {
           UNIQUE(giftcode_id, user_id)
         );
         CREATE INDEX IF NOT EXISTS idx_giftcode_redemptions_user ON giftcode_redemptions(user_id);
+
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS card_id TEXT UNIQUE;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS card_bg TEXT;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS card_show_wm INTEGER DEFAULT 1;
       `);
       return;
     }

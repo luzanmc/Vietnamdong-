@@ -18,6 +18,9 @@ export interface User {
   streak_last_date: string | null;
   registered_ip: string | null;
   locked: number;
+  card_id: string | null;
+  card_bg: string | null;
+  card_show_wm: number;
   created_at: string;
 }
 

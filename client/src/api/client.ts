@@ -163,6 +163,12 @@ export const api = {
     }),
   giftcodeHistory: () => request<GiftcodeHistoryItem[]>('/giftcodes/history'),
 
+  updateCardConfig: (config: { card_bg: string | null; card_show_wm: boolean }) =>
+    request<{ ok: true; card_bg: string | null; card_show_wm: boolean }>('/auth/card-config', {
+      method: 'PATCH',
+      body: JSON.stringify(config),
+    }),
+
   networkStatus: () => request<{ ip: string; isVpn: boolean }>('/security/network-status'),
 };
 

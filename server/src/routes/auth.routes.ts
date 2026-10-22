@@ -32,6 +32,7 @@ import {
   setUserPasswordHash,
   markEmailVerified,
   updateUserAvatar,
+  updateCardConfig,
 } from '../repositories/userRepository.js';
 import {
   createPasswordReset,
@@ -377,6 +378,28 @@ authRouter.post('/avatar', requireAuth, async (req, res, next) => {
 });
 
 authRouter.get('/me', requireAuth, (req, res) => {
-  const { id, username, avatar_url, role, balance_nova, streak_days, email, email_verified } = req.user!;
-  res.json({ id, username, avatar_url, role, balance_nova, streak_days, email, email_verified: Boolean(email_verified) });
+  const { id, username, avatar_url, role, balance_nova, streak_days, email, email_verified, card_id, card_bg, card_show_wm } = req.user!;
+  res.json({
+    id,
+    username,
+    avatar_url,
+    role,
+    balance_nova,
+    streak_days,
+    email,
+    email_verified: Boolean(email_verified),
+    card_id: card_id || null,
+    card_bg: card_bg || null,
+    card_show_wm: card_show_wm !== 0,
+  });
+});
+
+authRouter.patch('/card-config', requireAuth, async (req, res, next) => {
+  try {
+    const { card_bg, card_show_wm } = req.body;
+    await updateCardConfig(req.user!.id, card_bg ?? null, card_show_wm ?? true);
+    res.json({ ok: true, card_bg, card_show_wm });
+  } catch (err) {
+    next(err);
+  }
 });

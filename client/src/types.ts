@@ -7,6 +7,9 @@ export interface Me {
   streak_days: number;
   email: string | null;
   email_verified: boolean;
+  card_id?: string | null;
+  card_bg?: string | null;
+  card_show_wm?: boolean;
 }
 
 export interface Task {

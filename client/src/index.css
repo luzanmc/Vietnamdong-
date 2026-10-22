@@ -346,3 +346,237 @@ body {
     transition: none !important;
   }
 }
+
+/* ==========================================================================
+   VNC Card Styles (Exact 1:1 with vnccard.html)
+   ========================================================================== */
+.stage,
+.vnc-stage {
+  container-type: inline-size;
+  width: 100%;
+}
+
+.card,
+.vnc-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3567 / 2243;
+  border-radius: 4cqw;
+  overflow: hidden;
+  background: #050505;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08),
+              0 30px 60px -20px rgba(0, 0, 0, 0.8),
+              0 0 80px -30px rgba(99, 102, 241, 0.5);
+  isolation: isolate;
+  user-select: none;
+}
+
+.card .wm,
+.vnc-card .vnc-wm {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  user-select: none;
+  z-index: 2;
+  transition: opacity 0.2s ease;
+}
+
+.card.nowm .wm,
+.vnc-card.nowm .vnc-wm {
+  opacity: 0;
+}
+
+.card .shine,
+.vnc-card .vnc-shine {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.10), transparent 40%, transparent 70%, rgba(255, 255, 255, 0.04));
+  pointer-events: none;
+}
+
+.card .info,
+.vnc-card .vnc-info {
+  position: absolute;
+  left: 6.5cqw;
+  bottom: 7cqw;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2cqw;
+  text-align: left;
+}
+
+.card .info .label,
+.vnc-card .vnc-info .vnc-label {
+  font-size: 3.2cqw;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.card .info .amount,
+.vnc-card .vnc-info .vnc-amount {
+  font-family: "Space Grotesk", Inter, sans-serif;
+  font-weight: 700;
+  font-size: 9cqw;
+  letter-spacing: -0.02em;
+  color: #fff;
+  line-height: 1;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: baseline;
+}
+
+.card .info .amount small,
+.vnc-card .vnc-info .vnc-amount small {
+  font-size: 5cqw;
+  margin-left: 1cqw;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.card .info .id,
+.vnc-card .vnc-info .vnc-id {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 3cqw;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 1.5cqw;
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.15s ease;
+  width: fit-content;
+}
+
+.card .info .id:hover,
+.vnc-card .vnc-info .vnc-id:hover {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* Panel styles from vnccard.html */
+.panel.vnc-panel,
+.panel {
+  background: var(--surface, #0a0a0a);
+  border: 1px solid var(--line, #262626);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.panel .row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.panel .row > span {
+  font-size: 13px;
+  color: var(--muted, #8f8f8f);
+  font-weight: 500;
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.sw {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--line, #262626);
+  cursor: pointer;
+  padding: 0;
+  outline-offset: 2px;
+  transition: transform 0.12s ease;
+}
+
+.sw:hover {
+  transform: scale(1.06);
+}
+
+.sw[aria-pressed="true"] {
+  outline: 2px solid var(--text, #ededed);
+}
+
+.sw:focus-visible {
+  outline: 2px solid #22d3ee;
+}
+
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.tools .btn {
+  font: 500 13px Inter, sans-serif;
+  color: var(--text, #ededed);
+  background: #111;
+  border: 1px solid var(--line, #262626);
+  border-radius: 8px;
+  padding: 9px 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  transition: border-color 0.15s ease;
+}
+
+.tools .btn:hover {
+  border-color: #404040;
+}
+
+.tools .btn:focus-visible,
+.tools .btn:focus-within {
+  outline: 2px solid #22d3ee;
+  outline-offset: 2px;
+}
+
+.tools .btn input[type="file"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.tools .btn input[type="color"] {
+  width: 26px;
+  height: 26px;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.switch input[type="checkbox"] {
+  accent-color: #6366f1;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}

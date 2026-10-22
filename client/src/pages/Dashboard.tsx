@@ -8,6 +8,7 @@ import { StatCardSkeleton, TaskCardSkeleton, Skeleton } from '../components/Skel
 import { useToast } from '../context/ToastContext.js';
 import { playClickSound } from '../utils/sound.js';
 import CurrencyIcon from '../components/CurrencyIcon.js';
+import BalanceCard from '../components/BalanceCard.js';
 import type { Me, Wallet, Task } from '../types.js';
 
 export default function Dashboard() {
@@ -167,44 +168,35 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Right Hero Virtual Card (5 Cols) matching Landing 3D Glass aesthetic */}
-          <div className="md:col-span-5 flex justify-center md:justify-end">
-            <div className="w-full max-w-sm rounded-2xl p-5 border border-line bg-gradient-to-br from-surface via-surface2 to-surface shadow-xl relative overflow-hidden group">
-              <div className="flex items-center justify-between text-xs text-muted pb-3 border-b border-line/60">
-                <span className="font-display font-semibold tracking-wider text-[11px] text-ink flex items-center gap-1.5">
-                  <CurrencyIcon size={16} /> VIETNAMDONG / VNC
-                </span>
-                <span className="text-emerald-400 font-semibold text-[10px] flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> LIVE
-                </span>
-              </div>
+          {/* Right Hero Virtual Card (5 Cols) matching vnccard.html 1:1 */}
+          <div className="md:col-span-5 flex flex-col items-center md:items-end justify-center gap-3">
+            <div className="w-full max-w-sm">
+              <BalanceCard
+                amount={wallet?.balance_vnd}
+                currency="₫"
+                label="Số dư khả dụng"
+                cardId={me?.card_id || undefined}
+              />
+            </div>
 
-              <div className="py-4 text-center">
-                <div className="text-[11px] uppercase tracking-wider text-muted font-medium">Số dư khả dụng</div>
-                <div className="font-mono text-3xl sm:text-4xl font-bold text-amber tracking-tight flex items-center justify-center gap-2 mt-1">
-                  <CurrencyIcon size={28} />
-                  <span>{wallet?.balance_nova ?? 0}</span>
-                  <span className="text-base font-normal text-amber/80 font-body">VNC</span>
-                </div>
-                <div className="text-xs text-muted mt-1 font-mono">
-                  ≈ {(wallet?.balance_vnd ?? 0).toLocaleString('vi-VN')} VND
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-line/60 flex items-center justify-between text-xs">
-                <Link
-                  to="/giftcode"
-                  onClick={playClickSound}
-                  className="text-amber hover:underline flex items-center gap-1 text-[11px] font-semibold"
-                >
-                  <i className="bi bi-ticket-perforated-fill" /> Nhập Giftcode
-                </Link>
+            <div className="w-full max-w-sm flex items-center justify-between text-xs px-1">
+              <Link
+                to="/giftcode"
+                onClick={playClickSound}
+                className="text-amber hover:underline flex items-center gap-1.5 text-[11px] font-semibold"
+              >
+                <i className="bi bi-ticket-perforated-fill" /> Nhập Giftcode
+              </Link>
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] text-muted flex items-center gap-1">
+                  <i className="bi bi-hand-index-thumb text-indigo" /> Giữ thẻ để đổi nền
+                </span>
                 <Link
                   to="/wallet"
                   onClick={playClickSound}
                   className="px-3 py-1.5 rounded-xl font-bold text-xs bg-indigo hover:brightness-110 text-white transition btn-press flex items-center gap-1 shadow-md shadow-indigo/25"
                 >
-                  <i className="bi bi-arrow-up-right" /> Rút tiền ngay
+                  <i className="bi bi-arrow-up-right" /> Rút tiền
                 </Link>
               </div>
             </div>

@@ -17,6 +17,7 @@ import { useToast } from '../context/ToastContext.js';
 import { api, type ApiError } from '../api/client.js';
 import { playClickSound, isSoundEnabled, toggleSound } from '../utils/sound.js';
 import CurrencyIcon from '../components/CurrencyIcon.js';
+import BalanceCard, { BalanceCardCustomizer } from '../components/BalanceCard.js';
 
 const AVATAR_PRESETS = [
   { label: 'Cyber Cat', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Lucky' },
@@ -1017,6 +1018,27 @@ export default function Profile() {
       {/* Tab 3: Appearance & System */}
       {activeTab === 'appearance' && (
         <div className="space-y-6 animate-fade-in-up">
+          {/* VNC Card Balance Customizer */}
+          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-line space-y-6">
+            <div>
+              <h2 className="font-display text-lg font-bold text-ink flex items-center gap-2">
+                <i className="bi bi-credit-card-2-front-fill text-indigo" /> Tùy chỉnh thẻ số dư VNC
+              </h2>
+              <p className="text-xs text-muted mt-1">
+                Xem trước và thay đổi màu nền, ảnh nền tùy chỉnh hoặc watermark in trên thẻ của bạn
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6 items-start">
+              <div className="w-full max-w-sm mx-auto">
+                <BalanceCard />
+              </div>
+              <div className="w-full">
+                <BalanceCardCustomizer />
+              </div>
+            </div>
+          </div>
+
           <div className="glass-card rounded-3xl p-6 sm:p-8 border border-line space-y-6">
             <div>
               <h2 className="font-display text-lg font-bold text-ink flex items-center gap-2">

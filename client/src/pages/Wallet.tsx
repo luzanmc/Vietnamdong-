@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api, type ApiError } from '../api/client.js';
 import type { Wallet as WalletType, Withdrawal } from '../types.js';
 import CurrencyIcon from '../components/CurrencyIcon.js';
+import BalanceCard from '../components/BalanceCard.js';
 import AnimatedNumber from '../components/AnimatedNumber.js';
 import { Skeleton } from '../components/Skeleton.js';
 import { useLanguage } from '../context/LanguageContext.js';
@@ -77,7 +78,7 @@ interface WithdrawalModalData {
 
 export default function Wallet() {
   const { t } = useLanguage();
-  const { refresh } = useAuth();
+  const { me, refresh } = useAuth();
   const { novaToVndRate } = useSettings();
   const { success: toastSuccess, error: toastError } = useToast();
   const [wallet, setWallet] = useState<WalletType | null>(null);
@@ -250,43 +251,13 @@ export default function Wallet() {
       <div className="grid md:grid-cols-5 gap-6 items-start">
         {/* Holographic Virtual Card (Left - 2 Cols) */}
         <div className="md:col-span-2 space-y-4">
-          <div className="relative overflow-hidden rounded-3xl p-6 sm:p-7 border border-indigo-500/30 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 shadow-2xl text-white group">
-            <div className="absolute top-0 right-0 w-44 h-44 bg-cyan/20 rounded-full blur-2xl -z-10 pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-36 h-36 bg-indigo/30 rounded-full blur-2xl -z-10 pointer-events-none" />
-
-            <div className="relative z-10 flex flex-col justify-between h-48 sm:h-52">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CurrencyIcon size={24} />
-                  <span className="font-display font-bold text-sm tracking-wider uppercase gradient-text-indigo">
-                    VietnamDong
-                  </span>
-                </div>
-                <div className="text-[10px] font-mono text-cyan border border-cyan/40 px-2 py-0.5 rounded-full uppercase tracking-wider bg-cyan/10">
-                  Virtual VNC
-                </div>
-              </div>
-
-              <div>
-                <div className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold mb-1">
-                  Số dư khả dụng
-                </div>
-                <div className="font-mono text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
-                  {wallet ? <AnimatedNumber value={wallet.balance_nova} /> : <Skeleton className="h-8 w-24" />}
-                  <span className="text-sm font-normal text-amber font-body">VNC</span>
-                </div>
-                <div className="text-xs text-slate-400 mt-1 font-mono">
-                  ≈ {wallet ? wallet.balance_vnd.toLocaleString('vi-VN') : 0} VND
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-xs text-slate-300 border-t border-white/10 pt-3">
-                <span className="font-mono tracking-widest text-[11px]">•••• •••• •••• 2026</span>
-                <span className="text-[10px] uppercase text-cyan font-semibold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan animate-pulse" /> LIVE
-                </span>
-              </div>
-            </div>
+          <div className="w-full">
+            <BalanceCard
+              amount={wallet?.balance_vnd}
+              currency="₫"
+              label="Số dư khả dụng"
+              cardId={me?.card_id || undefined}
+            />
           </div>
 
           {/* Wallet Mini Stats */}
