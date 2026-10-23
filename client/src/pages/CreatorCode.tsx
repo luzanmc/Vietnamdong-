@@ -124,22 +124,25 @@ export default function CreatorCode() {
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
             placeholder="VD: LUZANMC"
-            className="w-full bg-surface2 border border-line rounded-xl px-4 py-3 text-sm font-mono tracking-wider text-ink focus:outline-none focus:border-indigo uppercase"
+            className="w-full bg-surface2 border border-line rounded-xl px-4 py-3 text-sm sm:text-base font-mono font-bold tracking-widest text-cyan focus:outline-none focus:border-indigo uppercase shadow-inner"
           />
         </div>
 
         <button
           type="submit"
           disabled={submitting || !code.trim()}
-          className="w-full py-3 rounded-xl font-display font-bold text-sm bg-gradient-to-r from-indigo to-cyan hover:brightness-110 text-white shadow-md transition btn-press flex items-center justify-center gap-2"
+          className="w-full py-3 sm:py-3.5 rounded-xl font-display font-bold text-sm bg-gradient-to-r from-indigo-600 via-indigo to-cyan hover:brightness-110 text-white shadow-lg shadow-indigo-500/25 transition-all btn-press flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
         >
           {submitting ? (
             <>
-              <i className="bi bi-arrow-repeat animate-spin" />
+              <i className="bi bi-arrow-repeat animate-spin text-cyan-200" />
               <span>Đang kiểm tra...</span>
             </>
           ) : (
-            <span>{t('creator.apply_button')}</span>
+            <>
+              <i className="bi bi-patch-check-fill text-base text-amber-300 drop-shadow" />
+              <span className="font-extrabold tracking-wide">{t('creator.apply_button')}</span>
+            </>
           )}
         </button>
       </form>

@@ -123,9 +123,9 @@ export default function Giftcode() {
                 </div>
                 <div>
                   <h2 className="font-display text-base sm:text-lg font-bold text-ink">
-                    Nhập mã quà tặng
+                    <span className="gradient-text-indigo">Nhập mã quà tặng</span>
                   </h2>
-                  <p className="text-[11px] text-muted">Mỗi mã chỉ kích hoạt được 1 lần cho mỗi tài khoản</p>
+                  <p className="text-[11px] text-muted">Mỗi mã nhận ngay <span className="text-amber font-semibold">VNC thưởng</span> vào ví (1 lần/tài khoản)</p>
                 </div>
               </div>
             </div>
@@ -157,9 +157,13 @@ export default function Giftcode() {
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-muted block">
-                  Mã Giftcode
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-ink flex items-center gap-1.5">
+                    <i className="bi bi-key-fill text-indigo" />
+                    <span>Mã Giftcode nhận thưởng</span>
+                  </label>
+                  <span className="text-[10px] font-medium text-muted">Tự động viết hoa</span>
+                </div>
                 <div className="relative">
                   <input
                     type="text"
@@ -170,7 +174,7 @@ export default function Giftcode() {
                       if (errorMsg) setErrorMsg(null);
                     }}
                     autoFocus
-                    className="w-full bg-surface2 border border-line rounded-2xl px-4 py-3.5 text-sm sm:text-base font-mono tracking-wider text-ink focus:outline-none focus:border-indigo uppercase pl-11 pr-10 shadow-inner"
+                    className="w-full bg-surface2 border border-line rounded-2xl px-4 py-3.5 text-base sm:text-lg font-mono font-bold tracking-widest text-amber focus:outline-none focus:border-indigo focus:ring-2 focus:ring-indigo/20 uppercase pl-11 pr-10 shadow-inner transition"
                   />
                   <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
                     <i className="bi bi-ticket-perforated-fill text-lg text-amber" />
@@ -182,10 +186,10 @@ export default function Giftcode() {
                         playClickSound();
                         setCode('');
                       }}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-ink text-sm p-1 transition"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-rose text-sm p-1 transition"
                       aria-label="Xóa mã"
                     >
-                      <i className="bi bi-x-circle-fill" />
+                      <i className="bi bi-x-circle-fill text-base" />
                     </button>
                   )}
                 </div>
@@ -194,17 +198,22 @@ export default function Giftcode() {
               <button
                 type="submit"
                 disabled={submitting || !code.trim()}
-                className="w-full py-3.5 sm:py-4 rounded-2xl font-display font-bold text-sm sm:text-base bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:brightness-110 text-white shadow-xl shadow-amber-500/20 transition-all btn-press flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full py-3.5 sm:py-4 rounded-2xl font-display font-bold text-sm sm:text-base bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-500 hover:from-indigo-500 hover:via-purple-500 hover:to-cyan-400 text-white shadow-xl shadow-indigo-500/25 hover:shadow-indigo-500/40 border border-white/20 transition-all btn-press flex items-center justify-center gap-2.5 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
                 {submitting ? (
                   <>
-                    <i className="bi bi-arrow-repeat animate-spin text-lg" />
-                    <span>Đang kiểm tra & kích hoạt...</span>
+                    <i className="bi bi-arrow-repeat animate-spin text-lg text-cyan-200" />
+                    <span className="text-cyan-100 font-semibold">Đang kiểm tra & kích hoạt...</span>
                   </>
                 ) : (
                   <>
-                    <i className="bi bi-gift-fill text-lg" />
-                    <span>Kích hoạt mã ngay</span>
+                    <i className="bi bi-gift-fill text-xl text-amber-300 drop-shadow-sm animate-bounce-subtle" />
+                    <span className="font-extrabold tracking-wide text-white drop-shadow-sm">
+                      Kích hoạt nhận thưởng
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white/20 text-cyan-100 border border-white/30 uppercase tracking-wider ml-1">
+                      VNC
+                    </span>
                   </>
                 )}
               </button>

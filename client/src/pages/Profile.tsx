@@ -936,7 +936,7 @@ export default function Profile() {
               </p>
             </div>
 
-            <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
+            <form onSubmit={handleChangePassword} className="space-y-4.5 w-full">
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-muted">Mật khẩu hiện tại</label>
                 <input
@@ -944,7 +944,7 @@ export default function Profile() {
                   placeholder="Nhập mật khẩu đang dùng"
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="w-full bg-surface2 border border-line rounded-xl px-4 py-2.5 text-sm text-ink focus:outline-none focus:border-indigo"
+                  className="w-full bg-surface2 border border-line rounded-xl px-4 py-3 text-sm text-ink focus:outline-none focus:border-indigo transition shadow-inner"
                   required
                 />
               </div>
@@ -956,7 +956,7 @@ export default function Profile() {
                   placeholder="Tối thiểu 6 ký tự"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full bg-surface2 border border-line rounded-xl px-4 py-2.5 text-sm text-ink focus:outline-none focus:border-indigo"
+                  className="w-full bg-surface2 border border-line rounded-xl px-4 py-3 text-sm text-ink focus:outline-none focus:border-indigo transition shadow-inner"
                   required
                 />
               </div>
@@ -968,7 +968,7 @@ export default function Profile() {
                   placeholder="Nhập lại mật khẩu mới"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-surface2 border border-line rounded-xl px-4 py-2.5 text-sm text-ink focus:outline-none focus:border-indigo"
+                  className="w-full bg-surface2 border border-line rounded-xl px-4 py-3 text-sm text-ink focus:outline-none focus:border-indigo transition shadow-inner"
                   required
                 />
               </div>
@@ -1049,7 +1049,7 @@ export default function Profile() {
               </p>
             </div>
 
-            <div className="space-y-4 max-w-xl">
+            <div className="space-y-4 w-full">
               {/* Theme selector */}
               <div className="flex items-center justify-between gap-3.5 p-4 rounded-2xl bg-surface2/60 border border-line">
                 <div className="min-w-0 flex-1">
