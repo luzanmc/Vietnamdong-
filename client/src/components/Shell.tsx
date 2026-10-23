@@ -206,7 +206,6 @@ export default function Shell() {
     setMobileOpen(false);
   }, [pathname]);
 
-<<<<<<< HEAD
   function toggleMenu() {
     playClickSound();
     if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
@@ -221,7 +220,7 @@ export default function Shell() {
       setMobileOpen(true);
     }
   }
-=======
+
   useEffect(() => {
     const el = bannerTextRef.current;
     if (!el || !announcement) {
@@ -239,7 +238,6 @@ export default function Shell() {
       window.removeEventListener('resize', check);
     };
   }, [announcement]);
->>>>>>> 7d72ac6 (Update project)
 
   async function handleLogout() {
     playClickSound();
@@ -651,14 +649,10 @@ export default function Shell() {
         </button>
       </nav>
 
-<<<<<<< HEAD
       {/* Mobile Footer */}
       <div className="lg:hidden">
         <Footer />
       </div>
-      <BackgroundMusicPlayer />
-=======
-      <Footer />
       <ErrorBoundary
         fallback={(reset) => (
           <div
@@ -680,7 +674,6 @@ export default function Shell() {
       >
         <BackgroundMusicPlayer />
       </ErrorBoundary>
->>>>>>> 7d72ac6 (Update project)
     </div>
   );
 }
