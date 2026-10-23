@@ -36,14 +36,22 @@ const CardContext = createContext<CardContextValue | null>(null);
 export function CardProvider({ children }: { children: ReactNode }) {
   const { me, refresh } = useAuth();
 
-  // Load initial from localStorage or empty
+  // Load initial from localStorage or empty safely
   const [cardBg, setCardBgState] = useState<string>(() => {
-    return localStorage.getItem('vnd_card_bg') || '';
+    try {
+      return localStorage.getItem('vnd_card_bg') || '';
+    } catch {
+      return '';
+    }
   });
 
   const [showWatermark, setShowWatermarkState] = useState<boolean>(() => {
-    const stored = localStorage.getItem('vnd_card_wm');
-    return stored !== null ? stored === 'true' : true;
+    try {
+      const stored = localStorage.getItem('vnd_card_wm');
+      return stored !== null ? stored === 'true' : true;
+    } catch {
+      return true;
+    }
   });
 
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
@@ -52,26 +60,49 @@ export function CardProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (me) {
       const remoteBg = me.card_bg ?? '';
-      setCardBgState(remoteBg);
+      let localBg = '';
+      try {
+        localBg = localStorage.getItem('vnd_card_bg') || '';
+      } catch {}
+
       if (remoteBg) {
-        localStorage.setItem('vnd_card_bg', remoteBg);
+        setCardBgState(remoteBg);
+        try {
+          localStorage.setItem('vnd_card_bg', remoteBg);
+        } catch {}
+      } else if (localBg) {
+        // If server hasn't saved yet or column was just created, re-sync local to server
+        setCardBgState(localBg);
+        api.updateCardConfig({ card_bg: localBg, card_show_wm: Boolean(me.card_show_wm ?? 1) })
+          .then(() => refresh())
+          .catch(() => {});
       } else {
-        localStorage.removeItem('vnd_card_bg');
+        setCardBgState('');
+        try {
+          localStorage.removeItem('vnd_card_bg');
+        } catch {}
       }
 
       const remoteWm = me.card_show_wm !== undefined ? Boolean(me.card_show_wm) : true;
       setShowWatermarkState(remoteWm);
-      localStorage.setItem('vnd_card_wm', String(remoteWm));
+      try {
+        localStorage.setItem('vnd_card_wm', String(remoteWm));
+      } catch {}
     }
   }, [me]);
 
   const setCardBg = (bg: string) => {
     setCardBgState(bg);
-    if (bg) {
-      localStorage.setItem('vnd_card_bg', bg);
-    } else {
-      localStorage.removeItem('vnd_card_bg');
+    try {
+      if (bg) {
+        localStorage.setItem('vnd_card_bg', bg);
+      } else {
+        localStorage.removeItem('vnd_card_bg');
+      }
+    } catch (e) {
+      console.warn('localStorage full, skipping local cache for card background', e);
     }
+
     if (me) {
       api.updateCardConfig({ card_bg: bg || null, card_show_wm: showWatermark })
         .then(() => refresh())
@@ -83,7 +114,9 @@ export function CardProvider({ children }: { children: ReactNode }) {
 
   const setShowWatermark = (show: boolean) => {
     setShowWatermarkState(show);
-    localStorage.setItem('vnd_card_wm', String(show));
+    try {
+      localStorage.setItem('vnd_card_wm', String(show));
+    } catch {}
     if (me) {
       api.updateCardConfig({ card_bg: cardBg || null, card_show_wm: show })
         .then(() => refresh())
@@ -96,8 +129,10 @@ export function CardProvider({ children }: { children: ReactNode }) {
   const resetToDefault = () => {
     setCardBgState('');
     setShowWatermarkState(true);
-    localStorage.removeItem('vnd_card_bg');
-    localStorage.setItem('vnd_card_wm', 'true');
+    try {
+      localStorage.removeItem('vnd_card_bg');
+      localStorage.setItem('vnd_card_wm', 'true');
+    } catch {}
     if (me) {
       api.updateCardConfig({ card_bg: null, card_show_wm: true })
         .then(() => refresh())

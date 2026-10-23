@@ -82,11 +82,26 @@ async function migrate(): Promise<void> {
           UNIQUE(giftcode_id, user_id)
         );
         CREATE INDEX IF NOT EXISTS idx_giftcode_redemptions_user ON giftcode_redemptions(user_id);
-
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS card_id TEXT UNIQUE;
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS card_bg TEXT;
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS card_show_wm INTEGER DEFAULT 1;
       `);
+
+      // Safely ensure card columns exist on users table independently
+      try {
+        await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS card_id TEXT');
+        await pool.query('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_card_id ON users(card_id)');
+      } catch (e) {
+        console.error('Failed to ensure card_id:', e);
+      }
+      try {
+        await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS card_bg TEXT');
+      } catch (e) {
+        console.error('Failed to ensure card_bg:', e);
+      }
+      try {
+        await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS card_show_wm INTEGER DEFAULT 1');
+      } catch (e) {
+        console.error('Failed to ensure card_show_wm:', e);
+      }
+
       return;
     }
   } catch {

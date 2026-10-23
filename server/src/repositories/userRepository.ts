@@ -35,10 +35,24 @@ export async function updateCardConfig(
   cardShowWm: boolean,
   client: Queryable = pool
 ): Promise<void> {
-  await client.query(
-    'UPDATE users SET card_bg = $1, card_show_wm = $2 WHERE id = $3',
-    [cardBg, cardShowWm ? 1 : 0, userId]
-  );
+  try {
+    await client.query(
+      'UPDATE users SET card_bg = $1, card_show_wm = $2 WHERE id = $3',
+      [cardBg, cardShowWm ? 1 : 0, userId]
+    );
+  } catch (err: any) {
+    // If column doesn't exist yet, alter table and retry once
+    try {
+      await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS card_bg TEXT');
+      await client.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS card_show_wm INTEGER DEFAULT 1');
+      await client.query(
+        'UPDATE users SET card_bg = $1, card_show_wm = $2 WHERE id = $3',
+        [cardBg, cardShowWm ? 1 : 0, userId]
+      );
+    } catch {
+      throw err;
+    }
+  }
 }
 
 export async function getUserById(id: string, client: Queryable = pool): Promise<User | undefined> {

@@ -127,7 +127,7 @@ function NavLinks({ onNavigate, isAdmin }: { onNavigate?: () => void; isAdmin: b
   const { t } = useLanguage();
 
   return (
-    <nav className="flex flex-col gap-5 px-3 py-2">
+    <nav className="flex flex-col gap-5 px-3 py-2 pb-16">
       {NAV_GROUPS.map((group) => {
         const visibleItems = group.items.filter((item) => !item.adminOnly || isAdmin);
         if (!visibleItems.length) return null;
@@ -181,6 +181,14 @@ function NavLinks({ onNavigate, isAdmin }: { onNavigate?: () => void; isAdmin: b
 
 export default function Shell() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = useState<boolean>(() => {
+    try {
+      const stored = localStorage.getItem('vnd_desktop_sidebar');
+      return stored !== null ? stored === 'true' : true;
+    } catch {
+      return true;
+    }
+  });
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const { me, logout } = useAuth();
   const { t } = useLanguage();
@@ -193,6 +201,21 @@ export default function Shell() {
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
+
+  function toggleMenu() {
+    playClickSound();
+    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+      setDesktopSidebarOpen((prev) => {
+        const next = !prev;
+        try {
+          localStorage.setItem('vnd_desktop_sidebar', String(next));
+        } catch {}
+        return next;
+      });
+    } else {
+      setMobileOpen(true);
+    }
+  }
 
   async function handleLogout() {
     playClickSound();
@@ -300,14 +323,12 @@ export default function Shell() {
               <span>{t('nav.logout')}</span>
             </button>
 
-            {/* Mobile Hamburger */}
+            {/* Menu Toggle Button (Mobile Drawer & Desktop Sidebar) */}
             <button
-              onClick={() => {
-                playClickSound();
-                setMobileOpen(true);
-              }}
-              className="lg:hidden w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-ink rounded-lg hover:bg-surface2 transition btn-press shrink-0"
+              onClick={toggleMenu}
+              className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-ink rounded-lg hover:bg-surface2 transition btn-press shrink-0"
               aria-label={t('nav.menu')}
+              title="Menu điều hướng"
             >
               <i className="bi bi-list text-2xl" />
             </button>
@@ -426,10 +447,30 @@ export default function Shell() {
 
       {/* Main Layout Area */}
       <div className="w-full flex flex-1 min-h-[calc(100vh-4rem)]">
-        {/* Desktop Sidebar */}
-        <aside className="w-64 shrink-0 border-r border-line hidden lg:flex lg:flex-col py-4 h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto bg-surface/30 backdrop-blur-sm z-20">
-          <NavLinks isAdmin={isAdmin} />
-        </aside>
+        {/* Desktop Sidebar (Collapsible with toggle & smooth independent scroll) */}
+        {desktopSidebarOpen && (
+          <aside className="w-64 shrink-0 border-r border-line hidden lg:flex lg:flex-col h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto overscroll-contain bg-surface/40 backdrop-blur-md z-20 select-none touch-pan-y transition-all">
+            {/* Desktop Sidebar Header */}
+            <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-line/60">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted">Điều hướng</span>
+              <button
+                onClick={() => {
+                  playClickSound();
+                  setDesktopSidebarOpen(false);
+                  try {
+                    localStorage.setItem('vnd_desktop_sidebar', 'false');
+                  } catch {}
+                }}
+                className="w-7 h-7 rounded-lg hover:bg-surface2 text-muted hover:text-ink flex items-center justify-center transition btn-press"
+                title="Thu gọn menu điều hướng"
+                aria-label="Thu gọn menu"
+              >
+                <i className="bi bi-x-lg text-xs" />
+              </button>
+            </div>
+            <NavLinks isAdmin={isAdmin} />
+          </aside>
+        )}
 
         {/* Content Wrapper (Page Outlet + Footer on Desktop) */}
         <div className="flex-1 flex flex-col min-w-0">
