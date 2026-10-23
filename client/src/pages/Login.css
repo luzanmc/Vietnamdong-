@@ -626,12 +626,14 @@ html:not(.dark) .vnd-auth-page .brand-mark,
 .vnd-auth-page .meter[data-s="4"] i { background: var(--green); }
 
 .vnd-auth-page .row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
   gap: 12px;
   font-size: 13px;
   color: var(--muted);
+  width: 100%;
 }
 
 .vnd-auth-page .row a {

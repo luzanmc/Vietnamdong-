@@ -495,9 +495,8 @@ html:not(.dark) .vnc-card:hover {
   color: rgba(255, 255, 255, 0.95);
 }
 
-/* Panel styles from vnccard.html (supports Light & Dark mode) */
-.panel.vnc-panel,
-.panel {
+/* Panel styles from vnccard.html (supports Light & Dark mode, scoped to .vnc-panel) */
+.vnc-panel {
   background: rgb(var(--color-surface));
   border: 1px solid rgb(var(--color-line));
   border-radius: 14px;
@@ -509,25 +508,25 @@ html:not(.dark) .vnc-card:hover {
   transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
 }
 
-.panel .row {
+.vnc-panel .row {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.panel .row > span {
+.vnc-panel .row > span {
   font-size: 13px;
   color: rgb(var(--color-muted));
   font-weight: 500;
 }
 
-.swatches {
+.vnc-panel .swatches {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
-.sw {
+.vnc-panel .sw {
   width: 40px;
   height: 40px;
   border-radius: 10px;
@@ -538,26 +537,26 @@ html:not(.dark) .vnc-card:hover {
   transition: transform 0.12s ease;
 }
 
-.sw:hover {
+.vnc-panel .sw:hover {
   transform: scale(1.06);
 }
 
-.sw[aria-pressed="true"] {
+.vnc-panel .sw[aria-pressed="true"] {
   outline: 2px solid rgb(var(--color-ink));
 }
 
-.sw:focus-visible {
+.vnc-panel .sw:focus-visible {
   outline: 2px solid rgb(var(--color-indigo));
 }
 
-.tools {
+.vnc-panel .tools {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   align-items: center;
 }
 
-.tools .btn {
+.vnc-panel .tools .btn {
   font: 500 13px Inter, sans-serif;
   color: rgb(var(--color-ink));
   background: rgb(var(--color-surface2));
@@ -572,18 +571,18 @@ html:not(.dark) .vnc-card:hover {
   transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
-.tools .btn:hover {
+.vnc-panel .tools .btn:hover {
   border-color: rgb(var(--color-indigo) / 0.6);
   background: rgb(var(--color-surface));
 }
 
-.tools .btn:focus-visible,
-.tools .btn:focus-within {
+.vnc-panel .tools .btn:focus-visible,
+.vnc-panel .tools .btn:focus-within {
   outline: 2px solid rgb(var(--color-indigo));
   outline-offset: 2px;
 }
 
-.tools .btn input[type="file"] {
+.vnc-panel .tools .btn input[type="file"] {
   position: absolute;
   opacity: 0;
   width: 0;
@@ -591,7 +590,7 @@ html:not(.dark) .vnc-card:hover {
   pointer-events: none;
 }
 
-.tools .btn input[type="color"] {
+.vnc-panel .tools .btn input[type="color"] {
   width: 26px;
   height: 26px;
   border: 0;

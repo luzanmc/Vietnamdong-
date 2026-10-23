@@ -584,7 +584,7 @@ export default function Login() {
                 </div>
               </label>
 
-              <div className="row">
+              <div className="row flex flex-row items-center justify-between w-full">
                 <label className="chk">
                   <input
                     type="checkbox"
