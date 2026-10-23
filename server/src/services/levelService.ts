@@ -50,10 +50,10 @@ export const MAX_LEVEL = 20;
 
 export function getTierFromLevel(level: number): { tier: LevelTier; tierName: string } {
   if (level >= 20) return { tier: 'diamond', tierName: 'Prime VIP' };
-  if (level >= 15) return { tier: 'gold', tierName: 'Huyen thoai' };
-  if (level >= 10) return { tier: 'purple', tierName: 'Tinh anh' };
-  if (level >= 5) return { tier: 'blue', tierName: 'Chien binh' };
-  return { tier: 'gray', tierName: 'Tap su' };
+  if (level >= 15) return { tier: 'gold', tierName: 'Huyền thoại ' };
+  if (level >= 10) return { tier: 'purple', tierName: 'VIP' };
+  if (level >= 5) return { tier: 'blue', tierName: 'Member' };
+  return { tier: 'gray', tierName: 'Tập sự' };
 }
 
 export function calculateLevel(xpInput: number): LevelInfo {
