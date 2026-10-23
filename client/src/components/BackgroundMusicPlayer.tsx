@@ -18,19 +18,18 @@ export default function BackgroundMusicPlayer() {
 
   if (!enabled || !currentTrack) return null;
 
-  const sourceType = currentTrack.type;
+  const sourceType = currentTrack.type || 'audio';
 
   return (
     <>
-      {/* Floating Mini-Player for Spotify & Audio / Controls (when showMiniPlayer is active) */}
       {showMiniPlayer && currentTrack && (
         <div className="fixed bottom-20 sm:bottom-24 right-3 sm:right-4 z-40 w-80 max-w-[calc(100vw-24px)] max-h-[82vh] overflow-y-auto rounded-3xl bg-surface/95 border border-line p-3 shadow-2xl backdrop-blur-xl animate-scale-in">
           <div className="flex items-center justify-between pb-2 mb-2 border-b border-line text-xs">
             <div className="flex items-center gap-1.5 font-semibold text-ink truncate">
-              {sourceType === 'youtube' && <i className="bi bi-youtube text-red-500" />}
-              {sourceType === 'spotify' && <i className="bi bi-spotify text-emerald-400" />}
-              {sourceType === 'audio' && <i className="bi bi-music-note-beamed text-indigo" />}
-              <span className="truncate">{currentTrack.title}</span>
+              {sourceType === 'youtube' && <i className="bi bi-youtube text-red-500 shrink-0" />}
+              {sourceType === 'spotify' && <i className="bi bi-spotify text-emerald-400 shrink-0" />}
+              {sourceType === 'audio' && <i className="bi bi-music-note-beamed text-indigo shrink-0" />}
+              <span className="truncate">{currentTrack.title || 'Không có tiêu đề'}</span>
             </div>
             <div className="flex items-center gap-1 shrink-0">
               <Link
@@ -42,6 +41,7 @@ export default function BackgroundMusicPlayer() {
                 <i className="bi bi-sliders text-xs" />
               </Link>
               <button
+                type="button"
                 onClick={() => {
                   playClickSound();
                   setShowMiniPlayer(false);
@@ -54,7 +54,6 @@ export default function BackgroundMusicPlayer() {
             </div>
           </div>
 
-          {/* If Spotify: Embed Player */}
           {sourceType === 'spotify' && currentTrack.spotifyEmbedUrl && (
             <div className="overflow-hidden rounded-2xl mb-2">
               <iframe
@@ -73,6 +72,7 @@ export default function BackgroundMusicPlayer() {
           {sourceType === 'youtube' ? (
             <div className="flex items-center justify-center gap-2 pt-1">
               <button
+                type="button"
                 onClick={() => {
                   playClickSound();
                   prevTrack();
@@ -83,6 +83,7 @@ export default function BackgroundMusicPlayer() {
                 <i className="bi bi-skip-backward-fill text-xs" />
               </button>
               <button
+                type="button"
                 onClick={() => {
                   playClickSound();
                   togglePlay();
@@ -93,6 +94,7 @@ export default function BackgroundMusicPlayer() {
                 <i className={`bi ${isPlaying ? 'bi-pause-fill' : 'bi-play-fill'} text-sm`} />
               </button>
               <button
+                type="button"
                 onClick={() => {
                   playClickSound();
                   nextTrack();
@@ -103,9 +105,10 @@ export default function BackgroundMusicPlayer() {
                 <i className="bi bi-skip-forward-fill text-xs" />
               </button>
               <button
+                type="button"
                 onClick={() => {
                   playClickSound();
-                  removeTrack(currentTrack.id);
+                  if (currentTrack.id) removeTrack(currentTrack.id);
                 }}
                 className="p-1.5 text-muted hover:text-rose rounded-lg transition"
                 title="Xóa bài này"
@@ -119,64 +122,67 @@ export default function BackgroundMusicPlayer() {
                 {currentTrack.thumbnail && sourceType !== 'spotify' && (
                   <img
                     src={currentTrack.thumbnail}
-                    alt={currentTrack.title}
+                    alt={currentTrack.title || 'Bài nhạc'}
                     className="w-9 h-9 rounded-xl object-cover shrink-0 border border-line"
                   />
                 )}
                 <div className="min-w-0">
-                  <div className="text-xs font-bold text-ink truncate">{currentTrack.title}</div>
-                  <div className="text-[10px] text-muted truncate">{currentTrack.artist}</div>
+                  <div className="text-xs font-bold text-ink truncate">{currentTrack.title || 'Không có tiêu đề'}</div>
+                  <div className="text-[10px] text-muted truncate">{currentTrack.artist || 'Nghệ sĩ chưa rõ'}</div>
                 </div>
               </div>
 
               <div className="flex items-center gap-1 shrink-0">
                 <button
+                  type="button"
                   onClick={() => {
-                    playClickSound();
-                    prevTrack();
-                  }}
-                  className="p-1.5 text-muted hover:text-ink rounded-lg transition"
-                  title="Bài trước"
-                >
-                  <i className="bi bi-skip-backward-fill text-xs" />
-                </button>
-                <button
-                  onClick={() => {
-                    playClickSound();
-                    togglePlay();
-                  }}
-                  className="w-8 h-8 rounded-xl bg-indigo text-white flex items-center justify-center transition hover:brightness-110 shadow-sm"
-                  title={isPlaying ? 'Tạm dừng' : 'Phát'}
-                >
-                  <i className={`bi ${isPlaying ? 'bi-pause-fill' : 'bi-play-fill'} text-sm`} />
-                </button>
-                <button
-                  onClick={() => {
-                    playClickSound();
-                    nextTrack();
-                  }}
-                  className="p-1.5 text-muted hover:text-ink rounded-lg transition"
-                  title="Bài sau"
-                >
-                  <i className="bi bi-skip-forward-fill text-xs" />
-                </button>
-                <button
-                  onClick={() => {
-                    playClickSound();
-                    removeTrack(currentTrack.id);
-                  }}
-                  className="p-1.5 text-muted hover:text-rose rounded-lg transition"
-                  title="Xóa bài này"
-                >
-                  <i className="bi bi-trash text-xs" />
-                </button>
-              </div>
+                  playClickSound();
+                  prevTrack();
+                }}
+                className="p-1.5 text-muted hover:text-ink rounded-lg transition"
+                title="Bài trước"
+              >
+                <i className="bi bi-skip-backward-fill text-xs" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  togglePlay();
+                }}
+                className="w-8 h-8 rounded-xl bg-indigo text-white flex items-center justify-center transition hover:brightness-110 shadow-sm"
+                title={isPlaying ? 'Tạm dừng' : 'Phát'}
+              >
+                <i className={`bi ${isPlaying ? 'bi-pause-fill' : 'bi-play-fill'} text-sm`} />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  nextTrack();
+                }}
+                className="p-1.5 text-muted hover:text-ink rounded-lg transition"
+                title="Bài sau"
+              >
+                <i className="bi bi-skip-forward-fill text-xs" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  if (currentTrack.id) removeTrack(currentTrack.id);
+                }}
+                className="p-1.5 text-muted hover:text-rose rounded-lg transition"
+                title="Xóa bài này"
+              >
+                <i className="bi bi-trash text-xs" />
+              </button>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
+    )}
 
-      {/* Floating Action Button (Mobile only since desktop has header MusicTab, hidden when mini-player is open) */}
       {!showMiniPlayer && (
         <div
           className="fixed right-3.5 z-40 flex items-center gap-2 md:hidden opacity-85 hover:opacity-100 transition-opacity"
@@ -184,6 +190,7 @@ export default function BackgroundMusicPlayer() {
         >
           {(sourceType === 'youtube' || sourceType === 'spotify') && (
             <button
+              type="button"
               onClick={() => {
                 playClickSound();
                 setShowMiniPlayer(true);
@@ -196,6 +203,7 @@ export default function BackgroundMusicPlayer() {
           )}
 
           <button
+            type="button"
             onClick={() => {
               playClickSound();
               if (sourceType === 'youtube') {
@@ -206,7 +214,7 @@ export default function BackgroundMusicPlayer() {
               }
             }}
             aria-label={isPlaying ? 'Tắt nhạc nền' : 'Bật nhạc nền'}
-            title={isPlaying ? `Đang phát: ${currentTrack.title}` : 'Bật nhạc nền'}
+            title={isPlaying ? `Đang phát: ${currentTrack.title || ''}` : 'Bật nhạc nền'}
             className={`w-9 h-9 min-w-[36px] min-h-[36px] rounded-full text-white shadow-xl flex items-center justify-center transition btn-press border border-line ${
               isPlaying
                 ? 'bg-gradient-to-tr from-indigo to-cyan shadow-[0_0_20px_rgba(85,167,255,0.4)] animate-pulse-soft'

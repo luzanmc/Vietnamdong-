@@ -334,9 +334,18 @@ adminRouter.get('/announcements', async (req, res, next) => {
 
 adminRouter.post('/announcements', async (req, res, next) => {
   try {
-    const message = String(req.body.message || '').trim();
-    if (!message) return res.status(400).json({ error: 'Nội dung thông báo không được để trống' });
-    await createAnnouncement(nanoid(), message);
+    const raw = String(req.body?.message || '').trim();
+    if (!raw) {
+      return res.status(400).json({ error: 'Nội dung thông báo không được để trống' });
+    }
+    const normalized = raw.replace(/\s+/g, ' ').trim();
+    if (!normalized) {
+      return res.status(400).json({ error: 'Nội dung thông báo không được để trống' });
+    }
+    if (raw.length > 200 || normalized.length > 200) {
+      return res.status(400).json({ error: 'Nội dung thông báo không được vượt quá 200 ký tự' });
+    }
+    await createAnnouncement(nanoid(), normalized);
     res.json({ ok: true });
   } catch (err) {
     next(err);

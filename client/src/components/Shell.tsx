@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Outlet, NavLink, useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
 import { useLanguage } from '../context/LanguageContext.js';
 import { useTheme } from '../context/ThemeContext.js';
 import { useSettings } from '../context/SettingsContext.js';
 import BackgroundMusicPlayer from './BackgroundMusicPlayer.js';
+import ErrorBoundary from './ErrorBoundary.js';
 import MusicTab from './MusicTab.js';
 import NotificationBell from './NotificationBell.js';
 import Footer from './Footer.js';
@@ -190,6 +191,9 @@ export default function Shell() {
     }
   });
   const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [bannerModalOpen, setBannerModalOpen] = useState(false);
+  const [isBannerClamped, setIsBannerClamped] = useState(false);
+  const bannerTextRef = useRef<HTMLParagraphElement>(null);
   const { me, logout } = useAuth();
   const { t } = useLanguage();
   const { announcement } = useSettings();
@@ -202,6 +206,7 @@ export default function Shell() {
     setMobileOpen(false);
   }, [pathname]);
 
+<<<<<<< HEAD
   function toggleMenu() {
     playClickSound();
     if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
@@ -216,6 +221,25 @@ export default function Shell() {
       setMobileOpen(true);
     }
   }
+=======
+  useEffect(() => {
+    const el = bannerTextRef.current;
+    if (!el || !announcement) {
+      setIsBannerClamped(false);
+      return;
+    }
+    const check = () => {
+      setIsBannerClamped(el.scrollHeight > el.clientHeight + 1);
+    };
+    check();
+    const frameId = requestAnimationFrame(check);
+    window.addEventListener('resize', check);
+    return () => {
+      cancelAnimationFrame(frameId);
+      window.removeEventListener('resize', check);
+    };
+  }, [announcement]);
+>>>>>>> 7d72ac6 (Update project)
 
   async function handleLogout() {
     playClickSound();
@@ -336,22 +360,76 @@ export default function Shell() {
         </div>
       </header>
 
-      {/* Announcement Banner */}
       {announcement && !bannerDismissed && (
-        <div className="bg-gradient-to-r from-indigo/15 via-cyan/15 to-indigo/15 border-b border-indigo/25 px-4 py-2 flex items-center justify-between gap-3 backdrop-blur-sm">
-          <div className="flex items-center gap-2.5 text-xs text-ink min-w-0 max-w-4xl mx-auto flex-1">
-            <span className="w-5 h-5 rounded-full bg-indigo/20 flex items-center justify-center shrink-0">
-              <i className="bi bi-megaphone-fill text-indigo text-xs" />
-            </span>
-            <span className="font-medium truncate">{announcement}</span>
+        <div
+          onClick={() => {
+            if (isBannerClamped) {
+              playClickSound();
+              setBannerModalOpen(true);
+            }
+          }}
+          className={`bg-gradient-to-r from-indigo/15 via-cyan/15 to-indigo/15 border-b border-indigo/25 px-2 sm:px-4 py-1 flex items-center justify-between gap-1 sm:gap-2 backdrop-blur-sm ${
+            isBannerClamped ? 'cursor-pointer hover:bg-indigo/20 transition-colors' : ''
+          }`}
+        >
+          <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-ink min-w-0 max-w-4xl mx-auto flex-1">
+            <div className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0">
+              <span className="w-6 h-6 rounded-full bg-indigo/20 flex items-center justify-center">
+                <i className="bi bi-megaphone-fill text-indigo text-xs" />
+              </span>
+            </div>
+            <p
+              ref={bannerTextRef}
+              className="font-medium text-xs text-ink line-clamp-2 break-words [overflow-wrap:anywhere] min-w-0 flex-1 leading-snug"
+            >
+              {announcement}
+            </p>
           </div>
           <button
-            onClick={() => setBannerDismissed(true)}
-            className="shrink-0 text-muted hover:text-ink p-1 rounded-md transition"
-            aria-label="Dismiss banner"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              playClickSound();
+              setBannerDismissed(true);
+            }}
+            className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0 text-muted hover:text-ink transition rounded-lg"
+            aria-label="Đóng thông báo"
           >
             <i className="bi bi-x-lg text-xs" />
           </button>
+        </div>
+      )}
+
+      {bannerModalOpen && announcement && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4 backdrop-blur-sm"
+          onClick={() => setBannerModalOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full sm:max-w-md bg-surface border border-line rounded-t-2xl sm:rounded-2xl p-4 shadow-2xl flex flex-col max-h-[60vh]"
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-line">
+              <div className="flex items-center gap-2 font-semibold text-sm text-ink min-w-0">
+                <i className="bi bi-megaphone-fill text-indigo shrink-0" />
+                <span className="truncate">Thông báo chung</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  setBannerModalOpen(false);
+                }}
+                className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-surface2 transition shrink-0"
+                aria-label="Đóng"
+              >
+                <i className="bi bi-x-lg text-xs" />
+              </button>
+            </div>
+            <div className="overflow-y-auto max-h-[60vh] py-3 text-xs sm:text-sm text-ink leading-relaxed break-words [overflow-wrap:anywhere]">
+              {announcement}
+            </div>
+          </div>
         </div>
       )}
 
@@ -573,11 +651,36 @@ export default function Shell() {
         </button>
       </nav>
 
+<<<<<<< HEAD
       {/* Mobile Footer */}
       <div className="lg:hidden">
         <Footer />
       </div>
       <BackgroundMusicPlayer />
+=======
+      <Footer />
+      <ErrorBoundary
+        fallback={(reset) => (
+          <div
+            className="fixed right-3.5 z-40"
+            style={{ bottom: 'calc(4.5rem + env(safe-area-inset-bottom))' }}
+          >
+            <button
+              type="button"
+              onClick={reset}
+              className="h-9 px-3 rounded-full bg-surface2/90 border border-line text-muted hover:text-ink shadow-lg flex items-center justify-center gap-1.5 transition backdrop-blur-md text-xs font-semibold"
+              title="Thử lại"
+              aria-label="Thử lại"
+            >
+              <i className="bi bi-arrow-clockwise text-xs" />
+              <span>Thử lại</span>
+            </button>
+          </div>
+        )}
+      >
+        <BackgroundMusicPlayer />
+      </ErrorBoundary>
+>>>>>>> 7d72ac6 (Update project)
     </div>
   );
 }

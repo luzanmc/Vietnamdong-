@@ -36,6 +36,7 @@ import SecurityGuard from './components/SecurityGuard.js';
 import Profile from './pages/Profile.js';
 import Giftcode from './pages/Giftcode.js';
 import Shell from './components/Shell.js';
+<<<<<<< HEAD
 import { CardProvider } from './context/CardContext.js';
 import { BalanceCardModal } from './components/BalanceCard.js';
 
@@ -45,11 +46,24 @@ export default function App() {
       <LanguageProvider>
         <AuthProvider>
           <CardProvider>
+=======
+import ErrorBoundary from './components/ErrorBoundary.js';
+
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <ThemeProvider>
+        <LanguageProvider>
+          <AuthProvider>
+>>>>>>> 7d72ac6 (Update project)
             <SettingsProvider>
               <MusicProvider>
                 <ToastProvider>
                   <SecurityGuard />
+<<<<<<< HEAD
                   <BalanceCardModal />
+=======
+>>>>>>> 7d72ac6 (Update project)
                   <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/landing" element={<Landing />} />
@@ -100,5 +114,6 @@ export default function App() {
         </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>
+    </ErrorBoundary>
   );
 }

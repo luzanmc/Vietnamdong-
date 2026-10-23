@@ -756,6 +756,7 @@ function GiftcodesAdmin() {
 function SiteSettings() {
   const [announcements, setAnnouncements] = useState<{ id: string; message: string; active: number; created_at: string }[]>([]);
   const [newAnnouncement, setNewAnnouncement] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   function loadAnnouncements() {
     adminApi<typeof announcements>('/announcements').then(setAnnouncements);
@@ -767,10 +768,23 @@ function SiteSettings() {
 
   async function postAnnouncement(e: React.FormEvent) {
     e.preventDefault();
-    if (!newAnnouncement.trim()) return;
-    await adminApi('/announcements', { method: 'POST', body: JSON.stringify({ message: newAnnouncement }) });
-    setNewAnnouncement('');
-    loadAnnouncements();
+    const trimmed = newAnnouncement.trim();
+    if (!trimmed) {
+      setError('Nội dung thông báo không được để trống');
+      return;
+    }
+    if (trimmed.length > 200) {
+      setError('Nội dung thông báo không được vượt quá 200 ký tự');
+      return;
+    }
+    try {
+      setError(null);
+      await adminApi('/announcements', { method: 'POST', body: JSON.stringify({ message: trimmed }) });
+      setNewAnnouncement('');
+      loadAnnouncements();
+    } catch (err: any) {
+      setError(err?.message || 'Có lỗi xảy ra');
+    }
   }
 
   async function deactivate(id: string) {
@@ -782,15 +796,36 @@ function SiteSettings() {
     <div className="space-y-5 max-w-md">
       <div className="bg-surface border border-line rounded-xl p-4 space-y-3">
         <h2 className="text-sm font-semibold">Thông báo chung (banner đầu trang)</h2>
-        <form onSubmit={postAnnouncement} className="flex gap-2">
-          <input value={newAnnouncement} onChange={(e) => setNewAnnouncement(e.target.value)} placeholder="Nội dung thông báo mới" className="flex-1 bg-surface2 border border-line rounded-lg px-3 py-1.5 text-sm" />
-          <button className="bg-indigo text-white text-xs font-medium px-3 py-2 rounded-lg shrink-0">Đăng</button>
+        <form onSubmit={postAnnouncement} className="space-y-2">
+          <div className="flex gap-2">
+            <input
+              value={newAnnouncement}
+              maxLength={200}
+              onChange={(e) => {
+                setNewAnnouncement(e.target.value);
+                if (error) setError(null);
+              }}
+              placeholder="Nội dung thông báo mới"
+              className="flex-1 bg-surface2 border border-line rounded-lg px-3 py-1.5 text-sm min-w-0"
+            />
+            <button type="submit" className="bg-indigo text-white text-xs font-medium px-3 py-2 rounded-lg shrink-0">
+              Đăng
+            </button>
+          </div>
+          <div className="flex items-center justify-between text-[11px]">
+            {error ? <span className="text-rose">{error}</span> : <span />}
+            <span className="text-muted font-mono">{newAnnouncement.length}/200</span>
+          </div>
         </form>
         <div className="space-y-2">
           {announcements.map((a) => (
-            <div key={a.id} className="flex items-center justify-between bg-surface2 rounded-lg px-3 py-2 text-xs">
-              <span className={a.active ? 'text-ink' : 'text-muted line-through'}>{a.message}</span>
-              {a.active === 1 && <button onClick={() => deactivate(a.id)} className="text-rose shrink-0 ml-2">Tắt</button>}
+            <div key={a.id} className="flex items-center justify-between bg-surface2 rounded-lg px-3 py-2 text-xs min-w-0">
+              <span className={`break-words [overflow-wrap:anywhere] min-w-0 flex-1 ${a.active ? 'text-ink' : 'text-muted line-through'}`}>{a.message}</span>
+              {a.active === 1 && (
+                <button type="button" onClick={() => deactivate(a.id)} className="text-rose shrink-0 ml-2">
+                  Tắt
+                </button>
+              )}
             </div>
           ))}
           {announcements.length === 0 && <p className="text-xs text-muted">Chưa có thông báo nào.</p>}

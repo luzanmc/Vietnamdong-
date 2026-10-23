@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react';
+import { playClickSound } from '../utils/sound.js';
 
 export type MusicSourceType = 'audio' | 'youtube' | 'spotify';
 
@@ -235,6 +236,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ytPlayerRef = useRef<any>(null);
   const ytReadyRef = useRef<boolean>(false);
+  const ytHostContainerRef = useRef<HTMLDivElement>(null);
 
   // Sync playlist to localStorage
   useEffect(() => {
@@ -274,12 +276,21 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     let checkInterval: any = null;
 
     function initYT() {
+      if (ytPlayerRef.current) return true;
       if (!window.YT || !window.YT.Player) return false;
-      const host = document.getElementById('vnd-yt-player-host');
-      if (!host) return false;
+      const container = ytHostContainerRef.current;
+      if (!container) return false;
+
+      let host = document.getElementById('vnd-yt-player-host');
+      if (!host) {
+        host = document.createElement('div');
+        host.id = 'vnd-yt-player-host';
+        host.className = 'w-full h-full';
+        container.appendChild(host);
+      }
 
       try {
-        ytPlayerRef.current = new window.YT.Player('vnd-yt-player-host', {
+        ytPlayerRef.current = new window.YT.Player(host, {
           height: '100%',
           width: '100%',
           videoId: currentTrack?.youtubeId || 'jfKfPfyJRdk',
@@ -299,13 +310,11 @@ export function MusicProvider({ children }: { children: ReactNode }) {
               } catch {}
             },
             onStateChange: (event: any) => {
-              // 1 = PLAYING, 2 = PAUSED, 0 = ENDED
               if (event.data === 1) {
                 setIsPlaying(true);
               } else if (event.data === 2) {
                 setIsPlaying(false);
               } else if (event.data === 0) {
-                // Auto next track
                 nextTrack();
               }
             },
@@ -565,17 +574,23 @@ export function MusicProvider({ children }: { children: ReactNode }) {
         }}
         className="border border-line bg-black relative"
       >
-        {showMiniPlayer && currentTrack?.type === 'youtube' && (
-          <button
-            onClick={() => setShowMiniPlayer(false)}
-            aria-label="Ẩn video"
-            title="Ẩn video"
-            className="absolute top-2 right-2 z-20 w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-black/70 hover:bg-black/90 text-white flex items-center justify-center transition"
-          >
-            <i className="bi bi-x-lg" />
-          </button>
-        )}
-        <div id="vnd-yt-player-host" className="w-full h-full" />
+        <div ref={ytHostContainerRef} className="w-full h-full" />
+        <button
+          type="button"
+          onClick={() => {
+            playClickSound();
+            setShowMiniPlayer(false);
+          }}
+          aria-label="Ẩn video"
+          title="Ẩn video"
+          className={`absolute top-2 right-2 z-20 w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-black/70 hover:bg-black/90 text-white flex items-center justify-center transition ${
+            showMiniPlayer && currentTrack?.type === 'youtube'
+              ? 'opacity-100 pointer-events-auto'
+              : 'opacity-0 pointer-events-none'
+          }`}
+        >
+          <i className="bi bi-x-lg text-xs" />
+        </button>
       </div>
 
       {children}
