@@ -11,6 +11,9 @@ import NotificationBell from './NotificationBell.js';
 import Footer from './Footer.js';
 import CurrencyIcon from './CurrencyIcon.js';
 import AnimatedNumber from './AnimatedNumber.js';
+import LevelBadge from './LevelBadge.js';
+import AvatarFrame from './AvatarFrame.js';
+import UserName from './UserName.js';
 import { playClickSound, isSoundEnabled, toggleSound } from '../utils/sound.js';
 
 interface NavGroup {
@@ -307,18 +310,22 @@ export default function Shell() {
                   <span>{me.streak_days}d</span>
                 </Link>
 
-                {/* Profile Link Button (Shown on sm+ to prevent header overcrowding on small phones) */}
                 <Link
                   to="/profile"
                   onClick={playClickSound}
                   title="Hồ sơ & Cài đặt"
-                  className="hidden sm:flex w-8 h-8 rounded-lg items-center justify-center text-muted hover:text-ink hover:bg-surface2 transition btn-press border border-line/60 shrink-0 overflow-hidden"
+                  className="flex items-center gap-1.5 px-1.5 py-1 rounded-xl hover:bg-surface2 transition btn-press border border-line/60 shrink-0"
                 >
-                  {me.avatar_url ? (
-                    <img src={me.avatar_url} alt={me.username} className="w-full h-full object-cover" />
-                  ) : (
-                    <i className="bi bi-person-fill text-sm" />
-                  )}
+                  <AvatarFrame level={me.level} shape="circle">
+                    {me.avatar_url ? (
+                      <img src={me.avatar_url} alt={me.username} className="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-indigo/20 text-indigo flex items-center justify-center font-bold text-[9px] sm:text-[10px]">
+                        {me.username.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                  </AvatarFrame>
+                  <LevelBadge level={me.level} size="xs" />
                 </Link>
               </>
             )}
@@ -465,21 +472,28 @@ export default function Shell() {
                   className="block p-3.5 rounded-xl bg-surface2/60 border border-line mb-3 hover:border-indigo/40 transition"
                 >
                   <div className="flex items-center gap-2.5 mb-2.5">
-                    {me.avatar_url ? (
-                      <img src={me.avatar_url} alt={me.username} className="w-9 h-9 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-9 h-9 rounded-full bg-indigo/20 text-indigo flex items-center justify-center font-bold text-sm">
-                        {me.username.slice(0, 2).toUpperCase()}
-                      </div>
-                    )}
+                    <AvatarFrame level={me.level} shape="circle">
+                      {me.avatar_url ? (
+                        <img src={me.avatar_url} alt={me.username} className="w-9 h-9 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-9 h-9 rounded-full bg-indigo/20 text-indigo flex items-center justify-center font-bold text-sm">
+                          {me.username.slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                    </AvatarFrame>
                     <div className="min-w-0 flex-1">
-                      <div className="font-semibold text-sm truncate flex items-center justify-between">
-                        <span>{me.username}</span>
-                        <i className="bi bi-gear-fill text-muted text-xs" />
+                      <div className="font-semibold text-sm truncate flex items-center justify-between gap-1">
+                        <div className="flex items-center gap-1.5 truncate">
+                          <UserName name={me.username} level={me.level} className="truncate" />
+                          <LevelBadge level={me.level} size="xs" />
+                        </div>
+                        <i className="bi bi-gear-fill text-muted text-xs shrink-0" />
                       </div>
                       <div className="text-[11px] text-muted flex items-center gap-1.5">
                         <span className="w-2 h-2 rounded-full bg-cyan inline-block animate-pulse" />
                         <span>{me.role === 'admin' ? 'Admin' : 'Thành viên'}</span>
+                        <span>•</span>
+                        <span>Cấp {me.level ?? 1}</span>
                       </div>
                     </div>
                   </div>

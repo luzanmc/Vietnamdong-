@@ -9,6 +9,8 @@ import { useToast } from '../context/ToastContext.js';
 import { playClickSound } from '../utils/sound.js';
 import CurrencyIcon from '../components/CurrencyIcon.js';
 import BalanceCard from '../components/BalanceCard.js';
+import LevelBadge from '../components/LevelBadge.js';
+import UserName from '../components/UserName.js';
 import type { Me, Wallet, Task } from '../types.js';
 
 export default function Dashboard() {
@@ -119,10 +121,31 @@ export default function Dashboard() {
               </span>
             </div>
 
-            <h1 className="font-display text-xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-ink leading-tight">
-              Chào mừng trở lại,{' '}
-              <span className="gradient-text-indigo">{me.username}</span>
+            <h1 className="font-display text-xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-ink leading-tight flex items-center gap-2 flex-wrap">
+              <span>Chào mừng trở lại,</span>
+              <UserName name={me.username} level={me.level} />
             </h1>
+
+            <Link
+              to="/profile"
+              onClick={playClickSound}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface2/70 hover:bg-surface2 border border-line text-xs transition btn-press max-w-full"
+              title="Xem chi tiết cấp độ & đặc quyền"
+            >
+              <LevelBadge level={me.level} size="xs" />
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="font-medium text-ink shrink-0">Cấp {me.level ?? 1}</span>
+                <div className="w-20 sm:w-28 h-1.5 bg-surface rounded-full overflow-hidden border border-line/50 shrink-0">
+                  <div
+                    className="h-full bg-gradient-to-r from-indigo to-cyan rounded-full transition-all duration-300"
+                    style={{ width: `${me.levelProgress?.progressPercent ?? 0}%` }}
+                  />
+                </div>
+                <span className="font-mono text-[10px] text-muted truncate">
+                  {me.xp ?? 0}/{me.levelProgress?.nextLevelXp ?? 'Max'} XP
+                </span>
+              </div>
+            </Link>
 
             <p className="text-xs sm:text-sm text-muted leading-relaxed max-w-xl">
               Vượt link tự động, điểm danh chuỗi ngày và tích lũy VNC đổi tiền mặt hoặc nạp game tức thì. An toàn, bảo mật và thanh toán chuẩn xác!

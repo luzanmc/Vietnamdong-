@@ -179,13 +179,43 @@ export async function searchUsers(
   query: string,
   limit = 50,
   client: Queryable = pool
-): Promise<Pick<User, 'id' | 'username' | 'balance_nova' | 'role' | 'created_at' | 'locked'>[]> {
+): Promise<Pick<User, 'id' | 'username' | 'balance_nova' | 'role' | 'created_at' | 'locked' | 'xp'>[]> {
   const { rows } = await client.query(
-    `SELECT id, username, balance_nova, role, created_at, locked FROM users
+    `SELECT id, username, balance_nova, role, created_at, locked, COALESCE(xp, 0)::int AS xp FROM users
      WHERE username ILIKE $1 ORDER BY created_at DESC LIMIT $2`,
     [`%${query}%`, limit]
   );
   return rows;
+}
+
+export async function addXpToUser(
+  userId: string,
+  xpDelta: number,
+  client: Queryable = pool
+): Promise<{ previousXp: number; newXp: number }> {
+  const { rows } = await client.query<{ xp: number }>(
+    `SELECT COALESCE(xp, 0)::int AS xp FROM users WHERE id = $1 FOR UPDATE`,
+    [userId]
+  );
+  const previousXp = Number(rows[0]?.xp || 0);
+  const newXp = Math.max(0, previousXp + xpDelta);
+  await client.query(`UPDATE users SET xp = $1 WHERE id = $2`, [newXp, userId]);
+  return { previousXp, newXp };
+}
+
+export async function setUserXp(
+  userId: string,
+  xp: number,
+  client: Queryable = pool
+): Promise<{ previousXp: number; newXp: number }> {
+  const { rows } = await client.query<{ xp: number }>(
+    `SELECT COALESCE(xp, 0)::int AS xp FROM users WHERE id = $1 FOR UPDATE`,
+    [userId]
+  );
+  const previousXp = Number(rows[0]?.xp || 0);
+  const newXp = Math.max(0, Math.floor(xp));
+  await client.query(`UPDATE users SET xp = $1 WHERE id = $2`, [newXp, userId]);
+  return { previousXp, newXp };
 }
 
 export async function adjustUserBalanceRaw(userId: string, delta: number, client: Queryable = pool): Promise<void> {

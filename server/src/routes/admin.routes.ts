@@ -14,7 +14,9 @@ import {
 import { listAllRedeemOrdersAdmin } from '../repositories/redeemRepository.js';
 import { adminFulfillOrder, adminRejectOrder } from '../services/redeemService.js';
 import { listAllTasksAdmin, updateTaskAdmin, sumTaskRewardOut } from '../repositories/taskRepository.js';
-import { searchUsers, getUserByUsername, adjustUserBalanceRaw, countAllUsers, lockUser, unlockUser } from '../repositories/userRepository.js';
+import { searchUsers, getUserByUsername, adjustUserBalanceRaw, countAllUsers, lockUser, unlockUser, getUserById, addXpToUser, setUserXp } from '../repositories/userRepository.js';
+import { calculateLevel } from '../services/levelService.js';
+import { logToDiscord } from '../services/discordService.js';
 import { createCreatorCode, updateCreatorCodeAdmin, listCreatorCodesAdmin } from '../repositories/creatorRepository.js';
 import { getSetting, setSetting } from '../repositories/settingsRepository.js';
 import { addLicenseKeys, listLicensesAdmin, listAllVietsubOrdersAdmin } from '../repositories/vietsubRepository.js';
@@ -173,7 +175,70 @@ adminRouter.patch('/creator-codes/:id', async (req, res, next) => {
 
 adminRouter.get('/users', async (req, res, next) => {
   try {
-    res.json(await searchUsers(String(req.query.search || '')));
+    const rawUsers = await searchUsers(String(req.query.search || ''));
+    const enriched = rawUsers.map((u) => {
+      const xp = Number(u.xp || 0);
+      const levelProgress = calculateLevel(xp);
+      return {
+        ...u,
+        xp,
+        level: levelProgress.level,
+        levelProgress,
+      };
+    });
+    res.json(enriched);
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.post('/users/:id/adjust-xp', async (req, res, next) => {
+  try {
+    const targetUser = await getUserById(req.params.id);
+    if (!targetUser) return res.status(404).json({ error: 'Người dùng không tồn tại' });
+
+    const xpDelta = req.body.xpDelta !== undefined ? Number(req.body.xpDelta) : undefined;
+    const directXp = req.body.xp !== undefined ? Number(req.body.xp) : undefined;
+
+    let resXp: { previousXp: number; newXp: number };
+    if (directXp !== undefined) {
+      if (isNaN(directXp) || directXp < 0) {
+        return res.status(400).json({ error: 'Giá trị XP không hợp lệ' });
+      }
+      resXp = await setUserXp(req.params.id, directXp);
+    } else if (xpDelta !== undefined) {
+      if (isNaN(xpDelta) || xpDelta === 0) {
+        return res.status(400).json({ error: 'Giá trị chênh lệch XP không hợp lệ' });
+      }
+      resXp = await addXpToUser(req.params.id, xpDelta);
+    } else {
+      return res.status(400).json({ error: 'Thiếu dữ liệu XP cần điều chỉnh' });
+    }
+
+    const oldLevel = calculateLevel(resXp.previousXp).level;
+    const newLevelInfo = calculateLevel(resXp.newXp);
+    const newLevel = newLevelInfo.level;
+
+    if (newLevel > oldLevel) {
+      await createNotification(
+        nanoid(),
+        targetUser.id,
+        `Bạn đã lên cấp ${newLevel}`,
+        '/profile'
+      );
+    }
+
+    const logMsg = `[Admin XP] ${req.user?.username} chỉnh XP cho ${targetUser.username}: ${resXp.previousXp} -> ${resXp.newXp} (Cấp ${newLevel})`;
+    console.log(logMsg);
+    logToDiscord(logMsg).catch(() => {});
+
+    res.json({
+      ok: true,
+      previousXp: resXp.previousXp,
+      xp: resXp.newXp,
+      level: newLevel,
+      levelProgress: newLevelInfo,
+    });
   } catch (err) {
     next(err);
   }

@@ -10,6 +10,10 @@ interface Attempt {
 }
 interface VerifyResult {
   rewardNova: number;
+  bonusNova?: number;
+  xpGained?: number;
+  level?: number;
+  levelUp?: number;
 }
 
 export default function VerifyLink() {
@@ -103,9 +107,23 @@ export default function VerifyLink() {
               <i className="bi bi-award-fill text-amber" />
               <span>Chúc mừng vượt link thành công!</span>
             </div>
-            <p className="text-sm text-[#8A8A93] mb-3">
-              Bạn đã nhận được <span className="font-mono font-semibold text-[#12B76A]">+{result.rewardNova} VNC</span>
-            </p>
+            <div className="space-y-1 mb-3">
+              <p className="text-sm text-[#8A8A93]">
+                Bạn đã nhận được <span className="font-mono font-semibold text-[#12B76A]">+{result.rewardNova} VNC</span> và <span className="font-mono font-semibold text-cyan">+{result.xpGained ?? 10} XP</span>
+              </p>
+              {result.bonusNova && result.bonusNova > 0 ? (
+                <div className="p-2 rounded-xl bg-amber/15 border border-amber/30 text-amber text-xs font-semibold flex items-center justify-center gap-1.5">
+                  <i className="bi bi-gift-fill" />
+                  <span>Trúng thưởng cấp độ: +{result.bonusNova} VNC!</span>
+                </div>
+              ) : null}
+              {result.levelUp ? (
+                <div className="p-2 rounded-xl bg-indigo/20 border border-indigo/40 text-indigo text-xs font-bold flex items-center justify-center gap-1.5">
+                  <i className="bi bi-arrow-up-circle-fill" />
+                  <span>Chúc mừng bạn đã lên cấp {result.levelUp}!</span>
+                </div>
+              ) : null}
+            </div>
             <a href="/dashboard" className="inline-block bg-white text-black text-sm font-semibold px-5 py-2 rounded-lg">
               Quay lại trang chủ
             </a>

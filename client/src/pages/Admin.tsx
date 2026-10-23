@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLanguage } from '../context/LanguageContext.js';
 import { Skeleton } from '../components/Skeleton.js';
+import LevelBadge from '../components/LevelBadge.js';
 
 async function adminApi<T>(path: string, opts: RequestInit = {}): Promise<T> {
   const res = await fetch(`/api/admin${path}`, { credentials: 'include', headers: { 'Content-Type': 'application/json' }, ...opts });
@@ -341,12 +342,15 @@ interface UserRow {
   username: string;
   balance_nova: number;
   role: string;
+  xp?: number;
+  level?: number;
 }
 
 function Users() {
   const [search, setSearch] = useState('');
   const [rows, setRows] = useState<UserRow[] | null>(null);
   const [adjust, setAdjust] = useState<Record<string, string>>({});
+  const [adjustXp, setAdjustXp] = useState<Record<string, string>>({});
 
   async function load() {
     setRows(await adminApi<UserRow[]>(`/users?search=${encodeURIComponent(search)}`));
@@ -361,6 +365,16 @@ function Users() {
     load();
   }
 
+  async function submitAdjustXp(id: string) {
+    const val = adjustXp[id]?.trim();
+    if (!val) return;
+    const amount = Number(val);
+    if (isNaN(amount) || amount === 0) return;
+    await adminApi(`/users/${id}/adjust-xp`, { method: 'POST', body: JSON.stringify({ xpDelta: amount }) });
+    setAdjustXp((a) => ({ ...a, [id]: '' }));
+    load();
+  }
+
   return (
     <div>
       <div className="flex gap-2 mb-3">
@@ -369,23 +383,47 @@ function Users() {
       </div>
       <TableWrap>
         <thead className="bg-surface2 text-muted text-xs">
-          <tr><th className="text-left px-3 py-2">Username</th><th className="text-left px-3 py-2">Số dư</th><th className="text-left px-3 py-2">Vai trò</th><th className="text-left px-3 py-2">Điều chỉnh VNC</th></tr>
+          <tr>
+            <th className="text-left px-3 py-2">Username</th>
+            <th className="text-left px-3 py-2">Cấp / XP</th>
+            <th className="text-left px-3 py-2">Số dư</th>
+            <th className="text-left px-3 py-2">Vai trò</th>
+            <th className="text-left px-3 py-2">Điều chỉnh VNC</th>
+            <th className="text-left px-3 py-2">Điều chỉnh XP</th>
+          </tr>
         </thead>
         <tbody>
           {!rows ? (
-            <TableSkeletonRows cols={4} />
+            <TableSkeletonRows cols={6} />
           ) : (
             rows.map((u) => (
               <tr key={u.id} className="border-t border-line">
                 <td className="px-3 py-2">{u.username}</td>
+                <td className="px-3 py-2">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <LevelBadge level={u.level} size="xs" />
+                    <span className="font-mono text-xs text-muted">{u.xp ?? 0} XP</span>
+                  </div>
+                </td>
                 <td className="px-3 py-2 font-mono">{u.balance_nova}</td>
                 <td className="px-3 py-2">{u.role}</td>
-                <td className="px-3 py-2 flex gap-2">
-                  <input
-                    value={adjust[u.id] || ''} onChange={(e) => setAdjust((a) => ({ ...a, [u.id]: e.target.value }))}
-                    placeholder="+/- VNC" className="w-24 bg-surface2 border border-line rounded px-2 py-1 text-xs"
-                  />
-                  <button onClick={() => submitAdjust(u.id)} className="text-xs text-cyan">Áp dụng</button>
+                <td className="px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={adjust[u.id] || ''} onChange={(e) => setAdjust((a) => ({ ...a, [u.id]: e.target.value }))}
+                      placeholder="+/- VNC" className="w-20 bg-surface2 border border-line rounded px-2 py-1 text-xs font-mono"
+                    />
+                    <button onClick={() => submitAdjust(u.id)} className="text-xs text-cyan">Áp dụng</button>
+                  </div>
+                </td>
+                <td className="px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={adjustXp[u.id] || ''} onChange={(e) => setAdjustXp((a) => ({ ...a, [u.id]: e.target.value }))}
+                      placeholder="+/- XP" className="w-20 bg-surface2 border border-line rounded px-2 py-1 text-xs font-mono"
+                    />
+                    <button onClick={() => submitAdjustXp(u.id)} className="text-xs text-amber">Áp dụng</button>
+                  </div>
                 </td>
               </tr>
             ))

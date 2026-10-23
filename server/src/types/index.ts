@@ -18,6 +18,7 @@ export interface User {
   streak_last_date: string | null;
   registered_ip: string | null;
   locked: number;
+  xp: number;
   card_id: string | null;
   card_bg: string | null;
   card_show_wm: number;
@@ -54,6 +55,7 @@ export interface TaskAttempt {
 
 export type LedgerReason =
   | 'task_reward'
+  | 'level_bonus'
   | 'withdraw'
   | 'transfer_in'
   | 'transfer_out'

@@ -18,6 +18,9 @@ import { api, type ApiError } from '../api/client.js';
 import { playClickSound, isSoundEnabled, toggleSound } from '../utils/sound.js';
 import CurrencyIcon from '../components/CurrencyIcon.js';
 import BalanceCard, { BalanceCardCustomizer } from '../components/BalanceCard.js';
+import LevelBadge from '../components/LevelBadge.js';
+import UserName from '../components/UserName.js';
+import AvatarFrame from '../components/AvatarFrame.js';
 
 const AVATAR_PRESETS = [
   { label: 'Cyber Cat', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=Lucky' },
@@ -319,41 +322,44 @@ export default function Profile() {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative z-10">
           <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
-            {/* Interactive Avatar with Edit Trigger */}
-            <div
-              onClick={handleOpenAvatarModal}
-              className="relative group cursor-pointer shrink-0"
-              title="Nhấn để chỉnh sửa ảnh đại diện"
-            >
-              {me?.avatar_url ? (
-                <img
-                  src={me.avatar_url}
-                  alt={me.username}
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-indigo/40 shadow-md group-hover:opacity-85 transition"
-                />
-              ) : (
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-indigo to-cyan text-white flex items-center justify-center font-display font-bold text-2xl sm:text-3xl shadow-lg shadow-indigo/20 group-hover:opacity-85 transition">
-                  {me?.username?.slice(0, 2).toUpperCase() || 'VN'}
-                </div>
-              )}
-              {/* Camera Hover Overlay */}
-              <div className="absolute inset-0 rounded-2xl bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[11px] font-semibold gap-0.5">
-                <i className="bi bi-camera-fill text-lg" />
-                <span>Đổi ảnh</span>
-              </div>
-              <button
-                type="button"
-                className="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-indigo text-white flex items-center justify-center shadow border border-white/20 text-xs hover:brightness-110"
+            <AvatarFrame level={me?.level} shape="square">
+              <div
+                onClick={handleOpenAvatarModal}
+                className="relative group cursor-pointer shrink-0"
+                title="Nhấn để chỉnh sửa ảnh đại diện"
               >
-                <i className="bi bi-pencil-fill text-[9px]" />
-              </button>
-            </div>
+                {me?.avatar_url ? (
+                  <img
+                    src={me.avatar_url}
+                    alt={me.username}
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-indigo/40 shadow-md group-hover:opacity-85 transition"
+                  />
+                ) : (
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-indigo to-cyan text-white flex items-center justify-center font-display font-bold text-2xl sm:text-3xl shadow-lg shadow-indigo/20 group-hover:opacity-85 transition">
+                    {me?.username?.slice(0, 2).toUpperCase() || 'VN'}
+                  </div>
+                )}
+                <div className="absolute inset-0 rounded-2xl bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[11px] font-semibold gap-0.5">
+                  <i className="bi bi-camera-fill text-lg" />
+                  <span>Đổi ảnh</span>
+                </div>
+                <button
+                  type="button"
+                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-indigo text-white flex items-center justify-center shadow border border-white/20 text-xs hover:brightness-110"
+                >
+                  <i className="bi bi-pencil-fill text-[9px]" />
+                </button>
+              </div>
+            </AvatarFrame>
 
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="font-display text-xl sm:text-3xl font-bold text-ink truncate max-w-[200px] sm:max-w-none">
-                  {me?.username}
-                </h1>
+                <UserName
+                  name={me?.username || 'Thành viên'}
+                  level={me?.level}
+                  className="font-display text-xl sm:text-3xl font-bold truncate max-w-[200px] sm:max-w-none"
+                />
+                <LevelBadge level={me?.level} size="md" />
                 {me?.role === 'admin' ? (
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo/20 text-indigo border border-indigo/40 uppercase shrink-0">
                     Admin
@@ -408,6 +414,80 @@ export default function Profile() {
                 <span>{me?.streak_days ?? 0}d</span>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="glass-panel p-4 sm:p-5 rounded-2xl border border-line bg-gradient-to-r from-surface2/80 via-surface/90 to-surface2/80 shadow-md">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+          <div className="flex items-center gap-3">
+            <AvatarFrame level={me?.level} shape="circle">
+              {me?.avatar_url ? (
+                <img src={me.avatar_url} alt={me.username} className="w-12 h-12 rounded-full object-cover" />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo to-cyan text-white flex items-center justify-center font-bold text-base">
+                  {me?.username?.slice(0, 2).toUpperCase() || 'VN'}
+                </div>
+              )}
+            </AvatarFrame>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <UserName name={me?.username || 'Thành viên'} level={me?.level} className="font-bold text-base text-ink" />
+                <LevelBadge level={me?.level} size="sm" />
+              </div>
+              <div className="text-xs text-muted mt-0.5 flex items-center gap-1.5">
+                <span>{me?.levelProgress?.tierName || 'Tập sự'}</span>
+                <span>•</span>
+                <span>Cấp {me?.level ?? 1}/20</span>
+              </div>
+            </div>
+          </div>
+          <div className="text-left sm:text-right font-mono">
+            <div className="text-[11px] text-muted">Kinh nghiệm tích lũy</div>
+            <div className="text-sm font-bold text-ink">
+              {me?.xp ?? 0} <span className="text-[11px] font-normal text-muted">XP</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-xs text-muted font-mono">
+            <span>Tiến độ</span>
+            <span>
+              {me?.levelProgress?.nextLevelXp
+                ? `${me.levelProgress.xpInCurrentLevel} / ${me.levelProgress.xpRequiredForNextLevel} XP (${me.levelProgress.progressPercent}%)`
+                : 'Đạt cấp tối đa (100%)'}
+            </span>
+          </div>
+          <div className="w-full h-2 rounded-full bg-surface2 overflow-hidden border border-line/60">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${
+                (me?.level ?? 1) >= 20
+                  ? 'bg-gradient-to-r from-rose-500 via-amber-400 to-orange-500'
+                  : (me?.level ?? 1) >= 15
+                  ? 'bg-gradient-to-r from-amber-400 to-yellow-300'
+                  : (me?.level ?? 1) >= 10
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500'
+                  : (me?.level ?? 1) >= 5
+                  ? 'bg-gradient-to-r from-sky-400 to-cyan-400'
+                  : 'bg-gradient-to-r from-zinc-500 to-zinc-400'
+              }`}
+              style={{ width: `${me?.levelProgress?.progressPercent ?? 0}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="mt-3 pt-3 border-t border-line/50 flex items-center justify-between text-xs gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 text-muted">
+            <i className="bi bi-gift-fill text-amber" />
+            <span>
+              {(me?.level ?? 1) >= 5
+                ? `Đặc quyền cấp độ: Xác suất ${(me?.levelProgress?.bonusChancePercent ?? 1).toFixed(1)}% nhận thêm tối đa ${me?.levelProgress?.bonusMaxCoin ?? 2} VNC mỗi link`
+                : 'Đạt cấp 5 để kích hoạt cơ hội nhận thêm VNC may mắn khi vượt link'}
+            </span>
+          </div>
+          <div className="text-[11px] font-mono text-muted shrink-0">
+            +10 XP/link • +5 XP/điểm danh
           </div>
         </div>
       </div>

@@ -18,6 +18,7 @@ import {
 import { verifyTurnstile } from '../services/turnstileService.js';
 import { hashPassword, comparePassword } from '../services/passwordService.js';
 import { sendPasswordResetEmail, sendVerificationEmail } from '../services/mailService.js';
+import { calculateLevel } from '../services/levelService.js';
 import {
   getUserByDiscordId,
   createUserFromDiscord,
@@ -384,7 +385,9 @@ authRouter.post('/avatar', requireAuth, async (req, res, next) => {
 });
 
 authRouter.get('/me', requireAuth, (req, res) => {
-  const { id, username, avatar_url, role, balance_nova, streak_days, email, email_verified, card_id, card_bg, card_show_wm } = req.user!;
+  const { id, username, avatar_url, role, balance_nova, streak_days, email, email_verified, card_id, card_bg, card_show_wm, xp } = req.user!;
+  const currentXp = Number(xp || 0);
+  const levelProgress = calculateLevel(currentXp);
   res.json({
     id,
     username,
@@ -397,6 +400,9 @@ authRouter.get('/me', requireAuth, (req, res) => {
     card_id: card_id || null,
     card_bg: card_bg || null,
     card_show_wm: card_show_wm !== 0,
+    xp: currentXp,
+    level: levelProgress.level,
+    levelProgress,
   });
 });
 

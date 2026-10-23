@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
   streak_last_date TEXT,
   registered_ip TEXT,
   locked INTEGER NOT NULL DEFAULT 0,
+  xp INTEGER NOT NULL DEFAULT 0,
   card_id TEXT UNIQUE,
   card_bg TEXT,
   card_show_wm INTEGER NOT NULL DEFAULT 1,
@@ -307,5 +308,7 @@ CREATE TABLE IF NOT EXISTS giftcode_redemptions (
 );
 
 CREATE INDEX IF NOT EXISTS idx_giftcode_redemptions_user ON giftcode_redemptions(user_id);
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS xp INTEGER NOT NULL DEFAULT 0;
 `;
 

@@ -1,3 +1,18 @@
+export type LevelTier = 'gray' | 'blue' | 'purple' | 'gold' | 'diamond';
+
+export interface LevelProgress {
+  level: number;
+  currentXp: number;
+  nextLevelXp: number | null;
+  xpInCurrentLevel: number;
+  xpRequiredForNextLevel: number;
+  progressPercent: number;
+  tier: LevelTier;
+  tierName: string;
+  bonusChancePercent: number;
+  bonusMaxCoin: number;
+}
+
 export interface Me {
   id: string;
   username: string;
@@ -10,6 +25,9 @@ export interface Me {
   card_id?: string | null;
   card_bg?: string | null;
   card_show_wm?: boolean;
+  xp?: number;
+  level?: number;
+  levelProgress?: LevelProgress;
 }
 
 export interface Task {
@@ -82,6 +100,9 @@ export interface LeaderboardRow {
   earned: number;
   day?: string;
   referred_count?: number;
+  xp?: number;
+  level?: number;
+  levelProgress?: LevelProgress;
 }
 
 export interface ChartPoint {

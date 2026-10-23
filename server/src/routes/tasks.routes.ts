@@ -43,7 +43,14 @@ tasksRouter.post('/attempt/:token/verify', async (req, res, next) => {
     const result = await completeAttempt(req.params.token);
     if (!result) return res.status(409).json({ error: 'Link này không hợp lệ hoặc đã được dùng' });
 
-    res.json({ ok: true, rewardNova: result.rewardNova });
+    res.json({
+      ok: true,
+      rewardNova: result.rewardNova,
+      bonusNova: result.bonusNova,
+      xpGained: result.xpGained,
+      level: result.level,
+      levelUp: result.levelUp,
+    });
   } catch (err) {
     next(err);
   }

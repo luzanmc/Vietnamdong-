@@ -5,6 +5,8 @@ import { credit } from './coinService.js';
 import { checkAndUnlockAchievements } from './achievementService.js';
 import { getClaimForDate, createClaim } from '../repositories/dailyRepository.js';
 import { getUserById, updateStreak } from '../repositories/userRepository.js';
+import { createNotification } from '../repositories/notificationRepository.js';
+import { calculateLevel, DAILY_CLAIM_XP } from './levelService.js';
 import { HttpError } from '../utils/httpError.js';
 
 export function todayStr(now = new Date()): string {
@@ -40,7 +42,7 @@ export async function getStatusForUser(
   };
 }
 
-export async function claimForUser(userId: string): Promise<{ reward_nova: number; streak_days: number }> {
+export async function claimForUser(userId: string): Promise<{ reward_nova: number; streak_days: number; xp_gained: number }> {
   const user = await getUserById(userId);
   if (!user) throw new HttpError(404, 'Không tìm thấy tài khoản');
 
@@ -54,8 +56,29 @@ export async function claimForUser(userId: string): Promise<{ reward_nova: numbe
     await createClaim(nanoid(), userId, today, reward, streakDay, client);
     await updateStreak(userId, streakDay, today, client);
     await credit(userId, reward, 'daily_reward', today, client);
+
+    const { rows: userRows } = await client.query<{ xp: number }>(
+      'SELECT COALESCE(xp, 0)::int AS xp FROM users WHERE id = $1 FOR UPDATE',
+      [userId]
+    );
+    const previousXp = Number(userRows[0]?.xp || 0);
+    const oldLevel = calculateLevel(previousXp).level;
+    const nextXp = previousXp + DAILY_CLAIM_XP;
+    const newLevel = calculateLevel(nextXp).level;
+
+    await client.query('UPDATE users SET xp = $1 WHERE id = $2', [nextXp, userId]);
+
+    if (newLevel > oldLevel) {
+      await createNotification(
+        nanoid(),
+        userId,
+        `Bạn đã lên cấp ${newLevel}`,
+        '/profile',
+        client
+      );
+    }
   });
 
   checkAndUnlockAchievements(userId).catch(() => {});
-  return { reward_nova: reward, streak_days: streakDay };
+  return { reward_nova: reward, streak_days: streakDay, xp_gained: DAILY_CLAIM_XP };
 }
