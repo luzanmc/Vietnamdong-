@@ -1056,7 +1056,7 @@ export default function Profile() {
               <button
                 type="submit"
                 disabled={savingPassword}
-                className="py-3 px-6 rounded-xl font-bold text-xs sm:text-sm bg-indigo hover:brightness-110 text-white transition btn-press flex items-center justify-center gap-2"
+                className="py-3 px-6 rounded-xl font-bold text-xs sm:text-sm bg-indigo hover:brightness-110 text-white shadow-md shadow-indigo/25 border border-indigo-400/30 transition btn-press flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {savingPassword ? (
                   <>
@@ -1146,7 +1146,7 @@ export default function Profile() {
                     playClickSound();
                     toggleTheme();
                   }}
-                  className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-surface border border-line text-ink hover:border-indigo transition btn-press flex items-center gap-1.5 shrink-0"
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-surface border border-slate-300 dark:border-line text-ink hover:border-indigo transition btn-press flex items-center gap-1.5 shrink-0 shadow-sm"
                 >
                   <i className="bi bi-arrow-repeat text-indigo" />
                   <span>Đổi giao diện</span>
@@ -1166,10 +1166,10 @@ export default function Profile() {
                 </div>
                 <button
                   onClick={handleToggleSound}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition btn-press flex items-center gap-1.5 shrink-0 ${
+                  className={`px-3.5 py-2 rounded-xl text-xs font-semibold border transition btn-press flex items-center gap-1.5 shrink-0 shadow-sm ${
                     soundOn
                       ? 'bg-cyan/15 border-cyan/40 text-cyan'
-                      : 'bg-surface border-line text-muted'
+                      : 'bg-white dark:bg-surface border-slate-300 dark:border-line text-muted hover:text-ink'
                   }`}
                 >
                   <i className={`bi ${soundOn ? 'bi-check2' : 'bi-x-lg'}`} />
@@ -1193,7 +1193,7 @@ export default function Profile() {
                     playClickSound();
                     toggleLanguage();
                   }}
-                  className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-surface border border-line text-ink hover:border-indigo transition btn-press flex items-center gap-1.5 shrink-0"
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-surface border border-slate-300 dark:border-line text-ink hover:border-indigo transition btn-press flex items-center gap-1.5 shrink-0 shadow-sm"
                 >
                   <i className="bi bi-globe" />
                   <span>{lang === 'vi' ? 'Tiếng Việt' : 'English'}</span>

@@ -198,7 +198,11 @@ export default function Giftcode() {
               <button
                 type="submit"
                 disabled={submitting || !code.trim()}
-                className="w-full py-3.5 sm:py-4 rounded-2xl font-display font-bold text-sm sm:text-base bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-500 hover:from-indigo-500 hover:via-purple-500 hover:to-cyan-400 text-white shadow-xl shadow-indigo-500/25 hover:shadow-indigo-500/40 border border-white/20 transition-all btn-press flex items-center justify-center gap-2.5 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className={`w-full py-3.5 sm:py-4 rounded-2xl font-display font-bold text-sm sm:text-base transition-all btn-press flex items-center justify-center gap-2.5 ${
+                  code.trim() && !submitting
+                    ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-cyan-500 hover:from-indigo-500 hover:via-purple-500 hover:to-cyan-400 text-white shadow-xl shadow-indigo-500/25 hover:shadow-indigo-500/40 border border-indigo-400/50 cursor-pointer'
+                    : 'bg-surface2 border border-line text-muted shadow-sm cursor-not-allowed'
+                }`}
               >
                 {submitting ? (
                   <>
@@ -207,11 +211,11 @@ export default function Giftcode() {
                   </>
                 ) : (
                   <>
-                    <i className="bi bi-gift-fill text-xl text-amber-300 drop-shadow-sm animate-bounce-subtle" />
-                    <span className="font-extrabold tracking-wide text-white drop-shadow-sm">
+                    <i className={`bi bi-gift-fill text-xl drop-shadow-sm ${code.trim() ? 'text-amber-300 animate-bounce-subtle' : 'text-muted'}`} />
+                    <span className={`font-extrabold tracking-wide drop-shadow-sm ${code.trim() ? 'text-white' : 'text-muted'}`}>
                       Kích hoạt nhận thưởng
                     </span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white/20 text-cyan-100 border border-white/30 uppercase tracking-wider ml-1">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ml-1 ${code.trim() ? 'bg-white/20 text-cyan-100 border border-white/30' : 'bg-surface border border-line text-muted'}`}>
                       VNC
                     </span>
                   </>

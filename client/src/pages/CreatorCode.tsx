@@ -131,7 +131,11 @@ export default function CreatorCode() {
         <button
           type="submit"
           disabled={submitting || !code.trim()}
-          className="w-full py-3 sm:py-3.5 rounded-xl font-display font-bold text-sm bg-gradient-to-r from-indigo-600 via-indigo to-cyan hover:brightness-110 text-white shadow-lg shadow-indigo-500/25 transition-all btn-press flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+          className={`w-full py-3 sm:py-3.5 rounded-xl font-display font-bold text-sm transition-all btn-press flex items-center justify-center gap-2 ${
+            code.trim() && !submitting
+              ? 'bg-gradient-to-r from-indigo-600 via-indigo to-cyan hover:brightness-110 text-white border border-indigo-400/50 shadow-lg shadow-indigo-500/25 cursor-pointer'
+              : 'bg-surface2 border border-line text-muted shadow-sm cursor-not-allowed'
+          }`}
         >
           {submitting ? (
             <>
@@ -140,8 +144,10 @@ export default function CreatorCode() {
             </>
           ) : (
             <>
-              <i className="bi bi-patch-check-fill text-base text-amber-300 drop-shadow" />
-              <span className="font-extrabold tracking-wide">{t('creator.apply_button')}</span>
+              <i className={`bi bi-patch-check-fill text-base drop-shadow ${code.trim() ? 'text-amber-300' : 'text-muted'}`} />
+              <span className={`font-extrabold tracking-wide ${code.trim() ? 'text-white' : 'text-muted'}`}>
+                {t('creator.apply_button')}
+              </span>
             </>
           )}
         </button>
