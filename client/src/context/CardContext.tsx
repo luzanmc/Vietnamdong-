@@ -34,9 +34,9 @@ interface CardContextValue {
 const CardContext = createContext<CardContextValue | null>(null);
 
 export function CardProvider({ children }: { children: ReactNode }) {
-  const { me } = useAuth();
+  const { me, refresh } = useAuth();
 
-  // Load initial from localStorage
+  // Load initial from localStorage or empty
   const [cardBg, setCardBgState] = useState<string>(() => {
     return localStorage.getItem('vnd_card_bg') || '';
   });
@@ -48,25 +48,36 @@ export function CardProvider({ children }: { children: ReactNode }) {
 
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
 
-  // Sync with user profile once authenticated
+  // Sync strictly with user profile once authenticated
   useEffect(() => {
     if (me) {
-      if (me.card_bg !== undefined && me.card_bg !== null) {
-        setCardBgState(me.card_bg);
-        localStorage.setItem('vnd_card_bg', me.card_bg);
+      const remoteBg = me.card_bg ?? '';
+      setCardBgState(remoteBg);
+      if (remoteBg) {
+        localStorage.setItem('vnd_card_bg', remoteBg);
+      } else {
+        localStorage.removeItem('vnd_card_bg');
       }
-      if (me.card_show_wm !== undefined) {
-        setShowWatermarkState(Boolean(me.card_show_wm));
-        localStorage.setItem('vnd_card_wm', String(Boolean(me.card_show_wm)));
-      }
+
+      const remoteWm = me.card_show_wm !== undefined ? Boolean(me.card_show_wm) : true;
+      setShowWatermarkState(remoteWm);
+      localStorage.setItem('vnd_card_wm', String(remoteWm));
     }
   }, [me]);
 
   const setCardBg = (bg: string) => {
     setCardBgState(bg);
-    localStorage.setItem('vnd_card_bg', bg);
+    if (bg) {
+      localStorage.setItem('vnd_card_bg', bg);
+    } else {
+      localStorage.removeItem('vnd_card_bg');
+    }
     if (me) {
-      api.updateCardConfig({ card_bg: bg, card_show_wm: showWatermark }).catch(() => {});
+      api.updateCardConfig({ card_bg: bg || null, card_show_wm: showWatermark })
+        .then(() => refresh())
+        .catch((err) => {
+          console.error('Không thể đồng bộ nền thẻ lên máy chủ:', err);
+        });
     }
   };
 
@@ -74,7 +85,11 @@ export function CardProvider({ children }: { children: ReactNode }) {
     setShowWatermarkState(show);
     localStorage.setItem('vnd_card_wm', String(show));
     if (me) {
-      api.updateCardConfig({ card_bg: cardBg || null, card_show_wm: show }).catch(() => {});
+      api.updateCardConfig({ card_bg: cardBg || null, card_show_wm: show })
+        .then(() => refresh())
+        .catch((err) => {
+          console.error('Không thể đồng bộ watermark lên máy chủ:', err);
+        });
     }
   };
 
@@ -84,7 +99,11 @@ export function CardProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('vnd_card_bg');
     localStorage.setItem('vnd_card_wm', 'true');
     if (me) {
-      api.updateCardConfig({ card_bg: null, card_show_wm: true }).catch(() => {});
+      api.updateCardConfig({ card_bg: null, card_show_wm: true })
+        .then(() => refresh())
+        .catch((err) => {
+          console.error('Không thể khôi phục cài đặt thẻ mặc định:', err);
+        });
     }
   };
 

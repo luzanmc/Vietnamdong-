@@ -20,10 +20,18 @@ export default function LuckyWheel() {
   const [spinning, setSpinning] = useState(false);
   const [wonPrize, setWonPrize] = useState<{ reward: number; label: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const tickIntervalRef = useRef<number | null>(null);
+
+  const wheelRef = useRef<HTMLDivElement>(null);
+  const animFrameRef = useRef<number | null>(null);
+  const rotationRef = useRef(0);
 
   useEffect(() => {
     api.spinStatus().then(setStatus).catch(() => {});
+    return () => {
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
+    };
   }, []);
 
   const segments: SpinSegment[] = status?.segments?.length
@@ -47,55 +55,107 @@ export default function LuckyWheel() {
     setError(null);
     setWonPrize(null);
 
-    // Audio ticking simulation that decelerates
-    let tickCount = 0;
-    const totalTicks = 42;
-    function scheduleNextTick() {
-      if (tickCount >= totalTicks) return;
-      playWheelTick(700 + (tickCount % 4) * 50);
-      tickCount++;
-      const progress = tickCount / totalTicks;
-      const delay = 40 + Math.pow(progress, 2.5) * 360; // slows down from 40ms to 400ms
-      tickIntervalRef.current = window.setTimeout(scheduleNextTick, delay);
-    }
-    scheduleNextTick();
+    let currentAngle = rotationRef.current;
+    let speed = 20; // High instant speed (deg/frame)
+    let lastTickAngle = currentAngle;
+    let isDecelerating = false;
+    let targetAngle = 0;
+    let decelStartAngle = 0;
+    let decelStartTime = 0;
+    const DECEL_DURATION = 3500; // ms for buttery smooth slowdown
 
-    try {
-      const res = await api.spin();
-      // Calculate rotation so chosen segment rests at top (pointer at 0 deg)
-      // Top position is -90 deg from 0 deg standard circle, so segmentIndex must align
-      const fullRotations = 360 * 5;
-      const sliceCenter = res.segmentIndex * segmentAngle + segmentAngle / 2;
-      const landingAngle = fullRotations + (360 - sliceCenter);
+    let apiResult: { segmentIndex: number; reward: number } | null = null;
+    let apiError: string | null = null;
 
-      setRotation((prev) => prev + landingAngle);
+    // Send API in background while wheel spins immediately!
+    api.spin()
+      .then((res) => {
+        apiResult = res;
+      })
+      .catch((err) => {
+        apiError = (err as ApiError).message || 'Đã có lỗi xảy ra';
+      });
 
-      setTimeout(async () => {
-        if (tickIntervalRef.current) clearTimeout(tickIntervalRef.current);
-        setSpinning(false);
-        setStatus((s) => (s ? { ...s, can_spin: false } : s));
+    const step = (now: number) => {
+      // Play wheel click sound as segments pass by
+      if (Math.abs(currentAngle - lastTickAngle) >= segmentAngle) {
+        playWheelTick(700 + Math.floor(Math.random() * 80));
+        lastTickAngle = currentAngle;
+      }
 
-        const wonSegment = segments[res.segmentIndex] || { reward: res.reward, label: `${res.reward} VNC` };
-        setWonPrize({ reward: res.reward, label: wonSegment.label });
+      if (!isDecelerating) {
+        // Instant spinning phase
+        currentAngle += speed;
 
-        if (res.reward > 0) {
-          playWinFanfare();
-          triggerConfetti();
-          toastSuccess(`Chúc mừng bạn nhận được ${res.reward} VNC!`, 'Vòng quay may mắn');
-        } else {
-          playCoinSound();
-          toastSuccess('Chúc bạn may mắn lần sau!', 'Vòng quay');
+        if (apiResult !== null || apiError !== null) {
+          if (apiError) {
+            isDecelerating = true;
+            decelStartAngle = currentAngle;
+            decelStartTime = now;
+            targetAngle = currentAngle + 360 * 1.5;
+          } else if (apiResult) {
+            isDecelerating = true;
+            decelStartAngle = currentAngle;
+            decelStartTime = now;
+
+            // Target alignment calculation: pointer is at top (-90 deg)
+            const sliceCenter = apiResult.segmentIndex * segmentAngle + segmentAngle / 2;
+            const targetMod = (360 - sliceCenter + 360) % 360;
+            const currentMod = currentAngle % 360;
+            let diff = targetMod - currentMod;
+            if (diff < 0) diff += 360;
+            // Add 3 full rotations for thrilling gradual deceleration
+            targetAngle = currentAngle + diff + 360 * 3;
+          }
         }
+      } else {
+        // Deceleration phase using smooth cubic ease-out
+        const elapsed = now - decelStartTime;
+        const progress = Math.min(elapsed / DECEL_DURATION, 1);
+        const ease = 1 - Math.pow(1 - progress, 3.2);
+        currentAngle = decelStartAngle + (targetAngle - decelStartAngle) * ease;
 
-        await refresh();
-      }, 4200);
-    } catch (err) {
-      if (tickIntervalRef.current) clearTimeout(tickIntervalRef.current);
-      setSpinning(false);
-      const msg = (err as ApiError).message;
-      setError(msg);
-      toastError(msg, 'Lỗi quay');
-    }
+        if (progress >= 1) {
+          currentAngle = targetAngle;
+          if (wheelRef.current) {
+            wheelRef.current.style.transform = `rotate(${currentAngle}deg)`;
+          }
+          rotationRef.current = currentAngle;
+          setRotation(currentAngle);
+          setSpinning(false);
+
+          if (apiError) {
+            setError(apiError);
+            toastError(apiError, 'Lỗi quay thưởng');
+          } else if (apiResult) {
+            setStatus((s) => (s ? { ...s, can_spin: false } : s));
+            const wonSegment = segments[apiResult.segmentIndex] || {
+              reward: apiResult.reward,
+              label: `${apiResult.reward} VNC`,
+            };
+            setWonPrize({ reward: apiResult.reward, label: wonSegment.label });
+
+            if (apiResult.reward > 0) {
+              playWinFanfare();
+              triggerConfetti();
+              toastSuccess(`Chúc mừng bạn trúng ${apiResult.reward} VNC!`, 'Vòng quay may mắn');
+            } else {
+              playCoinSound();
+              toastSuccess('Chúc bạn may mắn lần sau!', 'Vòng quay');
+            }
+            refresh();
+          }
+          return;
+        }
+      }
+
+      if (wheelRef.current) {
+        wheelRef.current.style.transform = `rotate(${currentAngle}deg)`;
+      }
+      animFrameRef.current = requestAnimationFrame(step);
+    };
+
+    animFrameRef.current = requestAnimationFrame(step);
   }
 
   if (!status) {
@@ -160,12 +220,11 @@ export default function LuckyWheel() {
 
           {/* Rotating Wheel Canvas / SVG */}
           <div
+            ref={wheelRef}
             className="w-full h-full rounded-full overflow-hidden shadow-inner"
             style={{
               transform: `rotate(${rotation}deg)`,
-              transition: spinning
-                ? 'transform 4.2s cubic-bezier(0.12, 0.8, 0.28, 1)'
-                : 'transform 0.4s ease-out',
+              willChange: 'transform',
             }}
           >
             <svg viewBox="0 0 400 400" className="w-full h-full select-none">

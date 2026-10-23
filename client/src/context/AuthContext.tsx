@@ -31,6 +31,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await api.logout();
     } finally {
       setMe(null);
+      localStorage.removeItem('vnd_card_bg');
+      localStorage.removeItem('vnd_card_wm');
     }
   }, []);
 

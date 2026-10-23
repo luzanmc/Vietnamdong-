@@ -197,14 +197,14 @@ export default function Shell() {
   async function handleLogout() {
     playClickSound();
     await logout();
-    navigate('/login');
+    navigate('/login', { replace: true });
   }
 
   return (
     <div className="min-h-screen bg-bg flex flex-col">
       {/* Header */}
       <header className="border-b border-line sticky top-0 z-30 bg-bg/90 backdrop-blur-md">
-        <div className="max-w-[1440px] mx-auto flex items-center justify-between px-3 sm:px-6 h-16 gap-2">
+        <div className="w-full flex items-center justify-between px-3 sm:px-6 h-16 gap-2">
           {/* Logo & Brand */}
           <Link
             to="/dashboard"
@@ -425,19 +425,24 @@ export default function Shell() {
       )}
 
       {/* Main Layout Area */}
-      <div className="max-w-[1440px] w-full mx-auto flex flex-1">
+      <div className="w-full flex flex-1 min-h-[calc(100vh-4rem)]">
         {/* Desktop Sidebar */}
-        <aside className="w-64 shrink-0 border-r border-line hidden lg:block py-4 h-[calc(100vh-60px)] sticky top-15 overflow-y-auto">
+        <aside className="w-64 shrink-0 border-r border-line hidden lg:flex lg:flex-col py-4 h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto bg-surface/30 backdrop-blur-sm z-20">
           <NavLinks isAdmin={isAdmin} />
         </aside>
 
-        {/* Page Outlet */}
-        <main
-          key={pathname}
-          className="page-enter flex-1 px-3 sm:px-8 py-5 sm:py-6 pb-40 sm:pb-28 lg:pb-8 min-w-0 max-w-full overflow-x-hidden"
-        >
-          <Outlet />
-        </main>
+        {/* Content Wrapper (Page Outlet + Footer on Desktop) */}
+        <div className="flex-1 flex flex-col min-w-0">
+          <main
+            key={pathname}
+            className="page-enter flex-1 px-3 sm:px-8 py-5 sm:py-6 pb-40 sm:pb-28 lg:pb-8 min-w-0 w-full max-w-7xl mx-auto overflow-x-hidden"
+          >
+            <Outlet />
+          </main>
+          <div className="hidden lg:block border-t border-line/60">
+            <Footer />
+          </div>
+        </div>
       </div>
 
       {/* Mobile Bottom Navigation Bar (Persistent on screens < lg) */}
@@ -527,7 +532,10 @@ export default function Shell() {
         </button>
       </nav>
 
-      <Footer />
+      {/* Mobile Footer */}
+      <div className="lg:hidden">
+        <Footer />
+      </div>
       <BackgroundMusicPlayer />
     </div>
   );

@@ -55,6 +55,7 @@ const cookieOpts: CookieOptions = {
   secure: env.nodeEnv === 'production',
   sameSite: 'lax',
   maxAge: 30 * 24 * 60 * 60 * 1000,
+  path: '/',
 };
 
 function hashToken(raw: string): string {
@@ -331,7 +332,12 @@ authRouter.get('/verify-email/:token', async (req, res, next) => {
 });
 
 authRouter.post('/logout', (req, res) => {
-  res.clearCookie('vnd_session');
+  res.clearCookie('vnd_session', {
+    httpOnly: true,
+    secure: env.nodeEnv === 'production',
+    sameSite: 'lax',
+    path: '/',
+  });
   res.json({ ok: true });
 });
 
@@ -365,8 +371,8 @@ authRouter.post('/avatar', requireAuth, async (req, res, next) => {
     let finalUrl: string | null = null;
     if (typeof avatar_url === 'string' && avatar_url.trim()) {
       const trimmed = avatar_url.trim();
-      if (trimmed.length > 500_000) {
-        return res.status(400).json({ error: 'Dung lượng ảnh đại diện quá lớn (tối đa 500KB)' });
+      if (trimmed.length > 2_500_000) {
+        return res.status(400).json({ error: 'Dung lượng ảnh đại diện quá lớn (tối đa 2MB)' });
       }
       finalUrl = trimmed;
     }
