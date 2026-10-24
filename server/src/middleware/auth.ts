@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { verifySession } from '../utils/jwt.js';
 import { getUserById } from '../repositories/userRepository.js';
+import { isSessionValid, touchSessionLastSeen } from '../services/sessionService.js';
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
   const cookieToken = req.cookies?.vnd_session;
@@ -11,6 +12,15 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   }
 
   try {
+    if (payload.sid) {
+      const valid = await isSessionValid(payload.sid);
+      if (!valid) {
+        res.status(401).json({ error: 'Phiên đăng nhập đã hết hạn hoặc bị thu hồi' });
+        return;
+      }
+      void touchSessionLastSeen(payload.sid);
+    }
+
     const user = await getUserById(payload.uid);
     if (!user || user.deleted_at) {
       res.status(401).json({ error: 'Tài khoản không tồn tại' });

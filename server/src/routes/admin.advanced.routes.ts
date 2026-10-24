@@ -30,6 +30,7 @@ import {
   listAdmins,
 } from '../repositories/userRepository.js';
 import { listAdminAuditLogs } from '../repositories/adminAuditRepository.js';
+import { auditService } from '../services/auditService.js';
 
 export const adminAdvancedRouter = Router();
 
@@ -425,6 +426,15 @@ adminAdvancedRouter.get('/audit-logs', async (req, res, next) => {
       page,
       limit,
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminAdvancedRouter.get('/audit-chain/verify', async (req, res, next) => {
+  try {
+    const result = await auditService.verifyChain();
+    res.json(result);
   } catch (err) {
     next(err);
   }

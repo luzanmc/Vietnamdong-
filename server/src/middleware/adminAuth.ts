@@ -6,6 +6,7 @@ import { getUserById } from '../repositories/userRepository.js';
 import { getTotp } from '../repositories/totpRepository.js';
 import { verifyTotpCode } from '../utils/totp.js';
 import { createAdminAuditLog } from '../repositories/adminAuditRepository.js';
+import { auditService } from '../services/auditService.js';
 import {
   getAdminTotpAttempt,
   recordAdminTotpFailure,
@@ -162,6 +163,11 @@ export async function logAdminAudit(
   req?: Request
 ): Promise<void> {
   try {
+    const chainRecord = await auditService.record(adminId, action, target ?? null, payload).catch((err) => {
+      console.error('Lỗi ghi audit chain:', err);
+      return null;
+    });
+
     let payloadStr: string | null = null;
     if (payload !== undefined && payload !== null) {
       const sanitized = { ...payload };
@@ -177,7 +183,7 @@ export async function logAdminAudit(
       }
     }
     const ip = req ? ((req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || null) : null;
-    await createAdminAuditLog(nanoid(), adminId, action, target ?? null, payloadStr, ip);
+    await createAdminAuditLog(nanoid(), adminId, action, target ?? null, payloadStr, ip, chainRecord?.hash || null);
   } catch (err) {
     console.error('Lỗi ghi audit log:', err);
   }

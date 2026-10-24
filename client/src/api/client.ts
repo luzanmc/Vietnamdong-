@@ -60,11 +60,31 @@ export function setUnauthorizedHandler(handler: () => void): void {
   unauthorizedHandler = handler;
 }
 
+if (typeof window !== 'undefined') {
+  const origFetch = window.fetch;
+  window.fetch = function (input: RequestInfo | URL, init?: RequestInit) {
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+    if (url.startsWith('/api') || url.includes('/api/')) {
+      const headers = new Headers(init?.headers || (input instanceof Request ? input.headers : {}));
+      if (!headers.has('X-Requested-With')) {
+        headers.set('X-Requested-With', 'vnd');
+      }
+      return origFetch(input, { ...init, headers });
+    }
+    return origFetch(input, init);
+  };
+}
+
 async function request<T>(path: string, opts: RequestInit = {}): Promise<T> {
+  const mergedHeaders: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'vnd',
+    ...((opts.headers as Record<string, string>) || {}),
+  };
   const res = await fetch(`${BASE}${path}`, {
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
     ...opts,
+    headers: mergedHeaders,
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {

@@ -20,6 +20,10 @@ export const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   jwtSecret: process.env.JWT_SECRET || 'dev-only-secret-change-me',
   clientUrl: resolveClientUrl(),
+  ipHashSalt: process.env.IP_HASH_SALT || 'vnd-default-ip-salt',
+  cspReportOnly: process.env.CSP_REPORT_ONLY === '1' || process.env.CSP_REPORT_ONLY === 'true',
+  payoutEncKey: process.env.PAYOUT_ENC_KEY || '',
+  cronSecret: process.env.CRON_SECRET || '',
 
   mail: {
     host: process.env.MAIL_HOST,

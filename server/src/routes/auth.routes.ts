@@ -49,6 +49,9 @@ import {
   findValidEmailVerification,
   markEmailVerificationUsed,
 } from '../repositories/emailVerificationRepository.js';
+import { createSession, recordLoginEvent, revokeSession } from '../services/sessionService.js';
+import { validatePasswordPolicy } from '../services/passwordPolicyService.js';
+import { auditService } from '../services/auditService.js';
 import type { CookieOptions } from 'express';
 
 export const authRouter = Router();
@@ -114,7 +117,9 @@ authRouter.get('/discord/callback', async (req, res, next) => {
     const avatarUrl = profile.avatar ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png` : null;
     const user = await upsertUserFromDiscord({ id: profile.id, username: profile.username, avatar_url: avatarUrl });
 
-    res.cookie('vnd_session', signSession(user), cookieOpts);
+    const sid = await createSession(user.id, req);
+    void recordLoginEvent(user.id, true, req);
+    res.cookie('vnd_session', signSession(user, sid), cookieOpts);
     res.redirect(`${env.clientUrl}/dashboard`);
   } catch (err) {
     next(err);
@@ -135,7 +140,9 @@ authRouter.post('/google', validateBody(googleLoginSchema), async (req, res, nex
       user = (await getUserById(id))!;
     }
 
-    res.cookie('vnd_session', signSession(user), cookieOpts);
+    const sid = await createSession(user.id, req);
+    void recordLoginEvent(user.id, true, req);
+    res.cookie('vnd_session', signSession(user, sid), cookieOpts);
     res.json({ ok: true });
   } catch (err) {
     (err as any).status = 401;
@@ -150,6 +157,8 @@ authRouter.post('/register', validateBody(registerSchema), async (req, res, next
 
     const captchaOk = await verifyTurnstile(captchaToken, req.ip);
     if (!captchaOk) return res.status(400).json({ error: 'Xác thực Captcha thất bại, vui lòng thử lại' });
+
+    await validatePasswordPolicy(password, { username, email });
 
     if (await getUserByEmail(email)) return res.status(409).json({ error: 'Email này đã được đăng ký' });
     if (await getUserByUsername(username)) return res.status(409).json({ error: 'Tên đăng nhập đã tồn tại' });
@@ -210,7 +219,9 @@ authRouter.post('/register', validateBody(registerSchema), async (req, res, next
     const verifyUrl = `${env.clientUrl}/api/auth/verify-email/${rawToken}`;
     sendVerificationEmail(email, verifyUrl).catch(() => {});
 
-    res.cookie('vnd_session', signSession(user), cookieOpts);
+    const sid = await createSession(user.id, req);
+    void recordLoginEvent(user.id, true, req);
+    res.cookie('vnd_session', signSession(user, sid), cookieOpts);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -232,7 +243,10 @@ authRouter.post('/login', validateBody(loginSchema), async (req, res, next) => {
     if (!user || !user.password_hash) return res.status(401).json({ error: 'Tài khoản hoặc mật khẩu không đúng' });
 
     const valid = await comparePassword(password, user.password_hash);
-    if (!valid) return res.status(401).json({ error: 'Tài khoản hoặc mật khẩu không đúng' });
+    if (!valid) {
+      void recordLoginEvent(user.id, false, req);
+      return res.status(401).json({ error: 'Tài khoản hoặc mật khẩu không đúng' });
+    }
 
     if (user.deleted_at) {
       return res.status(401).json({ error: 'Tài khoản không tồn tại' });
@@ -257,7 +271,9 @@ authRouter.post('/login', validateBody(loginSchema), async (req, res, next) => {
       return res.json({ requires2fa: true, pendingToken: signPendingTwoFactor(user.id) });
     }
 
-    res.cookie('vnd_session', signSession(user), cookieOpts);
+    const sid = await createSession(user.id, req);
+    void recordLoginEvent(user.id, true, req);
+    res.cookie('vnd_session', signSession(user, sid), cookieOpts);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -275,7 +291,10 @@ authRouter.post('/login/2fa', async (req, res, next) => {
     const totp = await getTotp(pending.uid);
     if (!totp || totp.enabled !== 1) return res.status(400).json({ error: 'Tài khoản chưa bật xác thực 2 lớp' });
 
-    if (!verifyTotpCode(totp.secret, code)) return res.status(401).json({ error: 'Mã xác thực không đúng' });
+    if (!verifyTotpCode(totp.secret, code)) {
+      void recordLoginEvent(pending.uid, false, req);
+      return res.status(401).json({ error: 'Mã xác thực không đúng' });
+    }
 
     const user = await getUserById(pending.uid);
     if (!user) return res.status(401).json({ error: 'Tài khoản không tồn tại' });
@@ -298,7 +317,9 @@ authRouter.post('/login/2fa', async (req, res, next) => {
       }
     }
 
-    res.cookie('vnd_session', signSession(user), cookieOpts);
+    const sid = await createSession(user.id, req);
+    void recordLoginEvent(user.id, true, req);
+    res.cookie('vnd_session', signSession(user, sid), cookieOpts);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -336,6 +357,7 @@ authRouter.post('/2fa/enable', requireAuth, async (req, res, next) => {
       return res.status(401).json({ error: 'Mã xác thực không đúng' });
     }
     await enableTotp(req.user!.id);
+    void auditService.record(req.user!.id, 'ENABLE_2FA', req.user!.id);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -350,6 +372,7 @@ authRouter.post('/2fa/disable', requireAuth, async (req, res, next) => {
       return res.status(401).json({ error: 'Mã xác thực không đúng' });
     }
     await deleteTotp(req.user!.id);
+    void auditService.record(req.user!.id, 'DISABLE_2FA', req.user!.id);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -385,6 +408,9 @@ authRouter.post('/reset-password', validateBody(resetPasswordSchema), async (req
     const record = await findValidPasswordReset(hashToken(token));
     if (!record) return res.status(400).json({ error: 'Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn' });
 
+    const targetUser = await getUserById(record.user_id);
+    await validatePasswordPolicy(password, { username: targetUser?.username, email: targetUser?.email });
+
     const passwordHash = await hashPassword(password);
     await setUserPasswordHash(record.user_id, passwordHash);
     await markPasswordResetUsed(record.id);
@@ -408,7 +434,12 @@ authRouter.get('/verify-email/:token', async (req, res, next) => {
   }
 });
 
-authRouter.post('/logout', (req, res) => {
+authRouter.post('/logout', async (req, res) => {
+  const cookieToken = req.cookies?.vnd_session;
+  const payload = cookieToken && verifySession(cookieToken);
+  if (payload?.sid) {
+    await revokeSession(payload.sid);
+  }
   res.clearCookie('vnd_session', {
     httpOnly: true,
     secure: env.nodeEnv === 'production',
@@ -424,9 +455,7 @@ authRouter.post('/change-password', requireAuth, async (req, res, next) => {
     if (!currentPassword || !newPassword) {
       return res.status(400).json({ error: 'Vui lòng nhập đầy đủ mật khẩu hiện tại và mật khẩu mới' });
     }
-    if (newPassword.length < 6) {
-      return res.status(400).json({ error: 'Mật khẩu mới phải có ít nhất 6 ký tự' });
-    }
+    await validatePasswordPolicy(newPassword, { username: req.user!.username, email: req.user!.email });
     if (!req.user!.password_hash) {
       return res.status(400).json({ error: 'Tài khoản đăng nhập qua mạng xã hội không có mật khẩu' });
     }
@@ -436,6 +465,7 @@ authRouter.post('/change-password', requireAuth, async (req, res, next) => {
     }
     const newHash = await hashPassword(newPassword);
     await setUserPasswordHash(req.user!.id, newHash);
+    void auditService.record(req.user!.id, 'CHANGE_PASSWORD', req.user!.id);
     res.json({ ok: true, message: 'Đổi mật khẩu thành công' });
   } catch (err) {
     next(err);

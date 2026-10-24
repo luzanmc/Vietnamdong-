@@ -8,12 +8,14 @@ export async function createAdminAuditLog(
   target?: string | null,
   payload?: string | null,
   ip?: string | null,
+  hash?: string | null,
+  prevHash?: string | null,
   client: Queryable = pool
 ): Promise<void> {
   await client.query(
-    `INSERT INTO admin_audit_log (id, admin_id, action, target, payload, ip, created_at)
-     VALUES ($1, $2, $3, $4, $5, $6, now())`,
-    [id, adminId, action, target ?? null, payload ?? null, ip ?? null]
+    `INSERT INTO admin_audit_log (id, admin_id, action, target, payload, ip, hash, prev_hash, created_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, now())`,
+    [id, adminId, action, target ?? null, payload ?? null, ip ?? null, hash ?? null, prevHash ?? null]
   );
 }
 

@@ -5,6 +5,7 @@ import type { User } from '../types/index.js';
 export interface SessionPayload {
   uid: string;
   role: User['role'];
+  sid?: string;
 }
 
 interface PendingTwoFactorPayload {
@@ -12,8 +13,12 @@ interface PendingTwoFactorPayload {
   purpose: 'pending_2fa';
 }
 
-export function signSession(user: Pick<User, 'id' | 'role'>): string {
-  return jwt.sign({ uid: user.id, role: user.role }, env.jwtSecret, { expiresIn: '30d' });
+export function signSession(user: Pick<User, 'id' | 'role'>, sid?: string): string {
+  const payload: SessionPayload = { uid: user.id, role: user.role };
+  if (sid) {
+    payload.sid = sid;
+  }
+  return jwt.sign(payload, env.jwtSecret, { expiresIn: '30d' });
 }
 
 export function verifySession(token: string): SessionPayload | null {

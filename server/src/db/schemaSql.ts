@@ -353,5 +353,89 @@ CREATE TABLE IF NOT EXISTS giftcode_redemptions (
 CREATE INDEX IF NOT EXISTS idx_giftcode_redemptions_user ON giftcode_redemptions(user_id);
 
 ALTER TABLE users ADD COLUMN IF NOT EXISTS xp INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS banned_at TIMESTAMPTZ;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS ban_reason TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS ban_expires_at TIMESTAMPTZ;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_frame TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
+
+CREATE TABLE IF NOT EXISTS admin_audit_log (
+  id TEXT PRIMARY KEY,
+  admin_id TEXT NOT NULL REFERENCES users(id),
+  action TEXT NOT NULL,
+  target TEXT,
+  payload TEXT,
+  ip TEXT,
+  hash TEXT,
+  prev_hash TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_audit_log_created_at ON admin_audit_log(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS admin_totp_attempts (
+  admin_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  failed_attempts INTEGER NOT NULL DEFAULT 0,
+  locked_until TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS user_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  device_hash TEXT,
+  user_agent TEXT,
+  ip_hash TEXT NOT NULL,
+  ip_masked TEXT NOT NULL,
+  country TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  last_seen_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  revoked_at TIMESTAMPTZ,
+  trusted BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_sessions_user ON user_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_revoked ON user_sessions(revoked_at);
+
+CREATE TABLE IF NOT EXISTS login_events (
+  id BIGSERIAL PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  success BOOLEAN NOT NULL,
+  ip_masked TEXT NOT NULL,
+  user_agent TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_login_events_user_created ON login_events(user_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS audit_chain (
+  id BIGSERIAL PRIMARY KEY,
+  actor_id TEXT,
+  action TEXT NOT NULL,
+  target TEXT,
+  payload JSONB,
+  prev_hash TEXT NOT NULL,
+  hash TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_chain_created_at ON audit_chain(created_at DESC);
+
+ALTER TABLE admin_audit_log ADD COLUMN IF NOT EXISTS hash TEXT;
+ALTER TABLE admin_audit_log ADD COLUMN IF NOT EXISTS prev_hash TEXT;
+
+CREATE OR REPLACE FUNCTION prevent_audit_chain_tamper()
+RETURNS TRIGGER AS $$
+BEGIN
+  RAISE EXCEPTION 'audit_chain is append-only and cannot be modified or deleted';
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_prevent_audit_chain_tamper ON audit_chain;
+CREATE TRIGGER trg_prevent_audit_chain_tamper
+BEFORE UPDATE OR DELETE ON audit_chain
+FOR EACH ROW
+EXECUTE FUNCTION prevent_audit_chain_tamper();
 `;
 
