@@ -322,7 +322,7 @@ export default function Profile() {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative z-10">
           <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
-            <AvatarFrame level={me?.level} shape="square">
+            <AvatarFrame level={me?.level} frame={me?.avatar_frame} shape="square">
               <div
                 onClick={handleOpenAvatarModal}
                 className="relative group cursor-pointer shrink-0"
@@ -421,7 +421,7 @@ export default function Profile() {
       <div className="glass-panel p-4 sm:p-5 rounded-2xl border border-line bg-gradient-to-r from-surface2/80 via-surface/90 to-surface2/80 shadow-md">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
           <div className="flex items-center gap-3">
-            <AvatarFrame level={me?.level} shape="circle">
+            <AvatarFrame level={me?.level} frame={me?.avatar_frame} shape="circle">
               {me?.avatar_url ? (
                 <img src={me.avatar_url} alt={me.username} className="w-12 h-12 rounded-full object-cover" />
               ) : (

@@ -101,6 +101,34 @@ async function migrate(): Promise<void> {
       } catch (e) {
         console.error('Failed to ensure card_show_wm:', e);
       }
+      try {
+        await pool.query(`
+          ALTER TABLE users ADD COLUMN IF NOT EXISTS banned_at TIMESTAMPTZ;
+          ALTER TABLE users ADD COLUMN IF NOT EXISTS ban_reason TEXT;
+          ALTER TABLE users ADD COLUMN IF NOT EXISTS ban_expires_at TIMESTAMPTZ;
+          ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 1;
+          ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_frame TEXT;
+          ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
+          CREATE TABLE IF NOT EXISTS admin_audit_log (
+            id TEXT PRIMARY KEY,
+            admin_id TEXT NOT NULL REFERENCES users(id),
+            action TEXT NOT NULL,
+            target TEXT,
+            payload TEXT,
+            ip TEXT,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+          );
+          CREATE INDEX IF NOT EXISTS idx_admin_audit_log_created_at ON admin_audit_log(created_at DESC);
+          CREATE TABLE IF NOT EXISTS admin_totp_attempts (
+            admin_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+            failed_attempts INTEGER NOT NULL DEFAULT 0,
+            locked_until TIMESTAMPTZ,
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+          );
+        `);
+      } catch (e) {
+        console.error('Failed to ensure admin tables and columns:', e);
+      }
 
       return;
     }

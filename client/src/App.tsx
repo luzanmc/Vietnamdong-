@@ -13,6 +13,7 @@ import Dashboard from './pages/Dashboard.js';
 import Wallet from './pages/Wallet.js';
 import Redeem from './pages/Redeem.js';
 import Admin from './pages/Admin.js';
+import AdminAdvanced from './pages/AdminAdvanced.js';
 import VerifyLink from './pages/VerifyLink.js';
 import NovaChart from './pages/NovaChart.js';
 import DailyReward from './pages/DailyReward.js';
@@ -92,6 +93,7 @@ export default function App() {
                 <Route element={<Shell />}>
                   <Route path="/admin" element={<Admin />} />
                 </Route>
+                <Route path="/admin/advanced" element={<AdminAdvanced />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

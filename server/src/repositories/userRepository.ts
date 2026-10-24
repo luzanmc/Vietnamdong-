@@ -177,15 +177,31 @@ export async function setCreatorCode(userId: string, creatorCodeId: string, clie
 
 export async function searchUsers(
   query: string,
-  limit = 50,
+  limit = 20,
+  offset = 0,
   client: Queryable = pool
-): Promise<Pick<User, 'id' | 'username' | 'balance_nova' | 'role' | 'created_at' | 'locked' | 'xp'>[]> {
-  const { rows } = await client.query(
-    `SELECT id, username, balance_nova, role, created_at, locked, COALESCE(xp, 0)::int AS xp FROM users
-     WHERE username ILIKE $1 ORDER BY created_at DESC LIMIT $2`,
-    [`%${query}%`, limit]
+): Promise<{
+  rows: (Pick<User, 'id' | 'username' | 'email' | 'avatar_url' | 'balance_nova' | 'role' | 'created_at' | 'locked' | 'xp' | 'avatar_frame' | 'card_bg' | 'card_id' | 'banned_at' | 'ban_reason' | 'ban_expires_at'>)[];
+  total: number;
+}> {
+  const searchTerm = `%${query.trim()}%`;
+  const countRes = await client.query(
+    `SELECT COUNT(*) AS total FROM users
+     WHERE deleted_at IS NULL AND (username ILIKE $1 OR email ILIKE $1 OR id ILIKE $1)`,
+    [searchTerm]
   );
-  return rows;
+  const total = Number(countRes.rows[0]?.total || 0);
+
+  const { rows } = await client.query(
+    `SELECT id, username, email, avatar_url, balance_nova, role, created_at, locked,
+            COALESCE(xp, 0)::int AS xp, avatar_frame, card_bg, card_id, banned_at, ban_reason, ban_expires_at
+     FROM users
+     WHERE deleted_at IS NULL AND (username ILIKE $1 OR email ILIKE $1 OR id ILIKE $1)
+     ORDER BY created_at DESC
+     LIMIT $2 OFFSET $3`,
+    [searchTerm, limit, offset]
+  );
+  return { rows, total };
 }
 
 export async function addXpToUser(
@@ -265,4 +281,111 @@ export async function lockUser(userId: string, client: Queryable = pool): Promis
 
 export async function unlockUser(userId: string, client: Queryable = pool): Promise<void> {
   await client.query('UPDATE users SET locked = 0 WHERE id = $1', [userId]);
+}
+
+export async function updateUserAvatarFrame(
+  userId: string,
+  frame: string | null,
+  client: Queryable = pool
+): Promise<void> {
+  await client.query('UPDATE users SET avatar_frame = $1 WHERE id = $2', [frame, userId]);
+}
+
+export async function updateUsername(
+  userId: string,
+  newUsername: string,
+  client: Queryable = pool
+): Promise<void> {
+  await client.query('UPDATE users SET username = $1 WHERE id = $2', [newUsername, userId]);
+}
+
+export async function banUser(
+  userId: string,
+  reason: string | null,
+  expiresAt: Date | null,
+  client: Queryable = pool
+): Promise<void> {
+  await client.query(
+    `UPDATE users
+     SET banned_at = now(),
+         ban_reason = $1,
+         ban_expires_at = $2,
+         locked = 1,
+         token_version = token_version + 1
+     WHERE id = $3`,
+    [reason, expiresAt, userId]
+  );
+}
+
+export async function unbanUser(userId: string, client: Queryable = pool): Promise<void> {
+  await client.query(
+    `UPDATE users
+     SET banned_at = NULL,
+         ban_reason = NULL,
+         ban_expires_at = NULL,
+         locked = 0
+     WHERE id = $1`,
+    [userId]
+  );
+}
+
+export async function softDeleteUser(userId: string, client: Queryable = pool): Promise<void> {
+  await client.query(
+    `UPDATE users
+     SET deleted_at = now(),
+         locked = 1,
+         token_version = token_version + 1
+     WHERE id = $1`,
+    [userId]
+  );
+}
+
+export async function hardDeleteUser(userId: string, client: Queryable = pool): Promise<void> {
+  await client.query('UPDATE users SET referred_by = NULL WHERE referred_by = $1', [userId]);
+  await client.query('UPDATE vietsub_licenses SET sold_to_user_id = NULL WHERE sold_to_user_id = $1', [userId]);
+  await client.query('DELETE FROM admin_totp_attempts WHERE admin_id = $1', [userId]);
+  await client.query('DELETE FROM admin_audit_log WHERE admin_id = $1', [userId]);
+  await client.query('DELETE FROM giftcode_redemptions WHERE user_id = $1', [userId]);
+  await client.query('DELETE FROM quest_progress WHERE user_id = $1', [userId]);
+  await client.query('DELETE FROM spin_claims WHERE user_id = $1', [userId]);
+  await client.query('DELETE FROM support_messages WHERE ticket_id IN (SELECT id FROM support_tickets WHERE user_id = $1)', [userId]);
+  await client.query('DELETE FROM support_tickets WHERE user_id = $1', [userId]);
+  await client.query('DELETE FROM security_flags WHERE user_id = $1', [userId]);
+  await client.query('DELETE FROM vietsub_orders WHERE user_id = $1', [userId]);
+  await client.query('DELETE FROM user_achievements WHERE user_id = $1', [userId]);
+  await client.query('DELETE FROM notifications WHERE user_id = $1', [userId]);
+  await client.query('DELETE FROM daily_claims WHERE user_id = $1', [userId]);
+  await client.query('DELETE FROM email_verifications WHERE user_id = $1', [userId]);
+  await client.query('DELETE FROM password_resets WHERE user_id = $1', [userId]);
+  await client.query('DELETE FROM redeem_orders WHERE user_id = $1', [userId]);
+  await client.query('DELETE FROM transfers WHERE from_user_id = $1 OR to_user_id = $1', [userId]);
+  await client.query('DELETE FROM withdrawals WHERE user_id = $1', [userId]);
+  await client.query('DELETE FROM coin_ledger WHERE user_id = $1', [userId]);
+  await client.query('DELETE FROM task_attempts WHERE user_id = $1', [userId]);
+  await client.query('DELETE FROM creator_codes WHERE owner_user_id = $1', [userId]);
+  await client.query('DELETE FROM totp_secrets WHERE user_id = $1', [userId]);
+  await client.query('DELETE FROM users WHERE id = $1', [userId]);
+}
+
+export async function countActiveAdmins(client: Queryable = pool): Promise<number> {
+  const { rows } = await client.query('SELECT COUNT(*) AS c FROM users WHERE role = $1 AND deleted_at IS NULL', ['admin']);
+  return Number(rows[0]?.c || 0);
+}
+
+export async function updateUserRole(
+  userId: string,
+  role: 'user' | 'admin',
+  client: Queryable = pool
+): Promise<void> {
+  await client.query('UPDATE users SET role = $1 WHERE id = $2', [role, userId]);
+}
+
+export async function listAdmins(
+  client: Queryable = pool
+): Promise<Pick<User, 'id' | 'username' | 'email' | 'avatar_url' | 'created_at' | 'role'>[]> {
+  const { rows } = await client.query<Pick<User, 'id' | 'username' | 'email' | 'avatar_url' | 'created_at' | 'role'>>(
+    'SELECT id, username, email, avatar_url, created_at, role FROM users WHERE role = $1 AND deleted_at IS NULL ORDER BY created_at ASC',
+    ['admin']
+  );
+  return rows;
 }

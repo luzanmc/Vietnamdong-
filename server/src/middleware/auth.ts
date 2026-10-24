@@ -12,9 +12,17 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 
   try {
     const user = await getUserById(payload.uid);
-    if (!user) {
+    if (!user || user.deleted_at) {
       res.status(401).json({ error: 'Tài khoản không tồn tại' });
       return;
+    }
+    if (user.banned_at) {
+      const isExpired = user.ban_expires_at && new Date(user.ban_expires_at) <= new Date();
+      if (!isExpired) {
+        const reasonStr = user.ban_reason ? ` Lý do: ${user.ban_reason}.` : '';
+        res.status(403).json({ error: `Tài khoản đã bị khóa.${reasonStr}` });
+        return;
+      }
     }
     req.user = user;
     next();

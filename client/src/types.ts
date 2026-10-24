@@ -28,6 +28,7 @@ export interface Me {
   xp?: number;
   level?: number;
   levelProgress?: LevelProgress;
+  avatar_frame?: string | null;
 }
 
 export interface Task {
@@ -103,6 +104,7 @@ export interface LeaderboardRow {
   xp?: number;
   level?: number;
   levelProgress?: LevelProgress;
+  avatar_frame?: string | null;
 }
 
 export interface ChartPoint {

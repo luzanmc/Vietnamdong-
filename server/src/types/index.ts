@@ -23,6 +23,29 @@ export interface User {
   card_bg: string | null;
   card_show_wm: number;
   created_at: string;
+  banned_at?: string | null;
+  ban_reason?: string | null;
+  ban_expires_at?: string | null;
+  token_version?: number;
+  avatar_frame?: string | null;
+  deleted_at?: string | null;
+}
+
+export interface AdminAuditLog {
+  id: string;
+  admin_id: string;
+  action: string;
+  target?: string | null;
+  payload?: string | null;
+  ip?: string | null;
+  created_at: string;
+}
+
+export interface AdminTotpAttempt {
+  admin_id: string;
+  failed_attempts: number;
+  locked_until: string | null;
+  updated_at: string;
 }
 
 export interface Task {
@@ -193,6 +216,7 @@ declare global {
   namespace Express {
     interface Request {
       user?: User;
+      adminUser?: User;
     }
   }
 }

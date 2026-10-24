@@ -6,7 +6,7 @@ describe('calculateLevel', () => {
     const res = calculateLevel(0);
     expect(res.level).toBe(1);
     expect(res.tier).toBe('gray');
-    expect(res.tierName).toBe('Tap su');
+    expect(res.tierName).toBe('Tập sự');
     expect(res.progressPercent).toBe(0);
     expect(res.nextLevelXp).toBe(50);
   });
@@ -27,7 +27,7 @@ describe('calculateLevel', () => {
     const res = calculateLevel(320);
     expect(res.level).toBe(5);
     expect(res.tier).toBe('blue');
-    expect(res.tierName).toBe('Chien binh');
+    expect(res.tierName).toBe('Member');
     expect(res.bonusChancePercent).toBeGreaterThan(0);
   });
 
@@ -35,14 +35,14 @@ describe('calculateLevel', () => {
     const res = calculateLevel(1180);
     expect(res.level).toBe(10);
     expect(res.tier).toBe('purple');
-    expect(res.tierName).toBe('Tinh anh');
+    expect(res.tierName).toBe('VIP');
   });
 
   it('correctly maps to gold tier at level 15', () => {
     const res = calculateLevel(2740);
     expect(res.level).toBe(15);
     expect(res.tier).toBe('gold');
-    expect(res.tierName).toBe('Huyen thoai');
+    expect(res.tierName).toBe('Huyền thoại ');
   });
 
   it('caps at max level 20 for large xp', () => {

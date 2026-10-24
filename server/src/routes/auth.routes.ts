@@ -194,6 +194,24 @@ authRouter.post('/login', validateBody(loginSchema), async (req, res, next) => {
     const valid = await comparePassword(password, user.password_hash);
     if (!valid) return res.status(401).json({ error: 'Tài khoản hoặc mật khẩu không đúng' });
 
+    if (user.deleted_at) {
+      return res.status(401).json({ error: 'Tài khoản không tồn tại' });
+    }
+
+    if (user.banned_at) {
+      const isExpired = user.ban_expires_at && new Date(user.ban_expires_at) <= new Date();
+      if (!isExpired) {
+        const expiryStr = user.ban_expires_at ? new Date(user.ban_expires_at).toLocaleString('vi-VN') : 'Vĩnh viễn';
+        const reasonStr = user.ban_reason ? ` Lý do: ${user.ban_reason}.` : '';
+        return res.status(403).json({
+          error: `Tài khoản của bạn đã bị khóa.${reasonStr} Thời hạn: ${expiryStr}.`,
+          banned: true,
+          reason: user.ban_reason,
+          expiresAt: user.ban_expires_at,
+        });
+      }
+    }
+
     const totp = await getTotp(user.id);
     if (totp?.enabled === 1) {
       return res.json({ requires2fa: true, pendingToken: signPendingTwoFactor(user.id) });
@@ -221,6 +239,24 @@ authRouter.post('/login/2fa', async (req, res, next) => {
 
     const user = await getUserById(pending.uid);
     if (!user) return res.status(401).json({ error: 'Tài khoản không tồn tại' });
+
+    if (user.deleted_at) {
+      return res.status(401).json({ error: 'Tài khoản không tồn tại' });
+    }
+
+    if (user.banned_at) {
+      const isExpired = user.ban_expires_at && new Date(user.ban_expires_at) <= new Date();
+      if (!isExpired) {
+        const expiryStr = user.ban_expires_at ? new Date(user.ban_expires_at).toLocaleString('vi-VN') : 'Vĩnh viễn';
+        const reasonStr = user.ban_reason ? ` Lý do: ${user.ban_reason}.` : '';
+        return res.status(403).json({
+          error: `Tài khoản của bạn đã bị khóa.${reasonStr} Thời hạn: ${expiryStr}.`,
+          banned: true,
+          reason: user.ban_reason,
+          expiresAt: user.ban_expires_at,
+        });
+      }
+    }
 
     res.cookie('vnd_session', signSession(user), cookieOpts);
     res.json({ ok: true });
@@ -385,7 +421,7 @@ authRouter.post('/avatar', requireAuth, async (req, res, next) => {
 });
 
 authRouter.get('/me', requireAuth, (req, res) => {
-  const { id, username, avatar_url, role, balance_nova, streak_days, email, email_verified, card_id, card_bg, card_show_wm, xp } = req.user!;
+  const { id, username, avatar_url, role, balance_nova, streak_days, email, email_verified, card_id, card_bg, card_show_wm, xp, avatar_frame } = req.user!;
   const currentXp = Number(xp || 0);
   const levelProgress = calculateLevel(currentXp);
   res.json({
@@ -403,6 +439,7 @@ authRouter.get('/me', requireAuth, (req, res) => {
     xp: currentXp,
     level: levelProgress.level,
     levelProgress,
+    avatar_frame: avatar_frame || null,
   });
 });
 

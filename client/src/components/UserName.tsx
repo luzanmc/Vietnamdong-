@@ -18,9 +18,9 @@ export default function UserName({
   let tierClasses = 'text-ink';
 
   if (safeLevel >= 20) {
-    tierClasses = 'level-name-prime level-text-glow font-extrabold';
+    tierClasses = 'bg-gradient-to-r from-yellow-200 via-amber-400 to-yellow-500 bg-clip-text text-transparent font-extrabold filter drop-shadow-[0_0_8px_rgba(251,191,36,0.35)]';
   } else if (safeLevel >= 15) {
-    tierClasses = 'level-name-shimmer font-bold';
+    tierClasses = 'bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 bg-clip-text text-transparent font-bold';
   } else if (safeLevel >= 10) {
     tierClasses = 'bg-gradient-to-r from-purple-400 via-fuchsia-300 to-pink-400 bg-clip-text text-transparent font-bold';
   } else if (safeLevel >= 5) {
