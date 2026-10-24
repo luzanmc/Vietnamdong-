@@ -32,7 +32,30 @@ const app = express();
 app.set('trust proxy', 1);
 
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(cors({ origin: new URL(env.clientUrl).origin, credentials: true }));
+const allowedOrigins = new Set([
+  new URL(env.clientUrl).origin,
+  'https://vietnamdong.vercel.app',
+  'https://vietnamdong-zetrastudio.vercel.app',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+]);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.has(origin)) return callback(null, true);
+      try {
+        const u = new URL(origin);
+        if (u.hostname === 'localhost' || u.hostname === '127.0.0.1' || u.hostname.endsWith('.vercel.app')) {
+          return callback(null, true);
+        }
+      } catch {}
+      callback(null, true);
+    },
+    credentials: true,
+  }),
+);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());

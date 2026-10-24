@@ -1,11 +1,25 @@
 import 'dotenv/config';
 
+function resolveClientUrl(): string {
+  const custom = process.env.CLIENT_URL?.trim();
+  if (custom && !custom.includes('your-project.vercel.app')) {
+    return custom.replace(/\/+$/, '');
+  }
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL.replace(/\/+$/, '')}`;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL.replace(/\/+$/, '')}`;
+  }
+  return 'https://vietnamdong.vercel.app';
+}
+
 export const env = {
   appName: process.env.APP_NAME || 'VietnamDong',
   port: Number(process.env.PORT || process.env.SERVER_PORT || 3000),
   nodeEnv: process.env.NODE_ENV || 'development',
   jwtSecret: process.env.JWT_SECRET || 'dev-only-secret-change-me',
-  clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
+  clientUrl: resolveClientUrl(),
 
   mail: {
     host: process.env.MAIL_HOST,

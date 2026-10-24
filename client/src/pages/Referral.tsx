@@ -17,10 +17,27 @@ export default function Referral() {
     api.referral().then(setInfo).catch(() => {});
   }, []);
 
+  // Always normalize referral link so it uses the real working Vercel domain and never localhost
+  const resolvedReferralLink = (() => {
+    if (!info?.referral_link) return '';
+    let link = info.referral_link;
+    if (typeof window !== 'undefined') {
+      const origin = window.location.origin;
+      if (link.includes('localhost') && origin && !origin.includes('localhost') && !origin.includes('127.0.0.1')) {
+        link = link.replace(/https?:\/\/[^/]+/, origin);
+      } else if (link.includes('localhost')) {
+        link = link.replace(/https?:\/\/[^/]+/, 'https://vietnamdong.vercel.app');
+      }
+    } else if (link.includes('localhost')) {
+      link = link.replace(/https?:\/\/[^/]+/, 'https://vietnamdong.vercel.app');
+    }
+    return link;
+  })();
+
   function copyLink() {
-    if (!info) return;
+    if (!resolvedReferralLink) return;
     playClickSound();
-    navigator.clipboard.writeText(info.referral_link).then(() => {
+    navigator.clipboard.writeText(resolvedReferralLink).then(() => {
       setCopied(true);
       playCoinSound();
       toastSuccess('Đã sao chép link giới thiệu vào bộ nhớ tạm!', 'Sao chép');
@@ -29,7 +46,7 @@ export default function Referral() {
   }
 
   const shareText = encodeURIComponent('Tham gia VietnamDong cùng mình, kiếm VNC đổi tiền thật mỗi ngày!');
-  const shareUrl = info ? encodeURIComponent(info.referral_link) : '';
+  const shareUrl = resolvedReferralLink ? encodeURIComponent(resolvedReferralLink) : '';
 
   return (
     <div className="max-w-3xl mx-auto py-4 space-y-6">
@@ -77,7 +94,7 @@ export default function Referral() {
                 <div className="flex items-center gap-2">
                   <input
                     readOnly
-                    value={info.referral_link}
+                    value={resolvedReferralLink}
                     className="flex-1 bg-surface2 border border-line rounded-xl px-4 py-2.5 text-xs font-mono text-ink truncate focus:outline-none"
                   />
                   <button
