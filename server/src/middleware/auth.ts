@@ -35,6 +35,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       }
     }
     req.user = user;
+    req.sessionId = payload.sid;
     next();
   } catch (err) {
     next(err);

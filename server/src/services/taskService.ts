@@ -1,13 +1,14 @@
 import { nanoid } from 'nanoid';
 import { env } from '../config/env.js';
-import { withTransaction } from '../db/database.js';
+import { withTransaction, pool } from '../db/database.js';
 import { createLink } from './shortlinkService.js';
 import { credit } from './coinService.js';
 import { payReferralBonus } from './referralService.js';
 import { payCreatorBonus } from './creatorService.js';
-import { logToDiscord } from './discordService.js';
+import { logToDiscord, sendAlert } from './discordService.js';
 import { checkAndUnlockAchievements } from './achievementService.js';
 import { flagAndCheckAnomaly } from './securityService.js';
+import { recordDeviceLink } from './deviceLinkService.js';
 import {
   listActiveTasks,
   getTaskById,
@@ -35,13 +36,33 @@ export async function listTasksForUser(userId: string): Promise<TaskWithProgress
   return Promise.all(tasks.map(async (t) => ({ ...t, done_today: await countCompletedAttemptsToday(t.id, userId) })));
 }
 
-export async function startTaskForUser(userId: string, taskId: string): Promise<{ shortUrl: string }> {
+export async function startTaskForUser(
+  userId: string,
+  taskId: string,
+  deviceFp?: string,
+  ip?: string
+): Promise<{ shortUrl: string }> {
   const task = await getTaskById(taskId);
   if (!task) throw new HttpError(404, 'Nhiệm vụ không tồn tại');
+
+  const { rows: lastAttemptRows } = await pool.query<{ created_at: string }>(
+    `SELECT created_at FROM task_attempts WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
+    [userId]
+  );
+  if (lastAttemptRows.length > 0) {
+    const elapsedSinceLastStart = (Date.now() - new Date(lastAttemptRows[0].created_at).getTime()) / 1000;
+    if (elapsedSinceLastStart < 5) {
+      throw new HttpError(429, 'Vui lòng chờ ít nhất 5 giây giữa các lượt bắt đầu nhiệm vụ');
+    }
+  }
 
   const doneToday = await countCompletedAttemptsToday(task.id, userId);
   if (doneToday >= task.daily_limit) {
     throw new HttpError(400, 'Đã đạt giới hạn lượt hôm nay');
+  }
+
+  if (deviceFp && ip) {
+    recordDeviceLink(userId, deviceFp, ip).catch(() => {});
   }
 
   const attemptId = nanoid();
@@ -54,6 +75,56 @@ export async function startTaskForUser(userId: string, taskId: string): Promise<
 }
 
 export async function completeAttempt(token: string): Promise<CompleteAttemptResult | null> {
+  const { rows: attemptCheck } = await pool.query<{
+    id: string;
+    task_id: string;
+    user_id: string;
+    created_at: string;
+    status: string;
+    min_seconds: number | null;
+    task_name: string;
+  }>(
+    `SELECT ta.id, ta.task_id, ta.user_id, ta.created_at, ta.status, t.min_seconds, t.name as task_name
+     FROM task_attempts ta
+     JOIN tasks t ON t.id = ta.task_id
+     WHERE ta.token = $1`,
+    [token]
+  );
+
+  if (attemptCheck.length === 0) {
+    return null;
+  }
+
+  const attemptInfo = attemptCheck[0];
+  if (attemptInfo.status !== 'pending') {
+    return null;
+  }
+
+  const minSeconds = attemptInfo.min_seconds !== null && attemptInfo.min_seconds !== undefined ? Number(attemptInfo.min_seconds) : 8;
+  const elapsedSeconds = (Date.now() - new Date(attemptInfo.created_at).getTime()) / 1000;
+
+  if (elapsedSeconds < minSeconds) {
+    await pool.query(
+      `INSERT INTO security_flags (id, user_id, reason, created_at)
+       VALUES ($1, $2, $3, now())`,
+      [nanoid(), attemptInfo.user_id, `Hoàn thành nhiệm vụ ${attemptInfo.task_name} quá nhanh (${elapsedSeconds.toFixed(1)}s < ${minSeconds}s)`]
+    );
+    await pool.query(`UPDATE task_attempts SET status = 'expired' WHERE id = $1`, [attemptInfo.id]);
+    const user = await getUserById(attemptInfo.user_id);
+    sendAlert(
+      'fast_task_completion',
+      'Cảnh báo vượt link nhanh bất thường',
+      [
+        { name: 'Tài khoản', value: user?.username || attemptInfo.user_id, inline: true },
+        { name: 'Nhiệm vụ', value: attemptInfo.task_name, inline: true },
+        { name: 'Thời gian', value: `${elapsedSeconds.toFixed(1)}s (tối thiểu ${minSeconds}s)`, inline: true },
+      ],
+      attemptInfo.user_id,
+      'warning'
+    ).catch(() => {});
+    throw new HttpError(400, 'Thời gian hoàn thành nhiệm vụ quá ngắn, không thể ghi nhận');
+  }
+
   const txResult = await withTransaction(async (client) => {
     const { rows: attemptRows } = await client.query<{ id: string; task_id: string; user_id: string }>(
       `UPDATE task_attempts

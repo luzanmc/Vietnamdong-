@@ -60,6 +60,14 @@ export default function Login() {
   const [notice, setNotice] = useState<string | null>(null);
   const [pendingToken, setPendingToken] = useState<string | null>(null);
   const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [useRecoveryCode, setUseRecoveryCode] = useState(false);
+  const [pendingOtpToken, setPendingOtpToken] = useState<string | null>(null);
+  const [emailOtpCode, setEmailOtpCode] = useState('');
+  const [emailOtpNotice, setEmailOtpNotice] = useState<string | null>(null);
+  const [isEmailLoginMode, setIsEmailLoginMode] = useState(false);
+  const [emailLoginSent, setEmailLoginSent] = useState(false);
+  const [emailLoginAddress, setEmailLoginAddress] = useState('');
+  const [emailLoginCode, setEmailLoginCode] = useState('');
   const [pendingRef] = useState(() => localStorage.getItem('vnd_pending_ref'));
 
   // Live balance simulation for VNC Card - synchronized with LandingPage
@@ -225,6 +233,13 @@ export default function Login() {
           setPassword('');
           return;
         }
+        if ('requiresEmailOtp' in result) {
+          setPendingOtpToken(result.pendingToken);
+          setEmailOtpNotice(result.message);
+          setEmailOtpCode('');
+          setPassword('');
+          return;
+        }
       } else {
         await api.register({ username, email, password, captchaToken, acceptedTerms });
         const ref = localStorage.getItem('vnd_pending_ref');
@@ -272,9 +287,81 @@ export default function Login() {
     playClickSound();
     setPendingToken(null);
     setTwoFactorCode('');
+    setUseRecoveryCode(false);
     setError(null);
     setCaptchaToken('');
     setCaptchaReset((n) => n + 1);
+  }
+
+  async function handleEmailOtpSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    playClickSound();
+    if (!pendingOtpToken) return;
+    setError(null);
+    setBusy(true);
+    try {
+      await api.verifyLoginOtp(pendingOtpToken, emailOtpCode);
+      await refresh();
+      navigate('/dashboard');
+    } catch (err) {
+      setError((err as ApiError).message);
+      setEmailOtpCode('');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleRequestEmailCode(e: React.FormEvent) {
+    e.preventDefault();
+    playClickSound();
+    if (!emailLoginAddress.trim() || !/^\S+@\S+\.\S+$/.test(emailLoginAddress)) {
+      setError('Vui lòng nhập địa chỉ email hợp lệ.');
+      return;
+    }
+    if (!captchaToken) {
+      setError(t('login.captcha_required') || 'Vui lòng hoàn thành xác thực Cloudflare Turnstile.');
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await api.requestEmailLoginCode(emailLoginAddress, captchaToken);
+      setEmailLoginSent(true);
+      setNotice(res.message);
+      setCaptchaToken('');
+      setCaptchaReset((n) => n + 1);
+    } catch (err) {
+      setError((err as ApiError).message);
+      setCaptchaToken('');
+      setCaptchaReset((n) => n + 1);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleVerifyEmailLoginCode(e: React.FormEvent) {
+    e.preventDefault();
+    playClickSound();
+    if (!emailLoginCode.trim()) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const result = await api.verifyEmailLoginCode(emailLoginAddress, emailLoginCode);
+      if ('requires2fa' in result) {
+        setPendingToken(result.pendingToken);
+        setTwoFactorCode('');
+        setIsEmailLoginMode(false);
+        setEmailLoginSent(false);
+        return;
+      }
+      await refresh();
+      navigate('/dashboard');
+    } catch (err) {
+      setError((err as ApiError).message);
+      setEmailLoginCode('');
+    } finally {
+      setBusy(false);
+    }
   }
 
   if (loading) {
@@ -285,7 +372,102 @@ export default function Login() {
     return <Navigate to="/dashboard" replace />;
   }
 
-  // 2FA Modal View
+  if (pendingOtpToken) {
+    return (
+      <div className={`vnd-auth-page ${theme === 'light' ? 'light-mode' : ''}`} data-theme={theme}>
+        <header className="topbar">
+          <Link className="brand" to="/" onClick={playClickSound}>
+            <span className="brand-mark">
+              <img src="/logo-dark.png" alt="VietnamDong" className="brand-logo" />
+            </span>
+            <span>
+              VIETNAMDONG
+              <span className="brand-sub">VƯỢT LINK · KIẾM XU</span>
+            </span>
+          </Link>
+          <div className="topbar-actions">
+            <button
+              onClick={() => { playClickSound(); toggleTheme(); }}
+              aria-label="Toggle theme"
+              className="btn-icon"
+              title="Đổi giao diện Sáng/Tối"
+            >
+              <i className={`bi ${theme === 'dark' ? 'bi-sun-fill' : 'bi-moon-stars-fill'}`} />
+            </button>
+            <Link className="btn" to="/" onClick={playClickSound}>
+              <i className="bi bi-arrow-left" />
+              <span>Về trang chủ</span>
+            </Link>
+          </div>
+        </header>
+
+        <main className="auth" style={{ minHeight: 'calc(100vh - 72px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="twofa-modal">
+            <div className="twofa-icon">
+              <i className="bi bi-geo-alt" />
+            </div>
+            <h1 style={{ fontSize: '20px' }}>Xác minh đăng nhập quốc gia mới</h1>
+            <p className="sub" style={{ fontSize: '13px', marginBottom: '20px' }}>
+              {emailOtpNotice || 'Nhập mã xác thực 6 chữ số vừa được gửi đến email của bạn.'}
+            </p>
+
+            {error && (
+              <div className="err-box error" style={{ marginBottom: '16px' }}>
+                <i className="bi bi-exclamation-triangle-fill" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleEmailOtpSubmit}>
+              <input
+                value={emailOtpCode}
+                onChange={(e) => setEmailOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                autoFocus
+                maxLength={6}
+                placeholder="000000"
+                required
+                className="twofa-input"
+              />
+              <button
+                type="submit"
+                disabled={busy || emailOtpCode.length !== 6}
+                className="btn btn-primary"
+                style={{ width: '100%', marginTop: '14px' }}
+              >
+                {busy ? (
+                  <>
+                    <i className="bi bi-arrow-repeat animate-spin" />
+                    <span>Đang xử lý...</span>
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-check2-circle" />
+                    <span>Xác nhận</span>
+                  </>
+                )}
+              </button>
+            </form>
+
+            <p className="swap" style={{ marginTop: '20px' }}>
+              <button
+                onClick={() => {
+                  setPendingOtpToken(null);
+                  setEmailOtpCode('');
+                  setError(null);
+                }}
+                type="button"
+              >
+                Quay lại đăng nhập
+              </button>
+            </p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   if (pendingToken) {
     return (
       <div className={`vnd-auth-page ${theme === 'light' ? 'light-mode' : ''}`} data-theme={theme}>
@@ -318,11 +500,15 @@ export default function Login() {
         <main className="auth" style={{ minHeight: 'calc(100vh - 72px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div className="twofa-modal">
             <div className="twofa-icon">
-              <i className="bi bi-shield-lock" />
+              <i className={useRecoveryCode ? 'bi bi-key' : 'bi bi-shield-lock'} />
             </div>
-            <h1 style={{ fontSize: '22px' }}>{t('login.2fa_title') || 'Xác thực 2 bước (2FA)'}</h1>
+            <h1 style={{ fontSize: '22px' }}>
+              {useRecoveryCode ? 'Nhập mã khôi phục 2FA' : (t('login.2fa_title') || 'Xác thực 2 bước (2FA)')}
+            </h1>
             <p className="sub" style={{ fontSize: '13px', marginBottom: '20px' }}>
-              {t('login.2fa_subtitle') || 'Nhập mã 6 chữ số từ ứng dụng xác thực (Google Authenticator) của bạn.'}
+              {useRecoveryCode
+                ? 'Nhập 1 trong 8 mã khôi phục dự phòng dạng XXXXX-XXXXX đã lưu.'
+                : (t('login.2fa_subtitle') || 'Nhập mã 6 chữ số từ ứng dụng xác thực (Google Authenticator) của bạn.')}
             </p>
 
             {error && (
@@ -335,18 +521,20 @@ export default function Login() {
             <form onSubmit={handleTwoFactor}>
               <input
                 value={twoFactorCode}
-                onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                inputMode="numeric"
+                onChange={(e) =>
+                  setTwoFactorCode(e.target.value.replace(/[^A-Za-z0-9-]/g, '').slice(0, 11).toUpperCase())
+                }
+                inputMode={useRecoveryCode ? 'text' : 'numeric'}
                 autoComplete="one-time-code"
                 autoFocus
-                maxLength={6}
-                placeholder="000000"
+                maxLength={useRecoveryCode ? 11 : 6}
+                placeholder={useRecoveryCode ? 'XXXXX-XXXXX' : '000000'}
                 required
                 className="twofa-input"
               />
               <button
                 type="submit"
-                disabled={busy || twoFactorCode.length !== 6}
+                disabled={busy || (useRecoveryCode ? twoFactorCode.length < 10 : twoFactorCode.length !== 6)}
                 className="btn btn-primary"
                 style={{ width: '100%', marginTop: '14px' }}
               >
@@ -364,7 +552,29 @@ export default function Login() {
               </button>
             </form>
 
-            <p className="swap" style={{ marginTop: '20px' }}>
+            <div style={{ textAlign: 'center', marginTop: '14px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  setUseRecoveryCode(!useRecoveryCode);
+                  setTwoFactorCode('');
+                  setError(null);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#6C63F5',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                }}
+              >
+                {useRecoveryCode ? 'Dùng mã từ ứng dụng Google Authenticator' : 'Dùng mã khôi phục 2FA dự phòng'}
+              </button>
+            </div>
+
+            <p className="swap" style={{ marginTop: '16px' }}>
               <button onClick={cancelTwoFactor} type="button">
                 Quay lại đăng nhập
               </button>
@@ -540,8 +750,107 @@ export default function Login() {
             </div>
           )}
 
-          {/* LOGIN FORM */}
-          {mode === 'login' ? (
+          {isEmailLoginMode ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <p className="sub" style={{ margin: '0 0 10px 0' }}>
+                Đăng nhập không cần mật khẩu bằng mã xác thực 6 số gửi tới email đã xác minh của bạn.
+              </p>
+              {!emailLoginSent ? (
+                <form onSubmit={handleRequestEmailCode} noValidate>
+                  <label className="fld">
+                    <span>Địa chỉ email đã xác minh</span>
+                    <div className="inp">
+                      <i className="bi bi-envelope" />
+                      <input
+                        type="email"
+                        value={emailLoginAddress}
+                        onChange={(e) => setEmailLoginAddress(e.target.value)}
+                        placeholder="ban@example.com"
+                        required
+                        autoFocus
+                      />
+                    </div>
+                  </label>
+                  <div style={{ marginTop: '2px', display: 'flex', justifyContent: 'center' }}>
+                    <TurnstileWidget onToken={setCaptchaToken} reset={captchaReset} />
+                  </div>
+                  <button className="btn btn-primary" type="submit" disabled={busy || !emailLoginAddress.trim()}>
+                    {busy ? (
+                      <>
+                        <i className="bi bi-arrow-repeat animate-spin" />
+                        <span>Đang gửi mã...</span>
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-send" />
+                        <span>Gửi mã đăng nhập</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleVerifyEmailLoginCode} noValidate>
+                  <label className="fld">
+                    <span>Nhập mã 6 chữ số gửi tới email</span>
+                    <div className="inp">
+                      <i className="bi bi-key" />
+                      <input
+                        type="text"
+                        value={emailLoginCode}
+                        onChange={(e) => setEmailLoginCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        placeholder="000000"
+                        maxLength={6}
+                        required
+                        autoFocus
+                      />
+                    </div>
+                  </label>
+                  <button className="btn btn-primary" type="submit" disabled={busy || emailLoginCode.length !== 6}>
+                    {busy ? (
+                      <>
+                        <i className="bi bi-arrow-repeat animate-spin" />
+                        <span>Đang xác thực...</span>
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-box-arrow-in-right" />
+                        <span>Đăng nhập</span>
+                      </>
+                    )}
+                  </button>
+                  <div style={{ textAlign: 'center', marginTop: '10px' }}>
+                    <button
+                      type="button"
+                      style={{ background: 'none', border: 'none', color: 'var(--muted)', fontSize: '12px', cursor: 'pointer' }}
+                      onClick={() => {
+                        setEmailLoginSent(false);
+                        setEmailLoginCode('');
+                        setError(null);
+                      }}
+                    >
+                      Đổi email khác
+                    </button>
+                  </div>
+                </form>
+              )}
+              <div style={{ textAlign: 'center', marginTop: '12px' }}>
+                <button
+                  type="button"
+                  style={{ background: 'none', border: 'none', color: '#6C63F5', fontSize: '13px', cursor: 'pointer', fontWeight: 600 }}
+                  onClick={() => {
+                    playClickSound();
+                    setIsEmailLoginMode(false);
+                    setEmailLoginSent(false);
+                    setError(null);
+                    setNotice(null);
+                  }}
+                >
+                  <i className="bi bi-arrow-left" style={{ marginRight: '6px' }} />
+                  <span>Quay lại đăng nhập mật khẩu</span>
+                </button>
+              </div>
+            </div>
+          ) : mode === 'login' ? (
             <form onSubmit={handleSubmit} noValidate>
               <label className="fld">
                 <span>Email hoặc tên đăng nhập</span>
@@ -622,6 +931,25 @@ export default function Login() {
                   </>
                 )}
               </button>
+
+              <div style={{ marginTop: '12px' }}>
+                <button
+                  type="button"
+                  className="btn"
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '13px' }}
+                  onClick={() => {
+                    playClickSound();
+                    setIsEmailLoginMode(true);
+                    setEmailLoginSent(false);
+                    setEmailLoginAddress(identifier.includes('@') ? identifier : '');
+                    setError(null);
+                    setNotice(null);
+                  }}
+                >
+                  <i className="bi bi-envelope-at" />
+                  <span>Đăng nhập bằng mã email</span>
+                </button>
+              </div>
             </form>
           ) : (
             /* REGISTER FORM */

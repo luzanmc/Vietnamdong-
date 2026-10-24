@@ -14,11 +14,15 @@ import AdminSupport from './admin/AdminSupport.js';
 import AdminAlerts from './admin/AdminAlerts.js';
 import AdminReports from './admin/AdminReports.js';
 import AdminSettings from './admin/AdminSettings.js';
+import AdminRelatedAccounts from './admin/AdminRelatedAccounts.js';
+import AdminSecurityHealth from './admin/AdminSecurityHealth.js';
 
 type TabKey =
   | 'dashboard'
   | 'analytics'
   | 'users'
+  | 'related_accounts'
+  | 'security_health'
   | 'announcements'
   | 'codes'
   | 'withdrawals'
@@ -40,6 +44,8 @@ const TABS: TabDef[] = [
   { key: 'dashboard', label: 'Dashboard', icon: 'bi-speedometer2' },
   { key: 'analytics', label: 'Thống kê', icon: 'bi-graph-up' },
   { key: 'users', label: 'Người dùng', icon: 'bi-people' },
+  { key: 'related_accounts', label: 'Tài khoản liên quan', icon: 'bi-diagram-3' },
+  { key: 'security_health', label: 'Sức khỏe bảo mật', icon: 'bi-heart-pulse' },
   { key: 'announcements', label: 'Thông báo web', icon: 'bi-megaphone' },
   { key: 'codes', label: 'Tạo code', icon: 'bi-qr-code' },
   { key: 'withdrawals', label: 'Rút tiền', icon: 'bi-cash-coin' },
@@ -116,6 +122,8 @@ export default function Admin() {
           {tab === 'dashboard' && <AdminDashboard onSelectTab={(t) => setTab(t as TabKey)} />}
           {tab === 'analytics' && <AdminAnalytics />}
           {tab === 'users' && <AdminUsers />}
+          {tab === 'related_accounts' && <AdminRelatedAccounts />}
+          {tab === 'security_health' && <AdminSecurityHealth />}
           {tab === 'announcements' && <AdminAnnouncements />}
           {tab === 'codes' && <AdminCodes />}
           {tab === 'withdrawals' && <AdminWithdrawals />}

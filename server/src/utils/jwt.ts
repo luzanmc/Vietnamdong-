@@ -44,3 +44,25 @@ export function verifyPendingTwoFactor(token: string): { uid: string } | null {
     return null;
   }
 }
+
+interface PendingOtpPayload {
+  uid: string;
+  purpose: 'country_verification' | 'passwordless_login';
+  country?: string;
+}
+
+export function signPendingOtp(userId: string, purpose: 'country_verification' | 'passwordless_login', country?: string): string {
+  return jwt.sign({ uid: userId, purpose, country }, env.jwtSecret, { expiresIn: '10m' });
+}
+
+export function verifyPendingOtp(token: string): { uid: string; purpose: string; country?: string } | null {
+  try {
+    const payload = jwt.verify(token, env.jwtSecret) as PendingOtpPayload;
+    if (!payload.purpose || (payload.purpose !== 'country_verification' && payload.purpose !== 'passwordless_login')) {
+      return null;
+    }
+    return { uid: payload.uid, purpose: payload.purpose, country: payload.country };
+  } catch {
+    return null;
+  }
+}

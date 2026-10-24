@@ -8,6 +8,12 @@
       "includeFiles": "server/src/db/**"
     }
   },
+  "crons": [
+    {
+      "path": "/api/internal/purge-deleted",
+      "schedule": "0 0 * * *"
+    }
+  ],
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }

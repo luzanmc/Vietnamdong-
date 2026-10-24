@@ -30,6 +30,6 @@ export async function flagAndCheckAnomaly(userId: string): Promise<void> {
       'Tài khoản của bạn đã bị tạm khóa do phát hiện hoạt động bất thường. Vui lòng liên hệ hỗ trợ.',
       '/support'
     );
-    logToDiscord(`🚨 Tự động khóa tài khoản **${user?.username}** — hoàn thành ${recentCount} nhiệm vụ trong ${env.security.anomalyWindowMinutes} phút`);
+    logToDiscord(`[Canh bao] Tu dong khoa tai khoan **${user?.username}** — hoan thanh ${recentCount} nhiem vu trong ${env.security.anomalyWindowMinutes} phut`);
   }
 }

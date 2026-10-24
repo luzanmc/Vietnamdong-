@@ -22,12 +22,20 @@ import type {
   SupportTicket,
   SupportMessage,
   GiftcodeHistoryItem,
+  UserSessionItem,
+  LoginHistoryEvent,
+  PayoutAccountItem,
+  WithdrawTierInfo,
 } from '../types.js';
+import { getDeviceFingerprint } from '../utils/deviceFingerprint.js';
 
 
 const BASE = '/api';
 
-export type LoginResult = { ok: true } | { requires2fa: true; pendingToken: string };
+export type LoginResult =
+  | { ok: true }
+  | { requires2fa: true; pendingToken: string }
+  | { requiresEmailOtp: true; pendingToken: string; emailMasked: string; message: string };
 
 export interface TwoFactorSetup {
   secret: string;
@@ -108,9 +116,70 @@ export const api = {
   twoFactorStatus: () => request<{ enabled: boolean }>('/auth/2fa/status'),
   twoFactorSetup: () => request<TwoFactorSetup>('/auth/2fa/setup', { method: 'POST' }),
   twoFactorEnable: (code: string) =>
-    request<{ ok: true }>('/auth/2fa/enable', { method: 'POST', body: JSON.stringify({ code }) }),
+    request<{ ok: true; recoveryCodes?: string[] }>('/auth/2fa/enable', { method: 'POST', body: JSON.stringify({ code }) }),
   twoFactorDisable: (code: string) =>
     request<{ ok: true }>('/auth/2fa/disable', { method: 'POST', body: JSON.stringify({ code }) }),
+  twoFactorRecoveryCodesCount: () =>
+    request<{ remainingCount: number; totalCount: number }>('/auth/2fa/recovery-codes/count'),
+  twoFactorRegenerateRecoveryCodes: (code: string) =>
+    request<{ ok: true; recoveryCodes: string[] }>('/auth/2fa/recovery-codes/regenerate', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    }),
+  requestEmailLoginCode: (email: string, captchaToken: string) =>
+    request<{ ok: true; message: string }>('/auth/email-code/request', {
+      method: 'POST',
+      body: JSON.stringify({ email, captchaToken }),
+    }),
+  verifyEmailLoginCode: (email: string, code: string) =>
+    request<LoginResult>('/auth/email-code/verify', { method: 'POST', body: JSON.stringify({ email, code }) }),
+  verifyLoginOtp: (pendingToken: string, code: string) =>
+    request<{ ok: true }>('/auth/login/verify-otp', { method: 'POST', body: JSON.stringify({ pendingToken, code }) }),
+  getSecurityAccountToken: (token: string) =>
+    request<{ valid: boolean; username: string }>(`/security/account-token/${token}`),
+  trustDevice: (token: string) =>
+    request<{ ok: true; message: string }>('/security/trust-device', { method: 'POST', body: JSON.stringify({ token }) }),
+  secureAccount: (token: string, newPassword: string) =>
+    request<{ ok: true; message: string }>('/security/secure-account', {
+      method: 'POST',
+      body: JSON.stringify({ token, newPassword }),
+    }),
+  getUserSessions: () => request<{ sessions: UserSessionItem[] }>('/security/sessions'),
+  revokeSession: (id: string) =>
+    request<{ ok: true; message: string }>(`/security/sessions/${id}/revoke`, { method: 'POST' }),
+  revokeOtherSessions: () =>
+    request<{ ok: true; message: string }>('/security/sessions/revoke-others', { method: 'POST' }),
+  getLoginHistory: () => request<{ events: LoginHistoryEvent[] }>('/security/login-history'),
+  exportPersonalData: async (password?: string, totpCode?: string) => {
+    const res = await fetch(`${BASE}/security/export-data`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'vnd',
+      },
+      credentials: 'include',
+      body: JSON.stringify({ password, totpCode }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new ApiError(data.error || data.message || 'Không thể tải dữ liệu cá nhân', res.status);
+    }
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `vietnamdong-data-${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+    return { ok: true };
+  },
+  requestDeleteAccount: (body: { password?: string; totpCode?: string; confirmUsername?: string }) =>
+    request<{ ok: true; message: string }>('/security/request-delete-account', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
   loginGoogle: (credential: string) => request('/auth/google', { method: 'POST', body: JSON.stringify({ credential }) }),
   forgotPassword: (body: { email: string; captchaToken: string }) =>
     request<{ ok: true; message: string }>('/auth/forgot-password', { method: 'POST', body: JSON.stringify(body) }),
@@ -126,7 +195,11 @@ export const api = {
   logout: () => request('/auth/logout', { method: 'POST' }),
 
   tasks: () => request<Task[]>('/tasks'),
-  startTask: (id: string) => request<{ shortUrl: string }>(`/tasks/${id}/start`, { method: 'POST' }),
+  startTask: (id: string, captchaToken?: string) =>
+    request<{ shortUrl: string }>(`/tasks/${id}/start`, {
+      method: 'POST',
+      body: JSON.stringify({ captchaToken }),
+    }),
 
   wallet: () => request<Wallet>('/wallet'),
   ledger: () => request<LedgerEntry[]>('/wallet/ledger'),
@@ -140,8 +213,47 @@ export const api = {
     return request<{ items: LedgerEntry[]; total: number }>(`/wallet/ledger/filtered?${qs}`);
   },
   withdrawals: () => request<Withdrawal[]>('/wallet/withdrawals'),
-  withdraw: (body: { amount_nova: number; method: string; destination: string }) =>
-    request('/wallet/withdraw', { method: 'POST', body: JSON.stringify(body) }),
+  payoutAccounts: () => request<{ accounts: PayoutAccountItem[] }>('/wallet/payout-accounts'),
+  addPayoutAccount: (body: {
+    type: 'bank' | 'ewallet';
+    bank_name: string;
+    account_name: string;
+    account_number: string;
+    totpCode?: string;
+    otpCode?: string;
+  }) =>
+    request<{ ok: true; id: string; status: string; message: string }>('/wallet/payout-accounts', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  confirmPayoutAccount: (id: string, body: { token?: string; totpCode?: string; otpCode?: string }) =>
+    request<{ ok: true; message: string }>(`/wallet/payout-accounts/${id}/confirm`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  deletePayoutAccount: (id: string) =>
+    request<{ ok: true; message: string }>(`/wallet/payout-accounts/${id}`, { method: 'DELETE' }),
+  withdrawTierLimit: () => request<WithdrawTierInfo>('/wallet/tier-limit'),
+  initWithdraw: (body: { amount_nova: number; payout_account_id: string }) =>
+    request<{
+      requiresConfirmation: boolean;
+      challengeId: string;
+      method: 'totp' | 'email_otp';
+      emailMasked?: string;
+      amountNova: number;
+      amountVnd: number;
+      message: string;
+    }>('/wallet/withdraw/init', { method: 'POST', body: JSON.stringify(body) }),
+  confirmWithdraw: (body: { challengeId: string; code: string }) =>
+    request<{ ok: true; id: string; status: string; transfer_code?: string }>('/wallet/withdraw/confirm', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  withdraw: (body: { amount_nova: number; method: string; destination: string; payout_account_id?: string }) =>
+    request<{ ok: true; id: string; transfer_code?: string; requiresConfirmation?: boolean; requiresInit?: boolean }>(
+      '/wallet/withdraw',
+      { method: 'POST', body: JSON.stringify(body) }
+    ),
   transfer: (body: { to_username: string; amount_nova: number }) =>
     request('/wallet/transfer', { method: 'POST', body: JSON.stringify(body) }),
 

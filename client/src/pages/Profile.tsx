@@ -15,6 +15,7 @@ import { useTheme } from '../context/ThemeContext.js';
 import { useLanguage } from '../context/LanguageContext.js';
 import { useToast } from '../context/ToastContext.js';
 import { api, type ApiError } from '../api/client.js';
+import type { UserSessionItem, LoginHistoryEvent } from '../types.js';
 import { playClickSound, isSoundEnabled, toggleSound } from '../utils/sound.js';
 import CurrencyIcon from '../components/CurrencyIcon.js';
 import BalanceCard, { BalanceCardCustomizer } from '../components/BalanceCard.js';
@@ -34,7 +35,7 @@ const AVATAR_PRESETS = [
 ];
 
 export default function Profile() {
-  const { me, refresh } = useAuth();
+  const { me, refresh, logout } = useAuth();
   const navigate = useNavigate();
   const {
     enabled: musicEnabled,
@@ -60,14 +61,17 @@ export default function Profile() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') || 'music';
   const [activeTab, setActiveTab] = useState<'info' | 'music' | 'appearance'>(
-    initialTab === 'giftcode' ? 'music' : (initialTab as any)
+    initialTab === 'giftcode' ? 'music' : initialTab === 'security' ? 'info' : (initialTab as any)
   );
 
-  // Sync tab with URL query parameter, redirect giftcode tab to /giftcode
   useEffect(() => {
     const tab = searchParams.get('tab');
     if (tab === 'giftcode') {
       navigate('/giftcode', { replace: true });
+      return;
+    }
+    if (tab === 'security') {
+      setActiveTab('info');
       return;
     }
     if (tab && ['info', 'music', 'appearance'].includes(tab)) {
@@ -310,6 +314,197 @@ export default function Profile() {
       toastError((err as ApiError).message, 'Đổi mật khẩu thất bại');
     } finally {
       setSavingPassword(false);
+    }
+  }
+
+  const [sessions, setSessions] = useState<UserSessionItem[]>([]);
+  const [loadingSessions, setLoadingSessions] = useState(false);
+  const [revokingSessionId, setRevokingSessionId] = useState<string | null>(null);
+  const [revokingOthers, setRevokingOthers] = useState(false);
+
+  const [loginHistory, setLoginHistory] = useState<LoginHistoryEvent[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [recoveryCount, setRecoveryCount] = useState<number | null>(null);
+  const [recoveryModalOpen, setRecoveryModalOpen] = useState(false);
+  const [regenerateInputModalOpen, setRegenerateInputModalOpen] = useState(false);
+  const [regenerateTotpInput, setRegenerateTotpInput] = useState('');
+  const [regeneratingCodes, setRegeneratingCodes] = useState(false);
+  const [latestRecoveryCodes, setLatestRecoveryCodes] = useState<string[]>([]);
+  const [codesCopied, setCodesCopied] = useState(false);
+
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [exportPassword, setExportPassword] = useState('');
+  const [exportTotp, setExportTotp] = useState('');
+  const [exportingData, setExportingData] = useState(false);
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteTotp, setDeleteTotp] = useState('');
+  const [deleteUsernameInput, setDeleteUsernameInput] = useState('');
+  const [deletingAccount, setDeletingAccount] = useState(false);
+
+  async function loadSessions() {
+    setLoadingSessions(true);
+    try {
+      const res = await api.getUserSessions();
+      setSessions(res.sessions || []);
+    } catch {
+    } finally {
+      setLoadingSessions(false);
+    }
+  }
+
+  async function handleRevokeSession(id: string) {
+    playClickSound();
+    setRevokingSessionId(id);
+    try {
+      await api.revokeSession(id);
+      toastSuccess('Đã đăng xuất thiết bị thành công', 'Quản lý thiết bị');
+      await loadSessions();
+    } catch (err) {
+      toastError((err as ApiError).message, 'Lỗi đăng xuất thiết bị');
+    } finally {
+      setRevokingSessionId(null);
+    }
+  }
+
+  async function handleRevokeOtherSessions() {
+    playClickSound();
+    setRevokingOthers(true);
+    try {
+      await api.revokeOtherSessions();
+      toastSuccess('Đã đăng xuất tất cả thiết bị khác thành công', 'Quản lý thiết bị');
+      await loadSessions();
+    } catch (err) {
+      toastError((err as ApiError).message, 'Lỗi đăng xuất thiết bị');
+    } finally {
+      setRevokingOthers(false);
+    }
+  }
+
+  async function loadLoginHistory() {
+    setLoadingHistory(true);
+    try {
+      const res = await api.getLoginHistory();
+      setLoginHistory(res.events || []);
+    } catch {
+    } finally {
+      setLoadingHistory(false);
+    }
+  }
+
+  async function loadTwoFactorInfo() {
+    try {
+      const status = await api.twoFactorStatus();
+      setTwoFactorEnabled(status.enabled);
+      if (status.enabled) {
+        const countRes = await api.twoFactorRecoveryCodesCount();
+        setRecoveryCount(countRes.remainingCount);
+      }
+    } catch {}
+  }
+
+  useEffect(() => {
+    if (activeTab === 'info') {
+      loadSessions();
+      loadLoginHistory();
+      loadTwoFactorInfo();
+    }
+  }, [activeTab]);
+
+  async function handleRegenerateRecoveryCodes(e: React.FormEvent) {
+    e.preventDefault();
+    playClickSound();
+    setRegeneratingCodes(true);
+    try {
+      const res = await api.twoFactorRegenerateRecoveryCodes(regenerateTotpInput);
+      setLatestRecoveryCodes(res.recoveryCodes);
+      setRegenerateInputModalOpen(false);
+      setRegenerateTotpInput('');
+      setRecoveryModalOpen(true);
+      setRecoveryCount(res.recoveryCodes.length);
+      toastSuccess('Đã tạo mới 8 mã khôi phục 2FA', 'Mã khôi phục');
+    } catch (err) {
+      toastError((err as ApiError).message, 'Lỗi tạo lại mã');
+    } finally {
+      setRegeneratingCodes(false);
+    }
+  }
+
+  function handleCopyRecoveryCodes() {
+    playClickSound();
+    navigator.clipboard.writeText(latestRecoveryCodes.join('\n'));
+    setCodesCopied(true);
+    setTimeout(() => setCodesCopied(false), 2000);
+    toastSuccess('Đã sao chép 8 mã khôi phục', 'Sao chép');
+  }
+
+  function handleDownloadRecoveryCodes() {
+    playClickSound();
+    const text = `VIETNAMDONG - MA KHOI PHUC XAC THUC 2 BUOC (2FA)
+Tai khoan: ${me?.username || 'user'}
+Thoi gian tao: ${new Date().toLocaleString('vi-VN')}
+
+Luu y:
+- Moi ma chi su dung duoc dung 1 lan de dang nhap khi ban mat thiet bi xac thuc.
+- Giu file nay o noi an toan, tuyet doi khong chia se cho nguoi khac.
+
+Danh sach 8 ma:
+${latestRecoveryCodes.map((c, i) => `${i + 1}. ${c}`).join('\n')}
+`;
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `vietnamdong-2fa-recovery-codes-${Date.now()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+    toastSuccess('Đã tải xuống file vietnamdong-2fa-recovery-codes.txt', 'Tải file');
+  }
+
+  async function handleExportData(e: React.FormEvent) {
+    e.preventDefault();
+    playClickSound();
+    setExportingData(true);
+    try {
+      await api.exportPersonalData(exportPassword, exportTotp);
+      toastSuccess('Đã tải dữ liệu cá nhân thành công', 'Tải dữ liệu');
+      setExportModalOpen(false);
+      setExportPassword('');
+      setExportTotp('');
+    } catch (err) {
+      toastError((err as ApiError).message, 'Tải dữ liệu thất bại');
+    } finally {
+      setExportingData(false);
+    }
+  }
+
+  async function handleDeleteAccount(e: React.FormEvent) {
+    e.preventDefault();
+    playClickSound();
+    if (deleteUsernameInput.trim() !== me?.username) {
+      toastError('Tên đăng nhập xác nhận không chính xác', 'Lỗi xác nhận');
+      return;
+    }
+    setDeletingAccount(true);
+    try {
+      const res = await api.requestDeleteAccount({
+        password: deletePassword,
+        totpCode: deleteTotp,
+        confirmUsername: deleteUsernameInput,
+      });
+      toastSuccess(res.message, 'Xóa tài khoản');
+      setDeleteModalOpen(false);
+      await logout();
+      navigate('/login');
+    } catch (err) {
+      toastError((err as ApiError).message, 'Xóa tài khoản thất bại');
+    } finally {
+      setDeletingAccount(false);
     }
   }
 
@@ -1072,24 +1267,322 @@ export default function Profile() {
               </button>
             </form>
 
-            {/* 2FA Shortcut Card */}
-            <div className="pt-6 border-t border-line flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          </div>
+
+          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-line space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-line">
               <div>
-                <h3 className="font-semibold text-sm text-ink flex items-center gap-1.5">
-                  <i className="bi bi-shield-check text-cyan" /> Xác thực 2 bước (2FA)
-                </h3>
-                <p className="text-xs text-muted mt-0.5">
-                  Bảo vệ tài khoản qua Google Authenticator khi đăng nhập và rút tiền
+                <h2 className="font-display text-lg font-bold text-ink flex items-center gap-2">
+                  <i className="bi bi-shield-lock-fill text-indigo" /> Xác thực 2 bước (2FA) & Mã khôi phục
+                </h2>
+                <p className="text-xs text-muted mt-1">
+                  Bảo vệ đăng nhập và giao dịch rút tiền bằng ứng dụng Google Authenticator và mã khôi phục dự phòng
                 </p>
               </div>
-              <Link
-                to="/security"
-                onClick={playClickSound}
-                className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-surface2 hover:bg-line border border-line text-ink transition btn-press shrink-0 flex items-center gap-1.5"
+
+              <div className="flex items-center gap-2">
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                    twoFactorEnabled
+                      ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                      : 'bg-surface2 border-line text-muted'
+                  }`}
+                >
+                  <i className={`bi ${twoFactorEnabled ? 'bi-check-circle-fill' : 'bi-x-circle'} mr-1.5`} />
+                  {twoFactorEnabled ? 'Đang bật' : 'Chưa bật'}
+                </span>
+                <Link
+                  to="/security"
+                  onClick={playClickSound}
+                  className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-surface2 hover:bg-line border border-line text-ink transition btn-press flex items-center gap-1.5"
+                >
+                  <i className="bi bi-gear" />
+                  <span>{twoFactorEnabled ? 'Quản lý' : 'Cài đặt'}</span>
+                </Link>
+              </div>
+            </div>
+
+            {twoFactorEnabled && (
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-surface2/60 border border-line">
+                  <div>
+                    <div className="font-semibold text-xs sm:text-sm text-ink flex items-center gap-2">
+                      <i className="bi bi-key-fill text-indigo" />
+                      <span>Số mã khôi phục dự phòng còn lại</span>
+                    </div>
+                    <div className="text-xs text-muted mt-1">
+                      Mỗi mã khôi phục chỉ dùng được một lần duy nhất khi bạn không thể truy cập ứng dụng 2FA.
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <span className="font-mono text-base font-bold text-ink">
+                        {recoveryCount !== null ? recoveryCount : '...'}
+                      </span>
+                      <span className="text-xs text-muted"> / 8</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        playClickSound();
+                        setRegenerateTotpInput('');
+                        setRegenerateInputModalOpen(true);
+                      }}
+                      className="px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo hover:brightness-110 text-white transition btn-press flex items-center gap-1.5 shadow-sm shrink-0"
+                    >
+                      <i className="bi bi-arrow-repeat" />
+                      <span>Tạo lại 8 mã mới</span>
+                    </button>
+                  </div>
+                </div>
+
+                {recoveryCount !== null && recoveryCount <= 2 && (
+                  <div className="p-4 rounded-2xl bg-rose/10 border border-rose/30 text-xs text-rose flex items-start gap-3 animate-pulse">
+                    <i className="bi bi-exclamation-triangle-fill text-base shrink-0 mt-0.5" />
+                    <div className="leading-relaxed">
+                      <strong>Cảnh báo bảo mật:</strong> Bạn chỉ còn {recoveryCount} mã khôi phục dự phòng.
+                      Vui lòng tạo lại bộ mã mới ngay để đảm bảo không bị mất quyền truy cập vào tài khoản nếu mất thiết bị.
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-line space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-line">
+              <div>
+                <h2 className="font-display text-lg font-bold text-ink flex items-center gap-2">
+                  <i className="bi bi-laptop text-indigo" /> Thiết bị đang đăng nhập
+                </h2>
+                <p className="text-xs text-muted mt-1">
+                  Danh sách tất cả các phiên đăng nhập đang hoạt động của tài khoản này
+                </p>
+              </div>
+
+              {sessions.length > 1 && (
+                <button
+                  type="button"
+                  onClick={handleRevokeOtherSessions}
+                  disabled={revokingOthers}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold bg-rose/15 hover:bg-rose/25 text-rose border border-rose/30 transition btn-press flex items-center gap-2 self-start sm:self-auto disabled:opacity-50"
+                >
+                  {revokingOthers ? (
+                    <>
+                      <i className="bi bi-arrow-repeat animate-spin" />
+                      <span>Đang xử lý...</span>
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-box-arrow-right" />
+                      <span>Đăng xuất tất cả thiết bị khác</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+
+            {loadingSessions ? (
+              <div className="py-8 text-center text-xs text-muted space-y-2">
+                <i className="bi bi-arrow-repeat animate-spin text-2xl text-indigo inline-block" />
+                <p>Đang tải danh sách thiết bị...</p>
+              </div>
+            ) : sessions.length === 0 ? (
+              <div className="py-6 text-center text-xs text-muted">
+                Không tìm thấy phiên đăng nhập nào.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {sessions.map((s) => (
+                  <div
+                    key={s.id}
+                    className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${
+                      s.isCurrent
+                        ? 'bg-indigo/10 border-indigo/40 ring-1 ring-indigo/30'
+                        : 'bg-surface2/60 border-line hover:border-line/90'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div
+                        className={`w-11 h-11 rounded-2xl flex items-center justify-center text-lg shrink-0 border ${
+                          s.isCurrent
+                            ? 'bg-indigo text-white border-indigo'
+                            : 'bg-surface text-muted border-line'
+                        }`}
+                      >
+                        <i
+                          className={`bi ${
+                            /phone|mobile|ios|android/i.test(s.device)
+                              ? 'bi-phone'
+                              : /tablet|ipad/i.test(s.device)
+                              ? 'bi-tablet'
+                              : 'bi-laptop'
+                          }`}
+                        />
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-xs sm:text-sm text-ink truncate">
+                            {s.browser} trên {s.device}
+                          </span>
+                          {s.isCurrent && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo/20 text-indigo border border-indigo/30 shrink-0">
+                              Thiết bị này
+                            </span>
+                          )}
+                          {s.trusted && (
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shrink-0">
+                              Tin cậy
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="text-[11px] text-muted flex items-center gap-2 mt-1 flex-wrap">
+                          <span>IP: {s.ipMasked}</span>
+                          {s.country && (
+                            <>
+                              <span>•</span>
+                              <span>{s.country}</span>
+                            </>
+                          )}
+                          <span>•</span>
+                          <span>Hoạt động: {new Date(s.lastSeenAt).toLocaleString('vi-VN')}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {!s.isCurrent && (
+                      <button
+                        type="button"
+                        onClick={() => handleRevokeSession(s.id)}
+                        disabled={revokingSessionId === s.id}
+                        className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-surface border border-line text-rose hover:bg-rose/10 hover:border-rose/30 transition btn-press self-end sm:self-auto shrink-0 flex items-center gap-1.5 disabled:opacity-50"
+                      >
+                        {revokingSessionId === s.id ? (
+                          <i className="bi bi-arrow-repeat animate-spin" />
+                        ) : (
+                          <i className="bi bi-box-arrow-right" />
+                        )}
+                        <span>Đăng xuất</span>
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-line space-y-6">
+            <div className="pb-4 border-b border-line">
+              <h2 className="font-display text-lg font-bold text-ink flex items-center gap-2">
+                <i className="bi bi-clock-history text-cyan" /> Nhật ký đăng nhập gần nhất
+              </h2>
+              <p className="text-xs text-muted mt-1">
+                Lịch sử 20 lần đăng nhập gần nhất bao gồm cả những lần xác thực không thành công
+              </p>
+            </div>
+
+            {loadingHistory ? (
+              <div className="py-8 text-center text-xs text-muted space-y-2">
+                <i className="bi bi-arrow-repeat animate-spin text-2xl text-cyan inline-block" />
+                <p>Đang tải nhật ký...</p>
+              </div>
+            ) : loginHistory.length === 0 ? (
+              <div className="py-6 text-center text-xs text-muted">Chưa có nhật ký đăng nhập nào.</div>
+            ) : (
+              <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+                {loginHistory.map((h) => (
+                  <div
+                    key={h.id}
+                    className="p-3 rounded-2xl bg-surface2/50 border border-line/70 flex items-center justify-between gap-3 text-xs"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border ${
+                          h.success
+                            ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                            : 'bg-rose/15 text-rose border-rose/30'
+                        }`}
+                      >
+                        <i className={`bi ${h.success ? 'bi-check2' : 'bi-x-lg'}`} />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-semibold text-ink truncate">
+                          {h.browser} trên {h.device}
+                        </div>
+                        <div className="text-[11px] text-muted truncate">IP: {h.ipMasked}</div>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <div className={`font-bold text-[11px] ${h.success ? 'text-emerald-400' : 'text-rose'}`}>
+                        {h.success ? 'Thành công' : 'Thất bại'}
+                      </div>
+                      <div className="text-[10px] text-muted">{new Date(h.createdAt).toLocaleString('vi-VN')}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-line space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="font-display text-lg font-bold text-ink flex items-center gap-2">
+                  <i className="bi bi-download text-indigo" /> Tải dữ liệu cá nhân
+                </h2>
+                <p className="text-xs text-muted mt-1 leading-relaxed">
+                  Tải về toàn bộ dữ liệu tài khoản gồm hồ sơ, sổ coin, lịch sử nhiệm vụ, lệnh rút tiền và thiết bị dưới dạng file JSON.
+                  Giới hạn 1 lần mỗi 24 giờ.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  setExportPassword('');
+                  setExportTotp('');
+                  setExportModalOpen(true);
+                }}
+                className="px-4 py-2.5 rounded-xl text-xs font-bold bg-surface2 hover:bg-line border border-line text-ink transition btn-press shrink-0 flex items-center gap-2 self-start sm:self-auto"
               >
-                <i className="bi bi-arrow-right-circle" />
-                <span>Cài đặt bảo mật 2FA</span>
-              </Link>
+                <i className="bi bi-file-earmark-arrow-down" />
+                <span>Tải dữ liệu của tôi</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="glass-card rounded-3xl p-6 sm:p-8 border border-rose/30 bg-rose/5 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="font-display text-lg font-bold text-rose flex items-center gap-2">
+                  <i className="bi bi-trash3-fill" /> Xóa tài khoản vĩnh viễn
+                </h2>
+                <p className="text-xs text-muted mt-1 leading-relaxed">
+                  Tài khoản sẽ được đưa vào hàng đợi chờ xóa trong 7 ngày. Bạn có thể hủy yêu cầu bất kỳ lúc nào bằng cách đăng nhập lại.
+                  Sau 7 ngày, mọi dữ liệu nhận dạng cá nhân sẽ bị ẩn danh hóa vĩnh viễn.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  setDeletePassword('');
+                  setDeleteTotp('');
+                  setDeleteUsernameInput('');
+                  setDeleteModalOpen(true);
+                }}
+                className="px-4 py-2.5 rounded-xl text-xs font-bold bg-rose hover:brightness-110 text-white transition btn-press shrink-0 flex items-center gap-2 self-start sm:self-auto shadow-md shadow-rose/25"
+              >
+                <i className="bi bi-person-x-fill" />
+                <span>Yêu cầu xóa tài khoản</span>
+              </button>
             </div>
           </div>
         </div>
@@ -1378,6 +1871,342 @@ export default function Profile() {
                 )}
               </button>
             </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {regenerateInputModalOpen && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setRegenerateInputModalOpen(false);
+          }}
+        >
+          <div className="w-full max-w-md rounded-3xl bg-surface border border-line p-6 shadow-2xl animate-scale-in space-y-5" role="dialog">
+            <div className="flex items-center justify-between border-b border-line pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-indigo/20 text-indigo flex items-center justify-center">
+                  <i className="bi bi-shield-lock text-base" />
+                </div>
+                <h3 className="font-display font-bold text-base text-ink">Tạo lại 8 mã khôi phục 2FA</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRegenerateInputModalOpen(false)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-ink hover:bg-surface2 transition"
+              >
+                <i className="bi bi-x-lg text-sm" />
+              </button>
+            </div>
+
+            <p className="text-xs text-muted leading-relaxed">
+              Vui lòng nhập mã 6 số từ Google Authenticator để xác thực. Sau khi tạo mới, toàn bộ mã khôi phục cũ sẽ bị vô hiệu hóa ngay.
+            </p>
+
+            <form onSubmit={handleRegenerateRecoveryCodes} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-muted">Mã xác thực 2 bước (TOTP)</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={regenerateTotpInput}
+                  onChange={(e) => setRegenerateTotpInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="000000"
+                  maxLength={6}
+                  required
+                  autoFocus
+                  className="w-full bg-surface2 border border-line rounded-xl px-4 py-2.5 text-center font-mono text-base tracking-widest text-ink focus:outline-none focus:border-indigo"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setRegenerateInputModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl border border-line text-xs font-semibold text-muted hover:text-ink hover:bg-surface2 transition"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={regeneratingCodes || regenerateTotpInput.length !== 6}
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-indigo hover:brightness-110 text-white transition btn-press flex items-center gap-1.5 shadow-md shadow-indigo/25 disabled:opacity-50"
+                >
+                  {regeneratingCodes ? (
+                    <>
+                      <i className="bi bi-arrow-repeat animate-spin" />
+                      <span>Đang tạo...</span>
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-arrow-repeat" />
+                      <span>Tạo mới ngay</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {recoveryModalOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-lg rounded-3xl bg-surface border border-line p-6 shadow-2xl animate-scale-in space-y-5" role="dialog">
+            <div className="flex items-center gap-2.5 border-b border-line pb-4">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
+                <i className="bi bi-key-fill" />
+              </div>
+              <div>
+                <h3 className="font-display font-bold text-base text-ink">8 Mã khôi phục dự phòng mới</h3>
+                <p className="text-xs text-muted">Lưu lại ngay - Mã chỉ hiển thị MỘT lần duy nhất này</p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-amber/10 border border-amber/30 text-xs text-amber leading-relaxed flex items-start gap-2.5">
+              <i className="bi bi-exclamation-triangle-fill text-base shrink-0 mt-0.5" />
+              <div>
+                Mỗi mã khôi phục chỉ dùng được 1 lần để đăng nhập khi bạn mất thiết bị 2FA. Hãy lưu vào nơi an toàn hoặc tải file về máy.
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5 p-4 rounded-2xl bg-surface2 border border-line">
+              {latestRecoveryCodes.map((c, i) => (
+                <div
+                  key={i}
+                  className="p-2.5 rounded-xl bg-surface border border-line/80 font-mono text-xs font-bold text-center text-ink tracking-wider select-all"
+                >
+                  {c}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={handleCopyRecoveryCodes}
+                  className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl border border-line bg-surface2 hover:bg-line text-xs font-semibold text-ink transition btn-press flex items-center justify-center gap-1.5"
+                >
+                  <i className={`bi ${codesCopied ? 'bi-check2' : 'bi-clipboard'}`} />
+                  <span>{codesCopied ? 'Đã sao chép' : 'Sao chép tất cả'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadRecoveryCodes}
+                  className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl border border-line bg-surface2 hover:bg-line text-xs font-semibold text-ink transition btn-press flex items-center justify-center gap-1.5"
+                >
+                  <i className="bi bi-download" />
+                  <span>Tải .txt</span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setRecoveryModalOpen(false)}
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs font-bold bg-indigo hover:brightness-110 text-white transition btn-press flex items-center justify-center gap-1.5 shadow-md shadow-indigo/25"
+              >
+                <i className="bi bi-check2-circle text-sm" />
+                <span>Tôi đã lưu an toàn</span>
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {exportModalOpen && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-sm animate-fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setExportModalOpen(false);
+          }}
+        >
+          <div className="w-full max-w-md rounded-3xl bg-surface border border-line p-6 shadow-2xl animate-scale-in space-y-5" role="dialog">
+            <div className="flex items-center justify-between border-b border-line pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-indigo/20 text-indigo flex items-center justify-center">
+                  <i className="bi bi-download text-base" />
+                </div>
+                <h3 className="font-display font-bold text-base text-ink">Xác nhận tải dữ liệu cá nhân</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setExportModalOpen(false)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-ink hover:bg-surface2 transition"
+              >
+                <i className="bi bi-x-lg text-sm" />
+              </button>
+            </div>
+
+            <p className="text-xs text-muted leading-relaxed">
+              Để bảo vệ thông tin cá nhân, vui lòng nhập mật khẩu tài khoản (và mã xác thực 2 bước nếu có). File JSON sẽ được tải trực tiếp về thiết bị của bạn.
+            </p>
+
+            <form onSubmit={handleExportData} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-muted">Mật khẩu tài khoản</label>
+                <input
+                  type="password"
+                  value={exportPassword}
+                  onChange={(e) => setExportPassword(e.target.value)}
+                  placeholder="Nhập mật khẩu hiện tại"
+                  required
+                  autoFocus
+                  className="w-full bg-surface2 border border-line rounded-xl px-4 py-2.5 text-xs text-ink focus:outline-none focus:border-indigo"
+                />
+              </div>
+
+              {twoFactorEnabled && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted">Mã 2FA (hoặc mã khôi phục)</label>
+                  <input
+                    type="text"
+                    value={exportTotp}
+                    onChange={(e) => setExportTotp(e.target.value)}
+                    placeholder="Nhập mã 6 số hoặc mã khôi phục"
+                    required
+                    className="w-full bg-surface2 border border-line rounded-xl px-4 py-2.5 text-xs text-ink focus:outline-none focus:border-indigo"
+                  />
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setExportModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl border border-line text-xs font-semibold text-muted hover:text-ink hover:bg-surface2 transition"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={exportingData || !exportPassword}
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-indigo hover:brightness-110 text-white transition btn-press flex items-center gap-1.5 shadow-md shadow-indigo/25 disabled:opacity-50"
+                >
+                  {exportingData ? (
+                    <>
+                      <i className="bi bi-arrow-repeat animate-spin" />
+                      <span>Đang chuẩn bị...</span>
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-download" />
+                      <span>Tải file JSON</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {deleteModalOpen && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setDeleteModalOpen(false);
+          }}
+        >
+          <div className="w-full max-w-md rounded-3xl bg-surface border border-rose/40 p-6 shadow-2xl animate-scale-in space-y-5" role="dialog">
+            <div className="flex items-center justify-between border-b border-line pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-rose/20 text-rose flex items-center justify-center">
+                  <i className="bi bi-exclamation-triangle-fill text-base" />
+                </div>
+                <h3 className="font-display font-bold text-base text-rose">Xác nhận yêu cầu xóa tài khoản</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDeleteModalOpen(false)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-ink hover:bg-surface2 transition"
+              >
+                <i className="bi bi-x-lg text-sm" />
+              </button>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-rose/10 border border-rose/30 text-xs text-rose leading-relaxed space-y-1.5">
+              <div><strong>Lưu ý quan trọng:</strong></div>
+              <ul className="list-disc list-inside space-y-1 pl-1 text-[11px]">
+                <li>Bạn sẽ có 7 ngày để hủy yêu cầu này bằng cách đăng nhập lại.</li>
+                <li>Sau 7 ngày, email, username, avatar và thông tin xác thực sẽ bị ẩn danh hóa vĩnh viễn.</li>
+                <li>Không thể xóa nếu đang có lệnh rút tiền, đổi quà hoặc đơn Vietsub Studio chờ duyệt.</li>
+              </ul>
+            </div>
+
+            <form onSubmit={handleDeleteAccount} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-muted">Mật khẩu tài khoản</label>
+                <input
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  placeholder="Nhập mật khẩu hiện tại"
+                  required
+                  autoFocus
+                  className="w-full bg-surface2 border border-line rounded-xl px-4 py-2.5 text-xs text-ink focus:outline-none focus:border-rose"
+                />
+              </div>
+
+              {twoFactorEnabled && (
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-muted">Mã 2FA (hoặc mã khôi phục)</label>
+                  <input
+                    type="text"
+                    value={deleteTotp}
+                    onChange={(e) => setDeleteTotp(e.target.value)}
+                    placeholder="Nhập mã 6 số hoặc mã khôi phục"
+                    required
+                    className="w-full bg-surface2 border border-line rounded-xl px-4 py-2.5 text-xs text-ink focus:outline-none focus:border-rose"
+                  />
+                </div>
+              )}
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-muted">
+                  Gõ lại tên đăng nhập <span className="text-ink font-bold font-mono">{me?.username}</span> để xác nhận:
+                </label>
+                <input
+                  type="text"
+                  value={deleteUsernameInput}
+                  onChange={(e) => setDeleteUsernameInput(e.target.value)}
+                  placeholder={me?.username || 'tên đăng nhập'}
+                  required
+                  className="w-full bg-surface2 border border-line rounded-xl px-4 py-2.5 text-xs text-ink focus:outline-none focus:border-rose"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setDeleteModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl border border-line text-xs font-semibold text-muted hover:text-ink hover:bg-surface2 transition"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="submit"
+                  disabled={deletingAccount || deleteUsernameInput.trim() !== me?.username}
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-rose hover:brightness-110 text-white transition btn-press flex items-center gap-1.5 shadow-md shadow-rose/25 disabled:opacity-50"
+                >
+                  {deletingAccount ? (
+                    <>
+                      <i className="bi bi-arrow-repeat animate-spin" />
+                      <span>Đang xử lý...</span>
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-trash3-fill" />
+                      <span>Xác nhận xóa tài khoản</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>,
         document.body

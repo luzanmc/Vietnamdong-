@@ -29,6 +29,7 @@ import LuckyWheel from './pages/LuckyWheel.js';
 import Quests from './pages/Quests.js';
 import Support from './pages/Support.js';
 import Security from './pages/Security.js';
+import SecureAccount from './pages/SecureAccount.js';
 import Legal from './pages/Legal.js';
 import NotFound from './pages/NotFound.js';
 import Landing from './pages/Landing.js';
@@ -52,7 +53,8 @@ function AppContent() {
     location.pathname === '/login' ||
     location.pathname === '/register' ||
     location.pathname === '/forgot-password' ||
-    location.pathname === '/reset-password';
+    location.pathname === '/reset-password' ||
+    location.pathname === '/secure-account';
 
   if (maintenance && !isAdmin && !isAuthRoute) {
     return <Maintenance />;
@@ -75,6 +77,7 @@ function AppContent() {
         <Route path="/terms" element={<Legal kind="terms" />} />
         <Route path="/privacy" element={<Legal kind="privacy" />} />
         <Route path="/about" element={<Legal kind="about" />} />
+        <Route path="/secure-account" element={<SecureAccount />} />
         <Route element={<GuestRoute />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Login />} />

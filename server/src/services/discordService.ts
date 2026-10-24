@@ -8,13 +8,49 @@ export interface AlertField {
   inline?: boolean;
 }
 
+export function maskEmail(email: string): string {
+  if (!email || !email.includes('@')) return '***@***';
+  const [local, domain] = email.split('@');
+  if (!local || !domain) return '***@***';
+  const visible = local.length > 0 ? local[0] : '*';
+  return `${visible}***@${domain}`;
+}
+
+export function maskIp(ip: string): string {
+  if (!ip) return '*.*.*.*';
+  if (ip.includes('.')) {
+    const parts = ip.split('.');
+    if (parts.length === 4) {
+      return `${parts[0]}.${parts[1]}.*.*`;
+    }
+  }
+  if (ip.includes(':')) {
+    const parts = ip.split(':');
+    return `${parts.slice(0, 2).join(':')}:*:*`;
+  }
+  return '*.*.*.*';
+}
+
+export function maskAccount(account: string): string {
+  if (!account) return '****';
+  const clean = account.trim();
+  if (clean.length <= 4) return clean;
+  return `***${clean.slice(-4)}`;
+}
+
+export function sanitizeFieldText(text: string): string {
+  if (!text) return '';
+  return text.replace(/(ey[a-zA-Z0-9_\-]{20,}\.[a-zA-Z0-9_\-]{20,}\.[a-zA-Z0-9_\-]{20,})/g, '[TOKEN_REDACTED]');
+}
+
 export async function logToDiscord(message: string): Promise<void> {
   if (!env.discord.botToken || !env.discord.logChannelId) return;
   try {
+    const sanitized = sanitizeFieldText(message);
     await fetch(`https://discord.com/api/v10/channels/${env.discord.logChannelId}/messages`, {
       method: 'POST',
       headers: { Authorization: `Bot ${env.discord.botToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: message }),
+      body: JSON.stringify({ content: sanitized }),
     });
   } catch (err) {
     console.error('Discord log failed:', (err as Error).message);
@@ -49,10 +85,16 @@ export async function sendAlert(
       );
     }
 
+    const sanitizedFields = fields.map((f) => ({
+      name: f.name,
+      value: sanitizeFieldText(f.value),
+      inline: f.inline,
+    }));
+
     await pool.query(
       `INSERT INTO alert_log (id, type, title, details, created_at)
        VALUES ($1, $2, $3, $4, now())`,
-      [nanoid(), type, title, JSON.stringify(fields)]
+      [nanoid(), type, title, JSON.stringify(sanitizedFields)]
     );
 
     const webhookUrl = env.discord.alertWebhookUrl?.trim();
@@ -76,7 +118,7 @@ export async function sendAlert(
           {
             title,
             color,
-            fields,
+            fields: sanitizedFields,
             timestamp: new Date().toISOString(),
             footer: { text: env.appName },
           },
@@ -91,4 +133,18 @@ export async function sendAlert(
   } catch {
     return false;
   }
+}
+
+export async function sendTestAlert(adminUsername: string): Promise<boolean> {
+  return sendAlert(
+    'test_alert',
+    'Kiểm tra kết nối Webhook Cảnh báo Discord',
+    [
+      { name: 'Người thực hiện', value: adminUsername, inline: true },
+      { name: 'Thời gian', value: new Date().toLocaleString('vi-VN'), inline: true },
+      { name: 'Trạng thái', value: 'Hoạt động bình thường', inline: false },
+    ],
+    null,
+    'info'
+  );
 }

@@ -41,6 +41,7 @@ export interface Task {
   active: number;
   sort_order: number;
   done_today: number;
+  min_seconds?: number;
 }
 
 export interface Wallet {
@@ -56,13 +57,44 @@ export interface LedgerEntry {
   created_at: string;
 }
 
+export type PayoutAccountType = 'bank' | 'ewallet';
+export type PayoutAccountStatus = 'pending_email' | 'waiting' | 'active' | 'removed';
+
+export interface PayoutAccountItem {
+  id: string;
+  type: PayoutAccountType;
+  bank_name: string;
+  account_name: string;
+  last4: string;
+  status: PayoutAccountStatus;
+  created_at: string;
+  email_confirmed_at: string | null;
+  active_from: string | null;
+  isActive: boolean;
+  hoursUntilActive?: number;
+}
+
+export interface WithdrawTierInfo {
+  tier: 'new' | 'basic' | '2fa';
+  tierLabel: string;
+  dailyLimit: number;
+  totalWithdrawn24h: number;
+  remainingLimit: number;
+  limit2fa: number;
+}
+
 export interface Withdrawal {
   id: string;
   amount_nova: number;
   amount_vnd: number;
   method: 'momo' | 'bank' | 'card';
+  destination?: string;
   status: 'pending' | 'approved' | 'rejected' | 'paid';
   created_at: string;
+  risk_score?: number;
+  risk_reasons?: string[];
+  needs_review?: boolean;
+  payout_account_id?: string | null;
 }
 
 export interface RedeemItem {
@@ -255,6 +287,29 @@ export interface AlertLog {
   title: string;
   details: Array<{ name: string; value: string; inline?: boolean }> | null;
   created_at: string;
+}
+
+export interface UserSessionItem {
+  id: string;
+  device: string;
+  browser: string;
+  userAgent: string;
+  ipMasked: string;
+  country: string | null;
+  createdAt: string;
+  lastSeenAt: string;
+  trusted: boolean;
+  isCurrent: boolean;
+}
+
+export interface LoginHistoryEvent {
+  id: string;
+  success: boolean;
+  ipMasked: string;
+  device: string;
+  browser: string;
+  userAgent: string | null;
+  createdAt: string;
 }
 
 

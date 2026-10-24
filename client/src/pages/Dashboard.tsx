@@ -11,6 +11,7 @@ import CurrencyIcon from '../components/CurrencyIcon.js';
 import BalanceCard from '../components/BalanceCard.js';
 import LevelBadge from '../components/LevelBadge.js';
 import UserName from '../components/UserName.js';
+import TurnstileWidget from '../components/TurnstileWidget.js';
 import type { Me, Wallet, Task } from '../types.js';
 
 export default function Dashboard() {
@@ -20,6 +21,8 @@ export default function Dashboard() {
   const [filter, setFilter] = useState<'all' | 'hot' | 'available'>('all');
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [challengeTaskId, setChallengeTaskId] = useState<string | null>(null);
+  const [captchaReset, setCaptchaReset] = useState(0);
 
   const { error: toastError } = useToast();
 
@@ -42,14 +45,21 @@ export default function Dashboard() {
     load();
   }, []);
 
-  async function handleStart(taskId: string) {
+  async function handleStart(taskId: string, captchaToken?: string) {
     setBusyId(taskId);
     setError(null);
     try {
-      const { shortUrl } = await api.startTask(taskId);
+      const { shortUrl } = await api.startTask(taskId, captchaToken);
+      setChallengeTaskId(null);
       window.open(shortUrl, '_blank', 'noopener');
     } catch (e) {
-      const msg = (e as ApiError).message;
+      const err = e as ApiError;
+      if (err.status === 428) {
+        setChallengeTaskId(taskId);
+        setCaptchaReset((prev) => prev + 1);
+        return;
+      }
+      const msg = err.message;
       setError(msg);
       toastError(msg, 'Không thể mở nhiệm vụ');
     } finally {
@@ -327,6 +337,38 @@ export default function Dashboard() {
             {filteredTasks.map((t) => (
               <TaskCard key={t.id} task={t} onStart={handleStart} busy={busyId === t.id} />
             ))}
+          </div>
+        )}
+
+        {challengeTaskId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+            <div className="bg-surface border border-line rounded-2xl p-5 max-w-sm w-full space-y-4 shadow-2xl">
+              <div className="flex items-center justify-between pb-2 border-b border-line">
+                <h3 className="text-sm font-semibold text-ink flex items-center gap-2">
+                  <i className="bi bi-shield-check text-indigo" />
+                  <span>Xác minh bảo mật</span>
+                </h3>
+                <button
+                  onClick={() => setChallengeTaskId(null)}
+                  className="text-muted hover:text-ink text-sm p-1"
+                >
+                  <i className="bi bi-x-lg" />
+                </button>
+              </div>
+              <p className="text-xs text-muted leading-relaxed">
+                Hệ thống yêu cầu xác minh bảo vệ trước khi bắt đầu nhiệm vụ. Vui lòng bấm xác minh bên dưới.
+              </p>
+              <div className="flex justify-center py-2">
+                <TurnstileWidget
+                  reset={captchaReset}
+                  onToken={(token) => {
+                    if (token) {
+                      handleStart(challengeTaskId, token);
+                    }
+                  }}
+                />
+              </div>
+            </div>
           </div>
         )}
       </div>

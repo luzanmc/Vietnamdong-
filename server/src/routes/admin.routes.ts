@@ -58,7 +58,8 @@ import { toCsv } from '../utils/csv.js';
 import { listAnnouncementsAdmin, createAnnouncement, updateAnnouncement, deactivateAnnouncement } from '../repositories/announcementRepository.js';
 import { listEventsAdmin, createEvent, updateEvent, toggleEvent, deleteEvent } from '../repositories/eventRepository.js';
 import { invalidateMaintenanceCache } from '../services/maintenanceService.js';
-import { sendAlert } from '../services/discordService.js';
+import { sendAlert, sendTestAlert } from '../services/discordService.js';
+import { auditService } from '../services/auditService.js';
 import { monthlyTop } from '../repositories/leaderboardRepository.js';
 import { listAllTicketsAdmin, getTicketById, getMessagesForTicket, addMessage, closeTicket, reopenTicket } from '../repositories/supportRepository.js';
 import { getAllGiftcodes, createGiftcode, toggleGiftcodeActive, deleteGiftcode } from '../repositories/giftcodeRepository.js';
@@ -803,7 +804,10 @@ adminRouter.patch('/codes/creators/:id', async (req, res, next) => {
 
 adminRouter.get('/withdrawals', async (req, res, next) => {
   try {
-    res.json(await listAllWithdrawalsAdmin());
+    const status = req.query.status ? String(req.query.status) : undefined;
+    const needs_review = req.query.needs_review === 'true' || req.query.needs_review === '1';
+    const sortBy = req.query.sortBy as 'date' | 'risk' | 'amount' | undefined;
+    res.json(await listAllWithdrawalsAdmin({ status, needs_review: needs_review || undefined, sortBy }));
   } catch (err) {
     next(err);
   }
@@ -1428,6 +1432,255 @@ adminRouter.get('/reports/:type', async (req, res, next) => {
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="bao-cao-${type}-${month}.csv"`);
     res.send(csvContent);
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.get('/related-accounts', async (req, res, next) => {
+  try {
+    const groupBy = req.query.group_by === 'ip' ? 'ip' : 'fp';
+    const search = String(req.query.search || '').trim().toLowerCase();
+
+    if (groupBy === 'ip') {
+      const { rows } = await pool.query(
+        `SELECT dl.ip_hash AS group_key,
+                COUNT(DISTINCT dl.user_id)::int AS user_count,
+                MAX(dl.note) AS note,
+                MAX(dl.last_seen) AS last_seen,
+                MIN(dl.first_seen) AS first_seen,
+                json_agg(
+                  json_build_object(
+                    'id', u.id,
+                    'username', u.username,
+                    'email', u.email,
+                    'email_verified', u.email_verified,
+                    'balance_nova', u.balance_nova,
+                    'locked', u.locked,
+                    'banned_at', u.banned_at,
+                    'created_at', u.created_at,
+                    'last_seen', dl.last_seen,
+                    'withdraw_count', COALESCE(w.w_count, 0),
+                    'withdraw_sum', COALESCE(w.w_sum, 0)
+                  ) ORDER BY dl.last_seen DESC
+                ) AS users
+         FROM device_links dl
+         JOIN users u ON u.id = dl.user_id
+         LEFT JOIN (
+           SELECT user_id, COUNT(*)::int AS w_count, COALESCE(SUM(amount_nova), 0)::int AS w_sum
+           FROM withdrawals
+           GROUP BY user_id
+         ) w ON w.user_id = u.id
+         GROUP BY dl.ip_hash
+         HAVING COUNT(DISTINCT dl.user_id) >= 2
+         ORDER BY user_count DESC, last_seen DESC
+         LIMIT 100`
+      );
+      let results = rows;
+      if (search) {
+        results = results.filter((r: any) =>
+          r.group_key.toLowerCase().includes(search) ||
+          r.users.some((u: any) => u.username.toLowerCase().includes(search) || (u.email && u.email.toLowerCase().includes(search)))
+        );
+      }
+      return res.json(results);
+    } else {
+      const { rows } = await pool.query(
+        `SELECT dl.fp_hash AS group_key,
+                COUNT(DISTINCT dl.user_id)::int AS user_count,
+                MAX(dl.note) AS note,
+                MAX(dl.last_seen) AS last_seen,
+                MIN(dl.first_seen) AS first_seen,
+                json_agg(
+                  json_build_object(
+                    'id', u.id,
+                    'username', u.username,
+                    'email', u.email,
+                    'email_verified', u.email_verified,
+                    'balance_nova', u.balance_nova,
+                    'locked', u.locked,
+                    'banned_at', u.banned_at,
+                    'created_at', u.created_at,
+                    'last_seen', dl.last_seen,
+                    'withdraw_count', COALESCE(w.w_count, 0),
+                    'withdraw_sum', COALESCE(w.w_sum, 0)
+                  ) ORDER BY dl.last_seen DESC
+                ) AS users
+         FROM device_links dl
+         JOIN users u ON u.id = dl.user_id
+         LEFT JOIN (
+           SELECT user_id, COUNT(*)::int AS w_count, COALESCE(SUM(amount_nova), 0)::int AS w_sum
+           FROM withdrawals
+           GROUP BY user_id
+         ) w ON w.user_id = u.id
+         GROUP BY dl.fp_hash
+         HAVING COUNT(DISTINCT dl.user_id) >= 2
+         ORDER BY user_count DESC, last_seen DESC
+         LIMIT 100`
+      );
+      let results = rows;
+      if (search) {
+        results = results.filter((r: any) =>
+          r.group_key.toLowerCase().includes(search) ||
+          r.users.some((u: any) => u.username.toLowerCase().includes(search) || (u.email && u.email.toLowerCase().includes(search)))
+        );
+      }
+      return res.json(results);
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.post('/related-accounts/note', async (req, res, next) => {
+  try {
+    const admin = req.adminUser!;
+    const { groupKey, note, type } = req.body;
+    if (!groupKey) return res.status(400).json({ error: 'Thiếu groupKey' });
+    const col = type === 'ip' ? 'ip_hash' : 'fp_hash';
+    await pool.query(`UPDATE device_links SET note = $1 WHERE ${col} = $2`, [note || null, groupKey]);
+    void auditService.record(admin.id, 'UPDATE_DEVICE_LINK_NOTE', groupKey, { note, type });
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.post('/related-accounts/batch-ban', async (req, res, next) => {
+  try {
+    const admin = req.adminUser!;
+    const { userIds, reason } = req.body as { userIds: string[]; reason: string };
+    if (!Array.isArray(userIds) || userIds.length === 0) {
+      return res.status(400).json({ error: 'Danh sách tài khoản trống' });
+    }
+    const banReason = String(reason || 'Phát hiện liên kết nhiều tài khoản gian lận').trim();
+
+    for (const uid of userIds) {
+      await pool.query(
+        `UPDATE users SET locked = 1, banned_at = now(), ban_reason = $1 WHERE id = $2`,
+        [banReason, uid]
+      );
+      await pool.query(`UPDATE user_sessions SET revoked_at = now() WHERE user_id = $1`, [uid]);
+      await pool.query(
+        `INSERT INTO security_flags (id, user_id, reason, created_at) VALUES ($1, $2, $3, now())`,
+        [nanoid(), uid, `Admin khóa hàng loạt: ${banReason}`]
+      );
+      void auditService.record(admin.id, 'BATCH_BAN_USER', uid, { reason: banReason });
+    }
+
+    sendAlert(
+      'batch_ban',
+      'Admin thực hiện khóa hàng loạt tài khoản liên quan',
+      [
+        { name: 'Admin', value: admin.username, inline: true },
+        { name: 'Số lượng tài khoản', value: String(userIds.length), inline: true },
+        { name: 'Lý do', value: banReason, inline: false },
+      ],
+      'batch_ban_' + Date.now(),
+      'danger'
+    ).catch(() => {});
+
+    res.json({ ok: true, bannedCount: userIds.length });
+  } catch (err) {
+    next(err);
+  }
+});
+
+let securityHealthCache: { data: any; expiresAt: number } | null = null;
+
+adminRouter.get('/security-health', async (req, res, next) => {
+  try {
+    if (securityHealthCache && securityHealthCache.expiresAt > Date.now()) {
+      return res.json(securityHealthCache.data);
+    }
+
+    const { rows: failedLogins } = await pool.query<{ hour: string; count: string }>(
+      `SELECT to_char(date_trunc('hour', created_at), 'YYYY-MM-DD HH24:00') AS hour,
+              COUNT(*)::int AS count
+       FROM login_events
+       WHERE success = false AND created_at >= now() - interval '24 hours'
+       GROUP BY date_trunc('hour', created_at)
+       ORDER BY date_trunc('hour', created_at) ASC`
+    );
+
+    const { rows: lockedUsers } = await pool.query<{ count: string }>(
+      'SELECT COUNT(*)::int AS count FROM users WHERE locked = 1'
+    );
+    const { rows: deletionUsers } = await pool.query<{ count: string }>(
+      'SELECT COUNT(*)::int AS count FROM users WHERE deletion_requested_at IS NOT NULL AND deleted_at IS NULL'
+    );
+    const { rows: flaggedWithdrawals } = await pool.query<{ count: string }>(
+      "SELECT COUNT(*)::int AS count FROM withdrawals WHERE needs_review = true AND status = 'pending'"
+    );
+    const { rows: multiDeviceGroups } = await pool.query<{ count: string }>(
+      'SELECT COUNT(DISTINCT fp_hash)::int AS count FROM (SELECT fp_hash FROM device_links GROUP BY fp_hash HAVING COUNT(DISTINCT user_id) >= 2) t'
+    );
+    const { rows: abnormalCountries } = await pool.query<{ count: string }>(
+      "SELECT COUNT(*)::int AS count FROM security_flags WHERE reason LIKE '%quốc gia%' AND created_at >= now() - interval '7 days'"
+    );
+    const { rows: lockedGiftcodes } = await pool.query<{ count: string }>(
+      'SELECT COUNT(*)::int AS count FROM giftcode_failures WHERE locked_until > now()'
+    );
+
+    const data = {
+      failed_logins_24h: failedLogins.map((r) => ({ hour: r.hour, count: Number(r.count) })),
+      locked_users_count: Number(lockedUsers[0]?.count || 0),
+      deletion_requested_count: Number(deletionUsers[0]?.count || 0),
+      flagged_withdrawals_count: Number(flaggedWithdrawals[0]?.count || 0),
+      multi_account_device_groups_count: Number(multiDeviceGroups[0]?.count || 0),
+      abnormal_country_logins_count: Number(abnormalCountries[0]?.count || 0),
+      locked_giftcodes_count: Number(lockedGiftcodes[0]?.count || 0),
+      updated_at: new Date().toISOString(),
+    };
+
+    securityHealthCache = {
+      data,
+      expiresAt: Date.now() + 30000,
+    };
+
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.post('/security-health/verify-audit', async (req, res, next) => {
+  try {
+    const admin = req.adminUser!;
+    const result = await auditService.verifyChain();
+    if (!result.valid) {
+      sendAlert(
+        'audit_chain_tampered',
+        'Cảnh báo chuỗi Audit Trail bị đứt gãy hoặc có dấu hiệu bị can thiệp!',
+        [
+          { name: 'Admin kiểm tra', value: admin.username, inline: true },
+          { name: 'Số bản ghi kiểm tra', value: String(result.totalChecked), inline: true },
+          { name: 'Chi tiết lỗi', value: result.reason || 'Sai lệch hash chuỗi', inline: false },
+        ],
+        'audit_tampered',
+        'danger'
+      ).catch(() => {});
+    }
+    void auditService.record(admin.id, 'VERIFY_AUDIT_CHAIN', 'system', { valid: result.valid, total: result.totalChecked });
+    res.json({
+      valid: result.valid,
+      total: result.totalChecked,
+      errors: result.reason ? [result.reason] : [],
+      corruptedId: result.corruptedId,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.post('/security-health/test-alert', async (req, res, next) => {
+  try {
+    const admin = req.adminUser!;
+    const ok = await sendTestAlert(admin.username);
+    if (!ok) {
+      return res.status(400).json({ error: 'Không thể gửi cảnh báo. Vui lòng kiểm tra biến DISCORD_ALERT_WEBHOOK_URL.' });
+    }
+    res.json({ ok: true, message: 'Đã gửi thông báo kiểm tra tới Discord thành công.' });
   } catch (err) {
     next(err);
   }

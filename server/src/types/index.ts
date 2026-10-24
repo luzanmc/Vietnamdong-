@@ -29,6 +29,9 @@ export interface User {
   token_version?: number;
   avatar_frame?: string | null;
   deleted_at?: string | null;
+  withdraw_locked_until?: string | null;
+  deletion_requested_at?: string | null;
+  last_data_export_at?: string | null;
 }
 
 export interface AdminAuditLog {
@@ -57,6 +60,7 @@ export interface Task {
   is_hot: number;
   active: number;
   sort_order: number;
+  min_seconds?: number;
 }
 
 export interface TaskWithProgress extends Task {
@@ -133,8 +137,70 @@ export interface Withdrawal {
   destination: string;
   status: WithdrawStatus;
   admin_note: string | null;
+  admin_id?: string | null;
   created_at: string;
   processed_at: string | null;
+  risk_score?: number;
+  risk_reasons?: string[];
+  needs_review?: boolean;
+  payout_account_id?: string | null;
+}
+
+export type PayoutAccountType = 'bank' | 'ewallet';
+export type PayoutAccountStatus = 'pending_email' | 'waiting' | 'active' | 'removed';
+
+export interface PayoutAccount {
+  id: string;
+  user_id: string;
+  type: PayoutAccountType;
+  bank_name: string;
+  account_name: string;
+  account_number_enc: string;
+  last4: string;
+  status: PayoutAccountStatus;
+  created_at: string;
+  email_confirmed_at: string | null;
+  active_from: string | null;
+}
+
+export interface PayoutAccountSafe {
+  id: string;
+  type: PayoutAccountType;
+  bank_name: string;
+  account_name: string;
+  last4: string;
+  status: PayoutAccountStatus;
+  created_at: string;
+  email_confirmed_at: string | null;
+  active_from: string | null;
+  isActive: boolean;
+  hoursUntilActive?: number;
+}
+
+export interface WithdrawTierInfo {
+  tier: 'new' | 'basic' | '2fa';
+  tierLabel: string;
+  dailyLimit: number;
+  totalWithdrawn24h: number;
+  remainingLimit: number;
+  limit2fa: number;
+}
+
+export interface WithdrawChallenge {
+  id: string;
+  user_id: string;
+  payout_account_id: string;
+  amount_nova: number;
+  amount_vnd: number;
+  method: string;
+  destination: string;
+  code_hash: string | null;
+  requires_2fa: boolean;
+  attempts: number;
+  max_attempts: number;
+  expires_at: string;
+  used_at: string | null;
+  created_at: string;
 }
 
 export type RedeemCategory = 'game_topup' | 'card' | 'wallet';
@@ -217,6 +283,7 @@ declare global {
     interface Request {
       user?: User;
       adminUser?: User;
+      sessionId?: string;
     }
   }
 }

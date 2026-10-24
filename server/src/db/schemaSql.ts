@@ -437,5 +437,160 @@ CREATE TRIGGER trg_prevent_audit_chain_tamper
 BEFORE UPDATE OR DELETE ON audit_chain
 FOR EACH ROW
 EXECUTE FUNCTION prevent_audit_chain_tamper();
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS withdraw_locked_until TIMESTAMPTZ;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS deletion_requested_at TIMESTAMPTZ;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS last_data_export_at TIMESTAMPTZ;
+
+CREATE TABLE IF NOT EXISTS account_security_tokens (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token_hash TEXT NOT NULL UNIQUE,
+  device_hash TEXT,
+  session_id UUID REFERENCES user_sessions(id) ON DELETE SET NULL,
+  used_at TIMESTAMPTZ,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_account_security_tokens_hash ON account_security_tokens(token_hash);
+CREATE INDEX IF NOT EXISTS idx_account_security_tokens_user ON account_security_tokens(user_id);
+
+CREATE TABLE IF NOT EXISTS totp_recovery_codes (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  code_hash TEXT NOT NULL,
+  used_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_totp_recovery_codes_user ON totp_recovery_codes(user_id);
+
+CREATE TABLE IF NOT EXISTS totp_failed_attempts (
+  user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  failed_attempts INTEGER NOT NULL DEFAULT 0,
+  locked_until TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS email_auth_codes (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  code_hash TEXT NOT NULL,
+  purpose TEXT NOT NULL,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  max_attempts INTEGER NOT NULL DEFAULT 5,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_email_auth_codes_lookup ON email_auth_codes(user_id, purpose, expires_at);
+
+CREATE TABLE IF NOT EXISTS email_code_throttle (
+  id TEXT PRIMARY KEY,
+  identifier_hash TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_email_code_throttle_lookup ON email_code_throttle(identifier_hash, created_at);
+
+CREATE TABLE IF NOT EXISTS payout_accounts (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type TEXT NOT NULL CHECK (type IN ('bank', 'ewallet')),
+  bank_name TEXT NOT NULL,
+  account_name TEXT NOT NULL,
+  account_number_enc TEXT NOT NULL,
+  last4 TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('pending_email', 'waiting', 'active', 'removed')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  email_confirmed_at TIMESTAMPTZ,
+  active_from TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_payout_accounts_user ON payout_accounts(user_id);
+CREATE INDEX IF NOT EXISTS idx_payout_accounts_status ON payout_accounts(user_id, status);
+
+CREATE TABLE IF NOT EXISTS payout_account_confirmations (
+  id TEXT PRIMARY KEY,
+  payout_account_id TEXT NOT NULL REFERENCES payout_accounts(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token_hash TEXT NOT NULL UNIQUE,
+  expires_at TIMESTAMPTZ NOT NULL,
+  used_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_payout_account_confirmations_token ON payout_account_confirmations(token_hash);
+
+CREATE TABLE IF NOT EXISTS withdraw_challenges (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  payout_account_id TEXT NOT NULL REFERENCES payout_accounts(id) ON DELETE CASCADE,
+  amount_nova NUMERIC(20, 2) NOT NULL,
+  amount_vnd NUMERIC(20, 2) NOT NULL,
+  method TEXT NOT NULL,
+  destination TEXT NOT NULL,
+  code_hash TEXT,
+  requires_2fa BOOLEAN NOT NULL DEFAULT false,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  max_attempts INTEGER NOT NULL DEFAULT 5,
+  expires_at TIMESTAMPTZ NOT NULL,
+  used_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_withdraw_challenges_user ON withdraw_challenges(user_id);
+
+ALTER TABLE withdrawals ADD COLUMN IF NOT EXISTS risk_score INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE withdrawals ADD COLUMN IF NOT EXISTS risk_reasons JSONB NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE withdrawals ADD COLUMN IF NOT EXISTS needs_review BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE withdrawals ADD COLUMN IF NOT EXISTS payout_account_id TEXT REFERENCES payout_accounts(id);
+
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS min_seconds INTEGER NOT NULL DEFAULT 8;
+
+CREATE TABLE IF NOT EXISTS device_links (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  fp_hash TEXT NOT NULL,
+  ip_hash TEXT NOT NULL,
+  first_seen TIMESTAMPTZ NOT NULL DEFAULT now(),
+  last_seen TIMESTAMPTZ NOT NULL DEFAULT now(),
+  note TEXT,
+  UNIQUE(user_id, fp_hash)
+);
+
+CREATE INDEX IF NOT EXISTS idx_device_links_fp ON device_links(fp_hash);
+CREATE INDEX IF NOT EXISTS idx_device_links_ip ON device_links(ip_hash);
+CREATE INDEX IF NOT EXISTS idx_device_links_user ON device_links(user_id);
+
+CREATE TABLE IF NOT EXISTS rate_limit_counters (
+  key TEXT NOT NULL,
+  window_start TIMESTAMPTZ NOT NULL,
+  count INTEGER NOT NULL DEFAULT 1,
+  PRIMARY KEY (key, window_start)
+);
+
+CREATE INDEX IF NOT EXISTS idx_rate_limit_counters_key ON rate_limit_counters(key, window_start DESC);
+
+CREATE TABLE IF NOT EXISTS rate_limit_penalties (
+  key TEXT PRIMARY KEY,
+  violation_level INTEGER NOT NULL DEFAULT 0,
+  locked_until TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_rate_limit_penalties_locked ON rate_limit_penalties(locked_until);
+
+CREATE TABLE IF NOT EXISTS giftcode_failures (
+  id TEXT PRIMARY KEY,
+  identifier TEXT UNIQUE NOT NULL,
+  count INTEGER NOT NULL DEFAULT 0,
+  locked_until TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_giftcode_failures_identifier ON giftcode_failures(identifier);
 `;
 

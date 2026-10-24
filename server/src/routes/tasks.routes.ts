@@ -5,8 +5,9 @@ import { pool } from '../db/database.js';
 import { env } from '../config/env.js';
 import { requireAuth } from '../middleware/auth.js';
 import { requireNotLocked } from '../middleware/requireNotLocked.js';
-import { requireNoVpn } from '../middleware/requireNoVpn.js';
 import { verifyTurnstile } from '../services/turnstileService.js';
+import { checkIsVpn } from '../services/vpnDetectionService.js';
+import { countAccountsOnDevice } from '../services/deviceLinkService.js';
 import { listTasksForUser, startTaskForUser, completeAttempt } from '../services/taskService.js';
 import { getAttemptByToken, getAnyTaskById } from '../repositories/taskRepository.js';
 import { getSetting } from '../repositories/settingsRepository.js';
@@ -22,9 +23,50 @@ tasksRouter.get('/', requireAuth, async (req, res, next) => {
   }
 });
 
-tasksRouter.post('/:id/start', requireAuth, requireNotLocked, requireNoVpn, async (req, res, next) => {
+tasksRouter.post('/:id/start', requireAuth, requireNotLocked, async (req, res, next) => {
   try {
-    res.json(await startTaskForUser(req.user!.id, req.params.id));
+    const userId = req.user!.id;
+    const deviceFp = (req.headers['x-device-id'] as string) || '';
+    const clientIp = req.ip || '';
+
+    const vpnResult = await checkIsVpn(clientIp);
+    const isVpn = vpnResult.isVpn;
+    const accountsOnDevice = await countAccountsOnDevice(deviceFp);
+
+    const { rows: uRows } = await pool.query<{ created_at: string; email_verified: number }>(
+      'SELECT created_at, email_verified FROM users WHERE id = $1',
+      [userId]
+    );
+    const userCreatedAt = uRows[0]?.created_at ? new Date(uRows[0].created_at).getTime() : 0;
+    const isNew = Date.now() - userCreatedAt < 7 * 86400000 || !uRows[0]?.email_verified;
+
+    const { rows: anomalyRows } = await pool.query<{ count: string }>(
+      `SELECT COUNT(*) AS count FROM security_flags
+       WHERE user_id = $1 AND reason LIKE $2 AND created_at >= now() - interval '24 hours'`,
+      [userId, '%quá nhanh%']
+    );
+    const hasAnomaly = Number(anomalyRows[0]?.count || 0) > 0;
+
+    const isHighRisk = isVpn || accountsOnDevice >= 2 || isNew || hasAnomaly;
+
+    if (isHighRisk) {
+      const captchaToken = req.body?.captchaToken;
+      if (!captchaToken) {
+        return res.status(428).json({
+          error: 'challenge_required',
+          requiresTurnstile: true,
+          message: 'Yêu cầu xác minh bảo mật trước khi tiếp tục làm nhiệm vụ',
+        });
+      }
+
+      const verified = await verifyTurnstile(captchaToken, clientIp);
+      if (!verified) {
+        return res.status(400).json({ error: 'Xác thực Cloudflare Turnstile thất bại, vui lòng thử lại' });
+      }
+    }
+
+    const result = await startTaskForUser(userId, req.params.id, deviceFp, clientIp);
+    res.json(result);
   } catch (err) {
     next(err);
   }
