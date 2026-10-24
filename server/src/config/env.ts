@@ -36,6 +36,7 @@ export const env = {
     redirectUri: process.env.DISCORD_REDIRECT_URI,
     botToken: process.env.DISCORD_BOT_TOKEN,
     logChannelId: process.env.DISCORD_LOG_CHANNEL_ID,
+    alertWebhookUrl: process.env.DISCORD_ALERT_WEBHOOK_URL || '',
   },
 
   google: {

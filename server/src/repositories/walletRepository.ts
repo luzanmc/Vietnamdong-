@@ -84,17 +84,18 @@ export async function getPendingWithdrawal(id: string, client: Queryable = pool)
   return rows[0];
 }
 
-export async function markWithdrawalPaid(id: string, note: string | null, client: Queryable = pool): Promise<void> {
+export async function markWithdrawalPaid(id: string, note: string | null, adminId: string | null = null, client: Queryable = pool): Promise<void> {
   await client.query(
-    `UPDATE withdrawals SET status = 'paid', processed_at = now(), admin_note = $1 WHERE id = $2 AND status = 'pending'`,
-    [note, id]
+    `UPDATE withdrawals SET status = 'paid', processed_at = now(), admin_note = $1, admin_id = COALESCE($3, admin_id) WHERE id = $2 AND status = 'pending'`,
+    [note, id, adminId]
   );
 }
 
-export async function markWithdrawalRejected(id: string, note: string, client: Queryable = pool): Promise<void> {
-  await client.query(`UPDATE withdrawals SET status = 'rejected', processed_at = now(), admin_note = $1 WHERE id = $2`, [
+export async function markWithdrawalRejected(id: string, note: string, adminId: string | null = null, client: Queryable = pool): Promise<void> {
+  await client.query(`UPDATE withdrawals SET status = 'rejected', processed_at = now(), admin_note = $1, admin_id = COALESCE($3, admin_id) WHERE id = $2`, [
     note,
     id,
+    adminId,
   ]);
 }
 

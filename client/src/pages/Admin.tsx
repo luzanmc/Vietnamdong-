@@ -11,6 +11,8 @@ import AdminRedeem from './admin/AdminRedeem.js';
 import AdminTasks from './admin/AdminTasks.js';
 import AdminVietsub from './admin/AdminVietsub.js';
 import AdminSupport from './admin/AdminSupport.js';
+import AdminAlerts from './admin/AdminAlerts.js';
+import AdminReports from './admin/AdminReports.js';
 import AdminSettings from './admin/AdminSettings.js';
 
 type TabKey =
@@ -24,6 +26,8 @@ type TabKey =
   | 'tasks'
   | 'vietsub'
   | 'support'
+  | 'alerts'
+  | 'reports'
   | 'settings';
 
 interface TabDef {
@@ -43,6 +47,8 @@ const TABS: TabDef[] = [
   { key: 'tasks', label: 'Nhiệm vụ', icon: 'bi-list-check' },
   { key: 'vietsub', label: 'Vietsub Studio', icon: 'bi-badge-cc' },
   { key: 'support', label: 'Hỗ trợ', icon: 'bi-headset' },
+  { key: 'alerts', label: 'Cảnh báo', icon: 'bi-bell' },
+  { key: 'reports', label: 'Báo cáo', icon: 'bi-file-earmark-spreadsheet' },
   { key: 'settings', label: 'Cài đặt', icon: 'bi-sliders' },
 ];
 
@@ -117,6 +123,8 @@ export default function Admin() {
           {tab === 'tasks' && <AdminTasks />}
           {tab === 'vietsub' && <AdminVietsub />}
           {tab === 'support' && <AdminSupport />}
+          {tab === 'alerts' && <AdminAlerts />}
+          {tab === 'reports' && <AdminReports />}
           {tab === 'settings' && <AdminSettings />}
         </div>
       </div>

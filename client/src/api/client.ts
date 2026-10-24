@@ -34,6 +34,18 @@ export interface TwoFactorSetup {
   otpauthUri: string;
 }
 
+export interface MaintenanceData {
+  maintenance: boolean;
+  message?: string;
+  eta?: string | null;
+}
+
+let maintenanceHandler: ((data: MaintenanceData) => void) | null = null;
+
+export function setMaintenanceHandler(handler: (data: MaintenanceData) => void): void {
+  maintenanceHandler = handler;
+}
+
 class ApiError extends Error {
   status: number;
   constructor(message: string, status: number) {
@@ -56,8 +68,11 @@ async function request<T>(path: string, opts: RequestInit = {}): Promise<T> {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
+    if (res.status === 503 && data.maintenance && maintenanceHandler) {
+      maintenanceHandler({ maintenance: true, message: data.message, eta: data.eta });
+    }
     if (res.status === 401 && unauthorizedHandler) unauthorizedHandler();
-    throw new ApiError(data.error || 'Đã có lỗi xảy ra, vui lòng thử lại', res.status);
+    throw new ApiError(data.error || data.message || 'Đã có lỗi xảy ra, vui lòng thử lại', res.status);
   }
   return data as T;
 }
@@ -143,7 +158,17 @@ export const api = {
   myCreatorCode: () => request<CreatorCodeInfo>('/creator/mine'),
   applyCreatorCode: (code: string) => request('/creator/apply', { method: 'POST', body: JSON.stringify({ code }) }),
 
-  publicSettings: () => request<{ music_url: string; nova_to_vnd_rate: number; announcement: string }>('/settings/public'),
+  publicSettings: () =>
+    request<{
+      music_url: string;
+      nova_to_vnd_rate: number;
+      announcement: string;
+      maintenance?: boolean;
+      maintenance_message?: string;
+      maintenance_eta?: string | null;
+    }>('/settings/public'),
+  reportTask: (taskId: string, reason?: string) =>
+    request<{ ok: true }>(`/tasks/${taskId}/report`, { method: 'POST', body: JSON.stringify({ reason }) }),
 
   vietsubInfo: () => request<VietsubInfo>('/vietsub/info'),
   vietsubBuyNova: () => request<{ ok: true; orderId: string }>('/vietsub/buy-nova', { method: 'POST' }),

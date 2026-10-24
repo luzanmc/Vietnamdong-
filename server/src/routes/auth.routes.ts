@@ -15,6 +15,9 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
 } from '../validators/auth.validators.js';
+import { pool } from '../db/database.js';
+import { getSetting } from '../repositories/settingsRepository.js';
+import { sendAlert } from '../services/discordService.js';
 import { verifyTurnstile } from '../services/turnstileService.js';
 import { hashPassword, comparePassword } from '../services/passwordService.js';
 import { sendPasswordResetEmail, sendVerificationEmail } from '../services/mailService.js';
@@ -151,9 +154,12 @@ authRouter.post('/register', validateBody(registerSchema), async (req, res, next
     if (await getUserByEmail(email)) return res.status(409).json({ error: 'Email này đã được đăng ký' });
     if (await getUserByUsername(username)) return res.status(409).json({ error: 'Tên đăng nhập đã tồn tại' });
 
-    const clientIp = req.ip || null;
-    if (clientIp) {
-      const recentCount = await countUsersFromIpToday(clientIp);
+    const rawIp = req.ip || ((req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()) || null;
+    const ipSalt = env.jwtSecret || 'vnc-ip-salt';
+    const hashedIp = rawIp ? crypto.createHash('sha256').update(`${rawIp}:${ipSalt}`).digest('hex') : null;
+
+    if (hashedIp) {
+      const recentCount = await countUsersFromIpToday(hashedIp);
       if (recentCount >= env.security.maxRegistrationsPerIpPerDay) {
         return res.status(429).json({ error: 'Đã đạt giới hạn số tài khoản đăng ký từ địa chỉ này trong 24 giờ' });
       }
@@ -161,8 +167,42 @@ authRouter.post('/register', validateBody(registerSchema), async (req, res, next
 
     const id = nanoid();
     const passwordHash = await hashPassword(password);
-    await createUserWithPassword(id, email, username, passwordHash, clientIp);
+    await createUserWithPassword(id, email, username, passwordHash, hashedIp);
     const user = (await getUserById(id))!;
+
+    if (hashedIp) {
+      const { rows: sameIpUsers } = await pool.query<{ id: string; username: string }>(
+        `SELECT id, username FROM users WHERE registered_ip = $1 AND created_at >= now() - interval '24 hours'`,
+        [hashedIp]
+      );
+      const thresholdSetting = await getSetting('alert_multi_account_threshold');
+      const threshold = Number(thresholdSetting || 3);
+      const enabledSetting = await getSetting('alert_multi_account_enabled');
+      const alertEnabled = enabledSetting !== 'false' && enabledSetting !== '0';
+
+      if (sameIpUsers.length >= threshold) {
+        await pool.query(
+          `INSERT INTO security_flags (id, user_id, reason, created_at) VALUES ($1, $2, $3, now())`,
+          [nanoid(), id, 'Nhiều tài khoản tạo từ cùng địa chỉ trong 24 giờ']
+        );
+
+        if (alertEnabled) {
+          const userIds = sameIpUsers.map((u) => u.id).join(', ');
+          sendAlert(
+            'multi_account',
+            'Cảnh báo nhiều tài khoản mới từ cùng địa chỉ',
+            [
+              { name: 'Số lượng tài khoản (24h)', value: String(sameIpUsers.length), inline: true },
+              { name: 'Tài khoản vừa tạo', value: `${user.username} (${user.id})`, inline: true },
+              { name: 'Danh sách User ID', value: userIds.slice(0, 1000), inline: false },
+              { name: 'Quản trị hệ thống', value: `${env.clientUrl}/admin`, inline: false },
+            ],
+            hashedIp,
+            'warning'
+          ).catch(() => {});
+        }
+      }
+    }
 
     const rawToken = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();

@@ -18,6 +18,7 @@ import {
 import { getUserById } from '../repositories/userRepository.js';
 import { createNotification } from '../repositories/notificationRepository.js';
 import { calculateLevel, rollLevelBonus, TASK_COMPLETION_XP } from './levelService.js';
+import { getActiveMultiplierEvent } from '../repositories/eventRepository.js';
 import { HttpError } from '../utils/httpError.js';
 import type { TaskWithProgress } from '../types/index.js';
 
@@ -83,10 +84,30 @@ export async function completeAttempt(token: string): Promise<CompleteAttemptRes
       [attempt.user_id]
     );
 
+    const activeEvent = await getActiveMultiplierEvent(client);
+    let eventMultiplier = 1;
+    let eventType = 'xp_vnc';
+    if (activeEvent) {
+      eventMultiplier = Math.min(3, Math.max(1, Number(activeEvent.multiplier) || 1));
+      eventType = activeEvent.type || 'xp_vnc';
+    }
+
+    const baseReward = task.reward_nova;
+    let finalReward = baseReward;
+    if (eventType === 'xp_vnc' || eventType === 'vnc') {
+      finalReward = Math.round(baseReward * eventMultiplier);
+    }
+
+    const baseXp = TASK_COMPLETION_XP;
+    let finalXp = baseXp;
+    if (eventType === 'xp_vnc' || eventType === 'xp') {
+      finalXp = Math.round(baseXp * eventMultiplier);
+    }
+
     const currentUser = userRows[0];
     const previousXp = Number(currentUser?.xp || 0);
     const oldLevel = calculateLevel(previousXp).level;
-    const nextXp = previousXp + TASK_COMPLETION_XP;
+    const nextXp = previousXp + finalXp;
     const levelInfo = calculateLevel(nextXp);
     const newLevel = levelInfo.level;
 
@@ -109,20 +130,20 @@ export async function completeAttempt(token: string): Promise<CompleteAttemptRes
       await credit(attempt.user_id, bonusNova, 'level_bonus', attempt.id, client);
     }
 
-    if (task.reward_nova > 0) {
-      await credit(attempt.user_id, task.reward_nova, 'task_reward', attempt.id, client);
+    if (finalReward > 0) {
+      await credit(attempt.user_id, finalReward, 'task_reward', attempt.id, client);
     }
 
-    await payReferralBonus(attempt.user_id, task.reward_nova, client);
-    await payCreatorBonus(attempt.user_id, task.reward_nova, client);
+    await payReferralBonus(attempt.user_id, finalReward, client);
+    await payCreatorBonus(attempt.user_id, finalReward, client);
 
     return {
       attemptId: attempt.id,
       userId: attempt.user_id,
       taskName: task.name,
-      rewardNova: task.reward_nova,
+      rewardNova: finalReward,
       bonusNova,
-      xpGained: TASK_COMPLETION_XP,
+      xpGained: finalXp,
       level: newLevel,
       levelUp,
     };

@@ -16,6 +16,8 @@ import {
   createTransferRecord,
 } from '../repositories/walletRepository.js';
 import { getUserByUsername } from '../repositories/userRepository.js';
+import { getSetting } from '../repositories/settingsRepository.js';
+import { sendAlert } from '../services/discordService.js';
 
 export const walletRouter = Router();
 
@@ -63,6 +65,30 @@ walletRouter.post('/withdraw', requireAuth, requireNotLocked, requireNoVpn, requ
     const amountVnd = novaToVnd(amount_nova, env.economy.novaToVnd);
     await debit(req.user!.id, amount_nova, 'withdraw', id);
     await createWithdrawal(id, req.user!.id, amount_nova, amountVnd, method, destination);
+
+    const thresholdSetting = await getSetting('alert_withdraw_threshold');
+    const threshold = Number(thresholdSetting || 500000);
+    const enabledSetting = await getSetting('alert_withdraw_enabled');
+    const alertEnabled = enabledSetting !== 'false' && enabledSetting !== '0';
+
+    if (amountVnd >= threshold && alertEnabled) {
+      const destStr = String(destination || '');
+      const maskedDest = destStr.length > 4 ? `****${destStr.slice(-4)}` : destStr;
+      sendAlert(
+        'withdraw_large',
+        'Cảnh báo yêu cầu rút tiền lớn',
+        [
+          { name: 'Người dùng', value: `${req.user!.username} (${req.user!.id})`, inline: true },
+          { name: 'Số tiền VNC', value: `${amount_nova.toLocaleString('vi-VN')} VNC`, inline: true },
+          { name: 'Số tiền quy đổi', value: `${amountVnd.toLocaleString('vi-VN')} VND`, inline: true },
+          { name: 'Phương thức', value: method, inline: true },
+          { name: 'Tài khoản nhận', value: maskedDest, inline: true },
+          { name: 'Duyệt nhanh trong Admin', value: `${env.clientUrl}/admin`, inline: false },
+        ],
+        req.user!.id,
+        'warning'
+      ).catch(() => {});
+    }
 
     const transferCode = `VNC-RUT-${id.slice(0, 8).toUpperCase()}`;
     res.json({ ok: true, id, status: 'pending', transfer_code: transferCode });

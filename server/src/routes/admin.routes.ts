@@ -55,7 +55,10 @@ import { addLicenseKeys, listLicensesAdmin, listAllVietsubOrdersAdmin } from '..
 import { getVietsubPublicInfo, updateVietsubSettings, adminApproveVietsubOrder, adminRejectVietsubOrder } from '../services/vietsubService.js';
 import { createNotification } from '../repositories/notificationRepository.js';
 import { toCsv } from '../utils/csv.js';
-import { listAnnouncementsAdmin, createAnnouncement, deactivateAnnouncement } from '../repositories/announcementRepository.js';
+import { listAnnouncementsAdmin, createAnnouncement, updateAnnouncement, deactivateAnnouncement } from '../repositories/announcementRepository.js';
+import { listEventsAdmin, createEvent, updateEvent, toggleEvent, deleteEvent } from '../repositories/eventRepository.js';
+import { invalidateMaintenanceCache } from '../services/maintenanceService.js';
+import { sendAlert } from '../services/discordService.js';
 import { monthlyTop } from '../repositories/leaderboardRepository.js';
 import { listAllTicketsAdmin, getTicketById, getMessagesForTicket, addMessage, closeTicket, reopenTicket } from '../repositories/supportRepository.js';
 import { getAllGiftcodes, createGiftcode, toggleGiftcodeActive, deleteGiftcode } from '../repositories/giftcodeRepository.js';
@@ -571,8 +574,13 @@ adminRouter.post('/announcements', async (req, res, next) => {
     if (raw.length > 200) {
       return res.status(400).json({ error: 'Nội dung thông báo không được vượt quá 200 ký tự' });
     }
-    await createAnnouncement(nanoid(), raw);
-    await logAdminAudit(admin.id, 'CREATE_ANNOUNCEMENT', null, { message: raw }, req);
+    const startsAt = req.body?.starts_at ? new Date(req.body.starts_at).toISOString() : null;
+    const endsAt = req.body?.ends_at ? new Date(req.body.ends_at).toISOString() : null;
+    if (startsAt && endsAt && new Date(endsAt) <= new Date(startsAt)) {
+      return res.status(400).json({ error: 'Thời gian kết thúc phải sau thời gian bắt đầu' });
+    }
+    await createAnnouncement(nanoid(), raw, startsAt, endsAt);
+    await logAdminAudit(admin.id, 'CREATE_ANNOUNCEMENT', null, { message: raw, starts_at: startsAt, ends_at: endsAt }, req);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -586,8 +594,14 @@ adminRouter.patch('/announcements/:id', async (req, res, next) => {
     if (!raw) return res.status(400).json({ error: 'Nội dung thông báo không được để trống' });
     if (raw.length > 200) return res.status(400).json({ error: 'Nội dung thông báo không được vượt quá 200 ký tự' });
 
-    await pool.query('UPDATE announcements SET message = $1 WHERE id = $2', [raw, req.params.id]);
-    await logAdminAudit(admin.id, 'EDIT_ANNOUNCEMENT', req.params.id, { message: raw }, req);
+    const startsAt = req.body?.starts_at ? new Date(req.body.starts_at).toISOString() : null;
+    const endsAt = req.body?.ends_at ? new Date(req.body.ends_at).toISOString() : null;
+    if (startsAt && endsAt && new Date(endsAt) <= new Date(startsAt)) {
+      return res.status(400).json({ error: 'Thời gian kết thúc phải sau thời gian bắt đầu' });
+    }
+
+    await updateAnnouncement(req.params.id, raw, startsAt, endsAt);
+    await logAdminAudit(admin.id, 'EDIT_ANNOUNCEMENT', req.params.id, { message: raw, starts_at: startsAt, ends_at: endsAt }, req);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -812,7 +826,7 @@ adminRouter.post('/withdrawals/:id/approve', async (req, res, next) => {
     const admin = req.adminUser!;
     const w = await getPendingWithdrawal(req.params.id);
     if (!w) return res.status(404).json({ error: 'Không tìm thấy yêu cầu' });
-    await markWithdrawalPaid(req.params.id, req.body.note || null);
+    await markWithdrawalPaid(req.params.id, req.body.note || null, admin.id);
     await createNotification(nanoid(), w.user_id, `Yêu cầu rút ${w.amount_nova} VNC đã được duyệt và thanh toán.`, '/wallet');
     await logAdminAudit(admin.id, 'APPROVE_WITHDRAWAL', w.id, { amount: w.amount_nova, userId: w.user_id }, req);
     res.json({ ok: true });
@@ -827,7 +841,7 @@ adminRouter.post('/withdrawals/:id/reject', async (req, res, next) => {
     const w = await getPendingWithdrawal(req.params.id);
     if (!w) return res.status(404).json({ error: 'Không tìm thấy yêu cầu' });
     await credit(w.user_id, w.amount_nova, 'admin_adjust', w.id);
-    await markWithdrawalRejected(req.params.id, req.body.note || 'Từ chối bởi admin');
+    await markWithdrawalRejected(req.params.id, req.body.note || 'Từ chối bởi admin', admin.id);
     await createNotification(nanoid(), w.user_id, `Yêu cầu rút ${w.amount_nova} VNC bị từ chối, đã hoàn lại VNC.`, '/wallet');
     await logAdminAudit(admin.id, 'REJECT_WITHDRAWAL', w.id, { amount: w.amount_nova, userId: w.user_id, note: req.body.note }, req);
     res.json({ ok: true });
@@ -1159,8 +1173,261 @@ adminRouter.post('/settings', async (req, res, next) => {
     const { key, value } = req.body;
     if (!key) return res.status(400).json({ error: 'Khóa cài đặt không được để trống' });
     await setSetting(key, String(value ?? ''));
+    if (String(key).startsWith('maintenance_')) {
+      invalidateMaintenanceCache();
+    }
     await logAdminAudit(admin.id, 'UPDATE_SETTING', key, { value }, req);
     res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.get('/events', async (req, res, next) => {
+  try {
+    res.json(await listEventsAdmin());
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.post('/events', async (req, res, next) => {
+  try {
+    const admin = req.adminUser!;
+    const title = String(req.body?.title || '').trim();
+    const message = String(req.body?.message || '').trim();
+    const type = String(req.body?.type || 'xp_vnc').trim();
+    const multiplier = Math.min(3, Math.max(1, Number(req.body?.multiplier) || 1));
+    const startsAt = req.body?.starts_at ? new Date(req.body.starts_at).toISOString() : null;
+    const endsAt = req.body?.ends_at ? new Date(req.body.ends_at).toISOString() : null;
+
+    if (!title) return res.status(400).json({ error: 'Tiêu đề sự kiện không được để trống' });
+    if (startsAt && endsAt && new Date(endsAt) <= new Date(startsAt)) {
+      return res.status(400).json({ error: 'Thời gian kết thúc phải sau thời gian bắt đầu' });
+    }
+
+    const id = nanoid();
+    await createEvent(id, title, message, type, multiplier, startsAt, endsAt);
+    await logAdminAudit(admin.id, 'CREATE_EVENT', id, { title, message, type, multiplier, startsAt, endsAt }, req);
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.patch('/events/:id', async (req, res, next) => {
+  try {
+    const admin = req.adminUser!;
+    const title = String(req.body?.title || '').trim();
+    const message = String(req.body?.message || '').trim();
+    const type = String(req.body?.type || 'xp_vnc').trim();
+    const multiplier = Math.min(3, Math.max(1, Number(req.body?.multiplier) || 1));
+    const startsAt = req.body?.starts_at ? new Date(req.body.starts_at).toISOString() : null;
+    const endsAt = req.body?.ends_at ? new Date(req.body.ends_at).toISOString() : null;
+
+    if (!title) return res.status(400).json({ error: 'Tiêu đề sự kiện không được để trống' });
+    if (startsAt && endsAt && new Date(endsAt) <= new Date(startsAt)) {
+      return res.status(400).json({ error: 'Thời gian kết thúc phải sau thời gian bắt đầu' });
+    }
+
+    await updateEvent(req.params.id, title, message, type, multiplier, startsAt, endsAt);
+    await logAdminAudit(admin.id, 'UPDATE_EVENT', req.params.id, { title, message, type, multiplier, startsAt, endsAt }, req);
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.patch('/events/:id/toggle', async (req, res, next) => {
+  try {
+    const admin = req.adminUser!;
+    await toggleEvent(req.params.id);
+    await logAdminAudit(admin.id, 'TOGGLE_EVENT', req.params.id, null, req);
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.delete('/events/:id', async (req, res, next) => {
+  try {
+    const admin = req.adminUser!;
+    await deleteEvent(req.params.id);
+    await logAdminAudit(admin.id, 'DELETE_EVENT', req.params.id, null, req);
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.get('/alerts/log', async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, type, title, details, created_at FROM alert_log ORDER BY created_at DESC LIMIT 50`
+    );
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.post('/alerts/test', async (req, res, next) => {
+  try {
+    const admin = req.adminUser!;
+    const ok = await sendAlert(
+      'test',
+      'Thử nghiệm webhook Discord',
+      [
+        { name: 'Trạng thái', value: 'Kết nối webhook thành công', inline: true },
+        { name: 'Admin thực hiện', value: admin.username, inline: true },
+        { name: 'Thời gian gửi', value: new Date().toISOString(), inline: false },
+      ],
+      null,
+      'info'
+    );
+    await logAdminAudit(admin.id, 'TEST_ALERT_WEBHOOK', null, { ok }, req);
+    res.json({
+      ok,
+      message: ok
+        ? 'Gửi thử webhook thành công'
+        : 'Gửi thử thất bại. Vui lòng kiểm tra biến môi trường DISCORD_ALERT_WEBHOOK_URL',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+adminRouter.get('/reports/:type', async (req, res, next) => {
+  try {
+    const admin = req.adminUser!;
+    const type = String(req.params.type || '').trim();
+    let month = String(req.query.month || '').trim();
+
+    if (!month || !/^\d{4}-\d{2}$/.test(month)) {
+      const now = new Date();
+      month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    const [yearStr, monthStr] = month.split('-');
+    const year = Number(yearStr);
+    const monthNum = Number(monthStr);
+    const startDate = `${month}-01 00:00:00+07`;
+    const nextMonth = monthNum === 12 ? 1 : monthNum + 1;
+    const nextYear = monthNum === 12 ? year + 1 : year;
+    const endDate = `${nextYear}-${String(nextMonth).padStart(2, '0')}-01 00:00:00+07`;
+
+    let csvContent = '';
+
+    if (type === 'tasks' || type === 'revenue') {
+      const { rows } = await pool.query(
+        `SELECT
+           TO_CHAR(ta.completed_at AT TIME ZONE 'Asia/Ho_Chi_Minh', 'YYYY-MM-DD') AS ngay,
+           t.name AS ten_nhiem_vu,
+           t.provider_key AS nha_cung_cap,
+           COUNT(*)::int AS so_luot_hoan_thanh,
+           SUM(t.reward_nova)::int AS tong_vnc,
+           SUM(t.reward_nova * $3)::bigint AS doanh_thu_vnd
+         FROM task_attempts ta
+         JOIN tasks t ON t.id = ta.task_id
+         WHERE ta.status = 'completed'
+           AND ta.completed_at >= $1::timestamptz
+           AND ta.completed_at < $2::timestamptz
+         GROUP BY TO_CHAR(ta.completed_at AT TIME ZONE 'Asia/Ho_Chi_Minh', 'YYYY-MM-DD'), t.id, t.name, t.provider_key
+         ORDER BY ngay ASC, so_luot_hoan_thanh DESC
+         LIMIT 100000`,
+        [startDate, endDate, env.economy.novaToVnd]
+      );
+      const isTruncated = rows.length >= 100000;
+      csvContent = toCsv(
+        rows,
+        [
+          { key: 'ngay', label: 'Ngày' },
+          { key: 'ten_nhiem_vu', label: 'Tên nhiệm vụ' },
+          { key: 'nha_cung_cap', label: 'Nhà cung cấp' },
+          { key: 'so_luot_hoan_thanh', label: 'Số lượt hoàn thành' },
+          { key: 'tong_vnc', label: 'Tổng VNC' },
+          { key: 'doanh_thu_vnd', label: 'Doanh thu quy đổi (VND)' },
+        ],
+        isTruncated
+      );
+    } else if (type === 'coins' || type === 'ledger') {
+      const { rows } = await pool.query(
+        `SELECT
+           TO_CHAR(cl.created_at AT TIME ZONE 'Asia/Ho_Chi_Minh', 'YYYY-MM-DD') AS ngay,
+           cl.reason AS ly_do,
+           COUNT(*)::int AS so_giao_dich,
+           SUM(cl.amount)::bigint AS tong_vnc
+         FROM coin_ledger cl
+         WHERE cl.created_at >= $1::timestamptz
+           AND cl.created_at < $2::timestamptz
+         GROUP BY TO_CHAR(cl.created_at AT TIME ZONE 'Asia/Ho_Chi_Minh', 'YYYY-MM-DD'), cl.reason
+         ORDER BY ngay ASC, cl.reason ASC
+         LIMIT 100000`,
+        [startDate, endDate]
+      );
+      const isTruncated = rows.length >= 100000;
+      csvContent = toCsv(
+        rows,
+        [
+          { key: 'ngay', label: 'Ngày' },
+          { key: 'ly_do', label: 'Lý do phát sinh' },
+          { key: 'so_giao_dich', label: 'Số giao dịch' },
+          { key: 'tong_vnc', label: 'Tổng VNC' },
+        ],
+        isTruncated
+      );
+    } else if (type === 'withdrawals') {
+      const { rows } = await pool.query(
+        `SELECT
+           w.id,
+           u.username AS nguoi_dung,
+           w.amount_nova AS so_tien_vnc,
+           w.amount_vnd AS so_tien_vnd,
+           w.method AS phuong_thuc,
+           w.destination,
+           w.status AS trang_thai,
+           TO_CHAR(w.created_at AT TIME ZONE 'Asia/Ho_Chi_Minh', 'YYYY-MM-DD HH24:MI:SS') AS thoi_gian_tao,
+           TO_CHAR(w.processed_at AT TIME ZONE 'Asia/Ho_Chi_Minh', 'YYYY-MM-DD HH24:MI:SS') AS thoi_gian_duyet,
+           COALESCE(admin_u.username, '') AS admin_duyet
+         FROM withdrawals w
+         JOIN users u ON u.id = w.user_id
+         LEFT JOIN users admin_u ON admin_u.id = w.admin_id
+         WHERE w.created_at >= $1::timestamptz
+           AND w.created_at < $2::timestamptz
+         ORDER BY w.created_at ASC
+         LIMIT 100000`,
+        [startDate, endDate]
+      );
+      const sanitizedRows = rows.map((r) => {
+        const d = String(r.destination || '');
+        const masked = d.length > 4 ? `****${d.slice(-4)}` : d;
+        return { ...r, destination: masked };
+      });
+      const isTruncated = sanitizedRows.length >= 100000;
+      csvContent = toCsv(
+        sanitizedRows,
+        [
+          { key: 'id', label: 'ID yêu cầu' },
+          { key: 'nguoi_dung', label: 'Người dùng' },
+          { key: 'so_tien_vnc', label: 'Số tiền VNC' },
+          { key: 'so_tien_vnd', label: 'Số tiền VND' },
+          { key: 'phuong_thuc', label: 'Phương thức' },
+          { key: 'destination', label: '4 số cuối tài khoản' },
+          { key: 'trang_thai', label: 'Trạng thái' },
+          { key: 'thoi_gian_tao', label: 'Thời gian tạo' },
+          { key: 'thoi_gian_duyet', label: 'Thời gian duyệt' },
+          { key: 'admin_duyet', label: 'Admin duyệt' },
+        ],
+        isTruncated
+      );
+    } else {
+      return res.status(400).json({ error: 'Loại báo cáo không hợp lệ' });
+    }
+
+    await logAdminAudit(admin.id, 'EXPORT_REPORT', type, { month }, req);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="bao-cao-${type}-${month}.csv"`);
+    res.send(csvContent);
   } catch (err) {
     next(err);
   }

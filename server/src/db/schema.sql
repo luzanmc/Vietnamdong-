@@ -251,8 +251,51 @@ CREATE TABLE IF NOT EXISTS announcements (
   id TEXT PRIMARY KEY,
   message TEXT NOT NULL,
   active INTEGER NOT NULL DEFAULT 1,
+  starts_at TIMESTAMPTZ,
+  ends_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+ALTER TABLE announcements ADD COLUMN IF NOT EXISTS starts_at TIMESTAMPTZ;
+ALTER TABLE announcements ADD COLUMN IF NOT EXISTS ends_at TIMESTAMPTZ;
+ALTER TABLE withdrawals ADD COLUMN IF NOT EXISTS admin_id TEXT REFERENCES users(id);
+
+CREATE TABLE IF NOT EXISTS scheduled_events (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'xp_vnc',
+  multiplier NUMERIC(4,2) NOT NULL DEFAULT 1.0,
+  starts_at TIMESTAMPTZ,
+  ends_at TIMESTAMPTZ,
+  enabled INTEGER NOT NULL DEFAULT 1,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_scheduled_events_active ON scheduled_events(enabled, starts_at, ends_at);
+
+CREATE TABLE IF NOT EXISTS alert_throttle (
+  key TEXT PRIMARY KEY,
+  sent_at TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS alert_log (
+  id TEXT PRIMARY KEY,
+  type TEXT NOT NULL,
+  title TEXT NOT NULL,
+  details JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_alert_log_created_at ON alert_log(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS task_reports (
+  id TEXT PRIMARY KEY,
+  task_id TEXT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  reason TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_task_reports_task_created ON task_reports(task_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_task_reports_user_task ON task_reports(user_id, task_id);
 
 CREATE TABLE IF NOT EXISTS spin_claims (
   id TEXT PRIMARY KEY,

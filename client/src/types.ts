@@ -228,3 +228,33 @@ export interface GiftcodeHistoryItem {
   created_at: string;
 }
 
+export interface Announcement {
+  id: string;
+  message: string;
+  active: number;
+  starts_at: string | null;
+  ends_at: string | null;
+  created_at: string;
+}
+
+export interface ScheduledEvent {
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  multiplier: number;
+  starts_at: string | null;
+  ends_at: string | null;
+  enabled: number;
+  created_at: string;
+}
+
+export interface AlertLog {
+  id: string;
+  type: string;
+  title: string;
+  details: Array<{ name: string; value: string; inline?: boolean }> | null;
+  created_at: string;
+}
+
+

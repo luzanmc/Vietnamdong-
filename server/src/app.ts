@@ -6,6 +6,9 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import { env } from './config/env.js';
 import { ensureReady } from './db/database.js';
+import { getMaintenanceStatus } from './services/maintenanceService.js';
+import { verifySession } from './utils/jwt.js';
+import { verifyAdminToken } from './middleware/adminAuth.js';
 
 import { authRouter } from './routes/auth.routes.js';
 import { tasksRouter } from './routes/tasks.routes.js';
@@ -76,6 +79,68 @@ app.use(
   ['/api/auth/login', '/api/auth/login/2fa', '/api/auth/2fa/enable', '/api/auth/2fa/disable', '/api/auth/register', '/api/auth/forgot-password', '/api/auth/reset-password'],
   rateLimit({ windowMs: 60_000, max: 8, standardHeaders: true, legacyHeaders: false })
 );
+
+app.use('/api', async (req, res, next) => {
+  try {
+    const status = await getMaintenanceStatus();
+    if (!status.enabled) {
+      return next();
+    }
+
+    const path = req.originalUrl.split('?')[0];
+    if (
+      path === '/api/auth/login' ||
+      path === '/api/auth/login/2fa' ||
+      path === '/api/auth/me' ||
+      path === '/api/settings/public' ||
+      path.startsWith('/api/security') ||
+      path.startsWith('/api/card2k')
+    ) {
+      return next();
+    }
+
+    let isAdmin = false;
+    const sessionToken = req.cookies?.vnd_session;
+    if (sessionToken) {
+      const payload = verifySession(sessionToken);
+      if (payload?.role === 'admin') {
+        isAdmin = true;
+      }
+    }
+
+    if (!isAdmin) {
+      const adminToken = req.cookies?.vnd_admin_session || (req.headers['x-admin-token'] as string | undefined);
+      if (adminToken && typeof adminToken === 'string') {
+        const payload = verifyAdminToken(adminToken);
+        if (payload?.uid) {
+          isAdmin = true;
+        }
+      }
+    }
+
+    if (!isAdmin) {
+      const authHeader = req.headers.authorization;
+      if (authHeader?.startsWith('Bearer ')) {
+        const payload = verifySession(authHeader.slice(7).trim());
+        if (payload?.role === 'admin') {
+          isAdmin = true;
+        }
+      }
+    }
+
+    if (isAdmin) {
+      return next();
+    }
+
+    return res.status(503).json({
+      maintenance: true,
+      message: status.message,
+      eta: status.eta,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 
 app.use('/api/auth', authRouter);
 app.use('/api/tasks', tasksRouter);
