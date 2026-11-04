@@ -36,9 +36,9 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: '/dashboard', icon: 'bi-grid-1x2-fill', labelKey: 'nav.dashboard' },
       { to: '/chart', icon: 'bi-graph-up', labelKey: 'nav.chart' },
-      { to: '/daily-reward', icon: 'bi-gift-fill', labelKey: 'nav.daily', badge: 'HOT', badgeColor: 'bg-rose text-white' },
-      { to: '/lucky-wheel', icon: 'bi-stars', labelKey: 'nav.spin', badge: 'FREE', badgeColor: 'bg-amber text-black' },
-      { to: '/giftcode', icon: 'bi-ticket-perforated-fill', labelKey: 'nav.giftcode', badge: 'HOT', badgeColor: 'bg-amber text-black' },
+      { to: '/daily-reward', icon: 'bi-gift-fill', labelKey: 'nav.daily', badge: 'HOT', badgeColor: 'bg-rose/10 text-rose border border-rose/25' },
+      { to: '/lucky-wheel', icon: 'bi-stars', labelKey: 'nav.spin', badge: 'FREE', badgeColor: 'bg-amber/10 text-amber border border-amber/25' },
+      { to: '/giftcode', icon: 'bi-ticket-perforated-fill', labelKey: 'nav.giftcode', badge: 'HOT', badgeColor: 'bg-amber/10 text-amber border border-amber/25' },
       { to: '/quests', icon: 'bi-list-task', labelKey: 'nav.quests' },
       { to: '/leaderboard', icon: 'bi-trophy-fill', labelKey: 'nav.leaderboard' },
     ],
@@ -55,7 +55,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     title: 'Cộng đồng',
     items: [
-      { to: '/referral', icon: 'bi-people-fill', labelKey: 'nav.referral', badge: '20%', badgeColor: 'bg-cyan text-black' },
+      { to: '/referral', icon: 'bi-people-fill', labelKey: 'nav.referral', badge: '20%', badgeColor: 'bg-indigo/10 text-indigo border border-indigo/25' },
       { to: '/creator-code', icon: 'bi-tag-fill', labelKey: 'nav.creator' },
       { to: '/vietsub-studio', icon: 'bi-badge-cc-fill', labelKey: 'nav.vietsub' },
     ],
@@ -131,17 +131,17 @@ function NavLinks({ onNavigate, isAdmin }: { onNavigate?: () => void; isAdmin: b
   const { t } = useLanguage();
 
   return (
-    <nav className="flex flex-col gap-5 px-3 py-2 pb-16">
+    <nav className="flex flex-col gap-4 px-3 py-3 pb-16">
       {NAV_GROUPS.map((group) => {
         const visibleItems = group.items.filter((item) => !item.adminOnly || isAdmin);
         if (!visibleItems.length) return null;
 
         return (
-          <div key={group.title}>
-            <div className="px-3 mb-1.5 text-[10px] font-bold uppercase tracking-wider text-muted/70">
+          <div key={group.title} className="space-y-1">
+            <div className="px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted/60 select-none">
               {group.title}
             </div>
-            <div className="flex flex-col gap-0.5">
+            <div className="space-y-0.5">
               {visibleItems.map((item) => (
                 <NavLink
                   key={item.to}
@@ -151,23 +151,23 @@ function NavLinks({ onNavigate, isAdmin }: { onNavigate?: () => void; isAdmin: b
                     if (onNavigate) onNavigate();
                   }}
                   className={({ isActive }) =>
-                    `flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-all group ${
+                    `flex items-center justify-between px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-150 group ${
                       isActive
-                        ? 'text-indigo dark:text-cyan bg-indigo/10 dark:bg-indigo/25 border border-indigo/30 dark:border-indigo/40 shadow-sm font-semibold'
-                        : 'text-muted hover:text-ink hover:bg-surface2/80 hover:translate-x-0.5'
+                        ? 'text-ink font-semibold bg-surface2/90 border border-line/70 shadow-sm'
+                        : 'text-muted hover:text-ink hover:bg-surface2/60'
                     }`
                   }
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <i
-                      className={`bi ${item.icon} text-base shrink-0 transition-transform group-hover:scale-110`}
+                      className={`bi ${item.icon} text-base shrink-0 transition-transform group-hover:scale-105`}
                     />
                     <span className="truncate">{t(item.labelKey)}</span>
                   </div>
                   {item.badge && (
                     <span
-                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider shrink-0 ${
-                        item.badgeColor || 'bg-indigo text-white'
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 ${
+                        item.badgeColor || 'bg-surface2 text-muted border border-line/60'
                       }`}
                     >
                       {item.badge}
@@ -461,7 +461,7 @@ export default function Shell() {
                 </button>
               </div>
 
-              {/* Mobile User Profile Summary */}
+              {/* Mobile User Profile Summary - Apple Account Widget */}
               {me && (
                 <Link
                   to="/profile"
@@ -469,7 +469,7 @@ export default function Shell() {
                     playClickSound();
                     setMobileOpen(false);
                   }}
-                  className="block p-3.5 rounded-xl bg-surface2/60 border border-line mb-3 hover:border-indigo/40 transition"
+                  className="block p-3.5 rounded-2xl bg-surface2/60 border border-line mb-3 hover:border-line/80 transition"
                 >
                   <div className="flex items-center gap-2.5 mb-2.5">
                     <AvatarFrame level={me.level} shape="circle">
@@ -489,7 +489,7 @@ export default function Shell() {
                         </div>
                         <i className="bi bi-gear-fill text-muted text-xs shrink-0" />
                       </div>
-                      <div className="text-[11px] text-muted flex items-center gap-1.5">
+                      <div className="text-[11px] text-muted flex items-center gap-1.5 mt-0.5">
                         <span className="w-2 h-2 rounded-full bg-cyan inline-block animate-pulse" />
                         <span>{me.role === 'admin' ? 'Admin' : 'Thành viên'}</span>
                         <span>•</span>
@@ -498,12 +498,12 @@ export default function Shell() {
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2 pt-2 border-t border-line/60">
-                    <div className="text-center p-1.5 rounded-lg bg-bg/50">
-                      <div className="text-[10px] text-muted">Số dư</div>
+                    <div className="text-center p-2 rounded-xl bg-surface/70 border border-line/40">
+                      <div className="text-[10px] text-muted font-medium">Số dư</div>
                       <div className="font-mono text-xs font-bold text-amber">{me.balance_nova} VNC</div>
                     </div>
-                    <div className="text-center p-1.5 rounded-lg bg-bg/50">
-                      <div className="text-[10px] text-muted">Chuỗi ngày</div>
+                    <div className="text-center p-2 rounded-xl bg-surface/70 border border-line/40">
+                      <div className="text-[10px] text-muted font-medium">Chuỗi ngày</div>
                       <div className="font-mono text-xs font-bold text-rose flex items-center justify-center gap-1">
                         <span>{me.streak_days} ngày</span>
                         <i className="bi bi-fire" />
@@ -539,10 +539,13 @@ export default function Shell() {
       <div className="w-full flex flex-1 min-h-[calc(100vh-4rem)]">
         {/* Desktop Sidebar (Collapsible with toggle & smooth independent scroll) */}
         {desktopSidebarOpen && (
-          <aside className="w-64 shrink-0 border-r border-line hidden lg:flex lg:flex-col h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto overscroll-contain bg-surface/40 backdrop-blur-md z-20 select-none touch-pan-y transition-all">
+          <aside className="w-64 shrink-0 border-r border-line hidden lg:flex lg:flex-col h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto overscroll-contain bg-surface/50 backdrop-blur-xl z-20 select-none touch-pan-y transition-all">
             {/* Desktop Sidebar Header */}
-            <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-line/60">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-muted">Điều hướng</span>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-line/60">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
+                <i className="bi bi-compass text-indigo" />
+                <span>Danh mục</span>
+              </div>
               <button
                 onClick={() => {
                   playClickSound();
@@ -555,7 +558,7 @@ export default function Shell() {
                 title="Thu gọn menu điều hướng"
                 aria-label="Thu gọn menu"
               >
-                <i className="bi bi-x-lg text-xs" />
+                <i className="bi bi-chevron-left text-xs" />
               </button>
             </div>
             <NavLinks isAdmin={isAdmin} />
@@ -566,7 +569,7 @@ export default function Shell() {
         <div className="flex-1 flex flex-col min-w-0">
           <main
             key={pathname}
-            className="page-enter flex-1 px-3 sm:px-8 py-5 sm:py-6 pb-40 sm:pb-28 lg:pb-8 min-w-0 w-full max-w-7xl mx-auto overflow-x-hidden"
+            className="page-enter flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-40 sm:pb-28 lg:pb-8 min-w-0 w-full max-w-6xl mx-auto overflow-x-hidden"
           >
             <Outlet />
           </main>

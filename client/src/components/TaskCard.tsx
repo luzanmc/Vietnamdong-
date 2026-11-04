@@ -57,27 +57,29 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
     <>
       <div className="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden flex flex-col justify-between group">
         <div>
+          {/* Header row */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-indigo/15 border border-indigo/25 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                <i className="bi bi-link-45deg text-indigo text-lg" />
+              <div className="w-10 h-10 rounded-xl bg-surface2/80 border border-line/60 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-indigo">
+                <i className="bi bi-link-45deg text-lg" />
               </div>
               <div className="min-w-0">
                 <div className="font-semibold text-sm sm:text-base flex items-center gap-2">
-                  <span className="truncate">{task.name}</span>
+                  <span className="truncate text-ink">{task.name}</span>
                   {!!task.is_hot && (
-                    <span className="text-[9px] font-bold bg-gradient-to-r from-rose to-amber text-white px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 animate-pulse-soft shadow-sm flex items-center gap-1">
+                    <span className="text-[10px] font-semibold bg-rose/10 text-rose border border-rose/25 px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 flex items-center gap-1">
                       <span>HOT</span>
-                      <i className="bi bi-fire" />
+                      <i className="bi bi-fire text-[10px]" />
                     </span>
                   )}
                 </div>
-                <div className="text-[11px] text-muted truncate mt-0.5">
+                <div className="text-xs text-muted truncate mt-0.5">
                   Vượt link rút gọn để nhận thưởng VNC ngay
                 </div>
               </div>
             </div>
 
+            {/* Reward badge */}
             <div className="font-mono text-amber font-bold text-right shrink-0">
               <div className="flex items-center gap-1.5 text-base sm:text-lg">
                 <CurrencyIcon size={18} />
@@ -92,24 +94,26 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
             </div>
           </div>
 
+          {/* Progress Tracker */}
           <div className="mt-4">
-            <div className="flex items-center justify-between text-[11px] text-muted mb-1.5">
-              <span>Tiến độ hoàn thành hôm nay</span>
+            <div className="flex items-center justify-between text-xs text-muted mb-1.5">
+              <span>Tiến độ hoàn thành</span>
               <span className="font-mono font-medium text-ink">
                 {task.done_today} / {task.daily_limit} lượt ({pct}%)
               </span>
             </div>
-            <div className="h-2 rounded-full bg-surface2 border border-line/50 overflow-hidden relative">
+            <div className="h-1.5 rounded-full bg-surface2 border border-line/40 overflow-hidden relative">
               <div
-                className="h-full bg-gradient-to-r from-indigo via-cyan to-indigo transition-all duration-500 rounded-full"
+                className="h-full bg-indigo transition-all duration-300 rounded-full"
                 style={{ width: `${pct}%` }}
               />
             </div>
           </div>
         </div>
 
-        <div className="mt-4 pt-3 border-t border-line/40 flex items-center justify-between gap-2.5">
-          <span className="text-[11px] text-muted min-w-0 truncate">
+        {/* Action row */}
+        <div className="mt-4 pt-3 border-t border-line/50 flex items-center justify-between gap-2.5">
+          <span className="text-xs text-muted min-w-0 truncate">
             {atLimit ? (
               <span className="text-amber flex items-center gap-1">
                 <i className="bi bi-check2-circle text-xs shrink-0" /> <span className="truncate">Đã hoàn thành hôm nay</span>
@@ -124,7 +128,7 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
               type="button"
               onClick={() => setShowReport(true)}
               title="Báo link lỗi"
-              className="w-8 h-8 rounded-xl bg-surface2/80 hover:bg-rose/15 text-muted hover:text-rose border border-line flex items-center justify-center transition"
+              className="w-8 h-8 rounded-xl bg-surface2/80 hover:bg-rose/15 text-muted hover:text-rose border border-line/60 flex items-center justify-center transition btn-press"
             >
               <i className="bi bi-flag text-xs" />
             </button>
@@ -132,10 +136,10 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
             <button
               onClick={handleClick}
               disabled={busy || atLimit}
-              className={`flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl transition-all btn-press shadow-md ${
+              className={`flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl transition-all btn-press shrink-0 ${
                 atLimit
-                  ? 'bg-surface2 text-muted border border-line cursor-not-allowed opacity-60'
-                  : 'bg-gradient-to-r from-indigo to-indigo/90 hover:from-indigo hover:to-cyan text-white hover:shadow-[0_0_20px_rgba(108,99,245,0.4)]'
+                  ? 'bg-surface2 text-muted border border-line/60 cursor-not-allowed opacity-60'
+                  : 'bg-indigo hover:brightness-110 text-white shadow-sm'
               }`}
             >
               {busy ? (
@@ -161,9 +165,9 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
 
       {showReport && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="bg-surface border border-line rounded-2xl w-full max-w-sm p-5 space-y-4 shadow-2xl relative">
-            <div className="flex items-center justify-between pb-2 border-b border-line">
-              <h3 className="text-sm font-semibold flex items-center gap-2">
+          <div className="bg-surface border border-line/80 rounded-2xl w-full max-w-sm p-5 space-y-4 shadow-2xl relative">
+            <div className="flex items-center justify-between pb-2 border-b border-line/60">
+              <h3 className="text-sm font-semibold flex items-center gap-2 text-ink">
                 <i className="bi bi-flag-fill text-rose" /> Báo cáo link lỗi
               </h3>
               <button
@@ -178,15 +182,15 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
               <p className="text-xs text-muted mb-2">
                 Nhiệm vụ: <span className="font-semibold text-ink">{task.name}</span>
               </p>
-              <label className="text-[11px] text-muted block mb-1.5">Chọn lý do báo cáo</label>
+              <label className="text-[11px] text-muted block mb-1.5 font-medium">Chọn lý do báo cáo</label>
               <div className="space-y-1.5">
                 {REPORT_REASONS.map((r) => (
                   <label
                     key={r}
                     className={`flex items-center gap-2 text-xs p-2.5 rounded-xl border cursor-pointer transition ${
                       reason === r
-                        ? 'bg-indigo/15 border-indigo text-ink font-medium'
-                        : 'bg-surface2 border-line text-muted hover:text-ink'
+                        ? 'bg-indigo/15 border-indigo/40 text-ink font-medium'
+                        : 'bg-surface2/70 border-line/60 text-muted hover:text-ink'
                     }`}
                   >
                     <input
@@ -208,7 +212,7 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
                   value={customDetail}
                   onChange={(e) => setCustomDetail(e.target.value)}
                   placeholder="Mô tả chi tiết lỗi gặp phải..."
-                  className="w-full mt-2 bg-surface2 border border-line rounded-xl p-2.5 text-xs text-ink focus:outline-none focus:border-indigo"
+                  className="w-full mt-2 bg-surface2/70 border border-line/60 rounded-xl p-2.5 text-xs text-ink focus:outline-none focus:border-indigo"
                   maxLength={200}
                 />
               )}
@@ -239,7 +243,7 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
                 type="button"
                 disabled={submitting}
                 onClick={handleSendReport}
-                className="flex-1 py-2 rounded-xl bg-rose hover:brightness-110 text-white text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-md"
+                className="flex-1 py-2 rounded-xl bg-rose hover:brightness-110 text-white text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-sm"
               >
                 {submitting ? (
                   <>
