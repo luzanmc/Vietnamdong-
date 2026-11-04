@@ -112,19 +112,19 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 max-w-6xl mx-auto w-full">
       {/* Hero Banner styled with Apple-grade precision and unified geometry */}
-      <div className="glass-card rounded-2xl p-5 sm:p-7 border border-line/70 relative overflow-hidden">
-        {/* Subtle Apple ambient glow */}
-        <div className="absolute -top-24 -right-24 w-80 h-80 bg-indigo/5 rounded-full blur-3xl -z-10 pointer-events-none" />
+      <div className="glass-card rounded-3xl p-5 sm:p-7 border border-line/70 relative overflow-hidden">
+        {/* Subtle Ocean Blue ambient glow */}
+        <div className="absolute -top-24 -right-24 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl -z-10 pointer-events-none" />
 
         <div className="grid md:grid-cols-12 gap-6 items-center relative z-10">
           {/* Left Hero Content (7 Cols) */}
           <div className="md:col-span-7 space-y-4">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-surface2/80 text-muted border border-line/60">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium glass-pill text-blue-400 border border-blue-500/25">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_6px_#60a5fa]" />
                 <span>VietnamDong Hub</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-surface2/80 text-muted border border-line/60">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium glass-pill text-muted border border-line/60">
                 <i className="bi bi-fire text-amber text-xs" />
                 <span>Streak: {me.streak_days} ngày</span>
               </span>
@@ -138,7 +138,7 @@ export default function Dashboard() {
             <Link
               to="/profile"
               onClick={playClickSound}
-              className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-surface2/60 hover:bg-surface2/90 border border-line/60 text-xs transition btn-press max-w-full"
+              className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full glass-pill hover:border-blue-500/40 text-xs transition btn-press max-w-full"
               title="Xem chi tiết cấp độ & đặc quyền"
             >
               <LevelBadge level={me.level} size="xs" />
@@ -146,7 +146,7 @@ export default function Dashboard() {
                 <span className="font-medium text-ink shrink-0">Cấp {me.level ?? 1}</span>
                 <div className="w-24 sm:w-32 h-1.5 bg-surface rounded-full overflow-hidden border border-line/40 shrink-0">
                   <div
-                    className="h-full bg-indigo rounded-full transition-all duration-300"
+                    className="h-full bg-gradient-to-r from-blue-600 to-sky-400 rounded-full transition-all duration-300 shadow-[0_0_8px_rgba(59,130,246,0.5)]"
                     style={{ width: `${me.levelProgress?.progressPercent ?? 0}%` }}
                   />
                 </div>
@@ -165,36 +165,36 @@ export default function Dashboard() {
               <Link
                 to="/daily-reward"
                 onClick={playClickSound}
-                className="flex items-center justify-center sm:justify-start gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-surface2/70 hover:bg-surface2 border border-line/60 hover:border-line text-ink transition btn-press shadow-sm"
+                className="flex items-center justify-center sm:justify-start gap-2 px-4 py-2 rounded-full text-xs font-semibold glass-pill hover:border-blue-500/50 hover:text-blue-400 text-ink transition-all btn-press shadow-sm"
               >
-                <i className="bi bi-gift-fill text-rose text-sm shrink-0" />
+                <i className="bi bi-gift-fill text-blue-400 text-sm shrink-0" />
                 <span className="truncate">Điểm danh</span>
               </Link>
 
               <Link
                 to="/lucky-wheel"
                 onClick={playClickSound}
-                className="flex items-center justify-center sm:justify-start gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-surface2/70 hover:bg-surface2 border border-line/60 hover:border-line text-ink transition btn-press shadow-sm"
+                className="flex items-center justify-center sm:justify-start gap-2 px-4 py-2 rounded-full text-xs font-semibold glass-pill hover:border-blue-500/50 hover:text-blue-400 text-ink transition-all btn-press shadow-sm"
               >
-                <i className="bi bi-stars text-amber text-sm shrink-0" />
+                <i className="bi bi-stars text-sky-400 text-sm shrink-0" />
                 <span className="truncate">Quay thưởng</span>
               </Link>
 
               <Link
                 to="/wallet"
                 onClick={playClickSound}
-                className="flex items-center justify-center sm:justify-start gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-surface2/70 hover:bg-surface2 border border-line/60 hover:border-line text-ink transition btn-press shadow-sm"
+                className="flex items-center justify-center sm:justify-start gap-2 px-4 py-2 rounded-full text-xs font-semibold glass-pill hover:border-blue-500/50 hover:text-blue-400 text-ink transition-all btn-press shadow-sm"
               >
-                <i className="bi bi-wallet2 text-cyan text-sm shrink-0" />
+                <i className="bi bi-wallet2 text-blue-500 text-sm shrink-0" />
                 <span className="truncate">Rút tiền</span>
               </Link>
 
               <Link
                 to="/referral"
                 onClick={playClickSound}
-                className="flex items-center justify-center sm:justify-start gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-surface2/70 hover:bg-surface2 border border-line/60 hover:border-line text-ink transition btn-press shadow-sm"
+                className="flex items-center justify-center sm:justify-start gap-2 px-4 py-2 rounded-full text-xs font-semibold glass-pill hover:border-blue-500/50 hover:text-blue-400 text-ink transition-all btn-press shadow-sm"
               >
-                <i className="bi bi-people-fill text-indigo text-sm shrink-0" />
+                <i className="bi bi-people-fill text-blue-400 text-sm shrink-0" />
                 <span className="truncate">Hoa hồng 20%</span>
               </Link>
             </div>
@@ -215,15 +215,15 @@ export default function Dashboard() {
               <Link
                 to="/giftcode"
                 onClick={playClickSound}
-                className="px-3 py-1.5 rounded-xl font-medium text-xs bg-surface2/80 hover:bg-surface2 border border-line/60 text-ink transition btn-press flex items-center gap-1.5"
+                className="px-3.5 py-1.5 rounded-full font-medium text-xs glass-pill hover:border-blue-500/40 text-ink transition-all btn-press flex items-center gap-1.5"
               >
-                <i className="bi bi-ticket-perforated-fill text-amber" /> Nhập Giftcode
+                <i className="bi bi-ticket-perforated-fill text-blue-400" /> Nhập Giftcode
               </Link>
               <div className="flex items-center gap-2">
                 <Link
                   to="/wallet"
                   onClick={playClickSound}
-                  className="px-4 py-1.5 rounded-xl font-semibold text-xs bg-indigo hover:brightness-110 text-white transition btn-press flex items-center gap-1.5 shadow-sm"
+                  className="px-4 py-1.5 rounded-full font-semibold text-xs bg-blue-600 hover:bg-blue-500 text-white transition-all btn-press flex items-center gap-1.5 shadow-[0_0_15px_rgba(37,99,235,0.35)]"
                 >
                   <i className="bi bi-arrow-up-right" /> Rút tiền
                 </Link>
@@ -240,7 +240,7 @@ export default function Dashboard() {
           value={wallet?.balance_nova ?? 0}
           suffix="VNC"
           icon="bi-coin"
-          iconColor="text-amber"
+          iconColor="text-blue-400"
           hint={`≈ ${(wallet?.balance_vnd ?? 0).toLocaleString('vi-VN')}đ`}
           trend="Khả dụng"
         />
@@ -249,7 +249,7 @@ export default function Dashboard() {
           value={wallet?.total_redeemed_nova ?? 0}
           suffix="VNC"
           icon="bi-receipt-cutoff"
-          iconColor="text-cyan"
+          iconColor="text-sky-400"
           hint="Tổng VNC đã rút"
         />
         <StatCard
@@ -257,7 +257,7 @@ export default function Dashboard() {
           value={me.streak_days}
           suffix="ngày"
           icon="bi-fire"
-          iconColor="text-rose"
+          iconColor="text-blue-400"
           hint="Giữ streak x2 quà"
           trend="Streak"
         />
@@ -265,7 +265,7 @@ export default function Dashboard() {
           label="Cấp bậc"
           value={me.role === 'admin' ? 'Admin' : 'Thành viên'}
           icon="bi-person-badge-fill"
-          iconColor="text-indigo"
+          iconColor="text-blue-500"
           hint="Hạng hội viên"
         />
       </div>
@@ -275,7 +275,7 @@ export default function Dashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="font-display text-lg sm:text-xl font-bold flex items-center gap-2 text-ink">
-              <i className="bi bi-lightning-charge-fill text-amber" /> Nhiệm vụ rút gọn liên kết
+              <i className="bi bi-lightning-charge-fill text-blue-400" /> Nhiệm vụ rút gọn liên kết
             </h2>
             <p className="text-xs text-muted mt-0.5">
               Hoàn thành các liên kết bên dưới để cộng VNC trực tiếp vào số dư
@@ -283,15 +283,15 @@ export default function Dashboard() {
           </div>
 
           {/* Task Filter - Apple Segmented Control */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-surface2/80 border border-line/60 self-start sm:self-auto overflow-x-auto max-w-full no-scrollbar shadow-inner">
+          <div className="flex items-center gap-1 p-1 rounded-full glass-pill border border-line/60 self-start sm:self-auto overflow-x-auto max-w-full no-scrollbar shadow-inner">
             <button
               onClick={() => {
                 playClickSound();
                 setFilter('all');
               }}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all btn-press ${
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-full transition-all btn-press ${
                 filter === 'all'
-                  ? 'bg-surface text-ink font-semibold shadow-sm border border-line/40'
+                  ? 'bg-blue-600 text-white font-semibold shadow-[0_0_15px_rgba(37,99,235,0.35)]'
                   : 'text-muted hover:text-ink'
               }`}
             >
@@ -302,23 +302,23 @@ export default function Dashboard() {
                 playClickSound();
                 setFilter('hot');
               }}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all btn-press flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-full transition-all btn-press flex items-center gap-1.5 ${
                 filter === 'hot'
-                  ? 'bg-surface text-ink font-semibold shadow-sm border border-line/40'
+                  ? 'bg-blue-600 text-white font-semibold shadow-[0_0_15px_rgba(37,99,235,0.35)]'
                   : 'text-muted hover:text-ink'
               }`}
             >
               <span>HOT</span>
-              <i className="bi bi-fire text-rose text-xs" />
+              <i className="bi bi-fire text-amber text-xs" />
             </button>
             <button
               onClick={() => {
                 playClickSound();
                 setFilter('available');
               }}
-              className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all btn-press ${
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-full transition-all btn-press ${
                 filter === 'available'
-                  ? 'bg-surface text-ink font-semibold shadow-sm border border-line/40'
+                  ? 'bg-blue-600 text-white font-semibold shadow-[0_0_15px_rgba(37,99,235,0.35)]'
                   : 'text-muted hover:text-ink'
               }`}
             >

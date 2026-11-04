@@ -3,30 +3,30 @@
 @tailwind utilities;
 
 :root {
-  --color-bg: 8 11 20;
-  --color-surface: 16 21 34;
-  --color-surface2: 21 29 46;
-  --color-line: 37 45 65;
-  --color-ink: 244 247 255;
-  --color-muted: 155 168 192;
-  --color-indigo: 85 167 255;
-  --color-cyan: 98 240 189;
-  --color-amber: 245 165 36;
-  --color-rose: 244 63 94;
+  --color-bg: 7 7 9;
+  --color-surface: 15 15 19;
+  --color-surface2: 23 23 29;
+  --color-line: 38 38 46;
+  --color-ink: 248 250 255;
+  --color-muted: 148 155 170;
+  --color-indigo: 59 130 246;
+  --color-cyan: 56 189 248;
+  --color-amber: 59 130 246;
+  --color-rose: 239 68 68;
   color-scheme: dark;
 }
 
 :root[data-theme='light'],
 html:not(.dark):root {
-  --color-bg: 246 247 251;
+  --color-bg: 248 250 253;
   --color-surface: 255 255 255;
-  --color-surface2: 240 242 248;
-  --color-line: 223 227 238;
-  --color-ink: 14 20 36;
-  --color-muted: 86 97 119;
-  --color-indigo: 47 127 230;
-  --color-cyan: 13 159 115;
-  --color-amber: 217 119 6;
+  --color-surface2: 241 245 249;
+  --color-line: 226 232 240;
+  --color-ink: 15 23 42;
+  --color-muted: 100 116 139;
+  --color-indigo: 37 99 235;
+  --color-cyan: 2 132 199;
+  --color-amber: 37 99 235;
   --color-rose: 225 29 72;
   color-scheme: light;
 }
@@ -42,8 +42,8 @@ body {
   color: rgb(var(--color-ink));
   transition: background-color 0.25s ease, color 0.25s ease;
   background-image: 
-    radial-gradient(ellipse at 80% 0, rgba(27, 23, 64, 0.65) 0%, transparent 40%),
-    radial-gradient(circle at 15% 15%, rgba(85, 167, 255, 0.05) 0%, transparent 45%);
+    radial-gradient(ellipse at 85% 0%, rgba(37, 99, 235, 0.14) 0%, transparent 50%),
+    radial-gradient(circle at 10% 25%, rgba(59, 130, 246, 0.08) 0%, transparent 45%);
   background-attachment: fixed;
   overflow-x: clip;
   max-width: 100vw;
@@ -75,8 +75,8 @@ body {
 
 :root[data-theme='light'] body {
   background-image: 
-    radial-gradient(ellipse at 80% 0, rgba(227, 224, 255, 0.7) 0%, transparent 40%),
-    radial-gradient(circle at 15% 15%, rgba(47, 127, 230, 0.04) 0%, transparent 45%);
+    radial-gradient(ellipse at 85% 0%, rgba(37, 99, 235, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 10% 25%, rgba(59, 130, 246, 0.04) 0%, transparent 45%);
 }
 
 .font-mono-nums { font-variant-numeric: tabular-nums; }
@@ -97,45 +97,75 @@ body {
   background: rgb(var(--color-muted) / 0.5);
 }
 
-/* Glassmorphism Panels */
+/* Advanced Glassmorphism Panels */
 .glass-panel {
-  background: rgb(var(--color-surface) / 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgb(var(--color-line) / 0.8);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.15);
+  background: rgba(14, 14, 18, 0.75);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.35);
 }
 
 :root[data-theme='light'] .glass-panel {
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(226, 232, 240, 0.95);
   box-shadow: 0 4px 25px -4px rgba(15, 23, 42, 0.06);
 }
 
 .glass-card {
-  background: rgb(var(--color-surface) / 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgb(var(--color-line) / 0.7);
-  box-shadow: 0 2px 10px -2px rgba(0, 0, 0, 0.15);
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(15, 15, 20, 0.7);
+  backdrop-filter: blur(24px) saturate(190%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.4), inset 0 1px 1px 0 rgba(255, 255, 255, 0.06);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
-  border-color: rgb(var(--color-line));
-  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.25);
-  transform: translateY(-1.5px);
+  border-color: rgba(59, 130, 246, 0.45);
+  box-shadow: 0 14px 35px -5px rgba(0, 0, 0, 0.6), 0 0 25px rgba(37, 99, 235, 0.18);
+  transform: translateY(-2px);
 }
 
 :root[data-theme='light'] .glass-card {
   background: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: 0 2px 10px -2px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 :root[data-theme='light'] .glass-card:hover {
-  border-color: rgba(203, 213, 225, 0.95);
-  box-shadow: 0 8px 20px -3px rgba(15, 23, 42, 0.08);
+  border-color: rgba(37, 99, 235, 0.35);
+  box-shadow: 0 12px 28px -4px rgba(37, 99, 235, 0.12);
+}
+
+/* Glass Floating Sidebar (matching Image 4) */
+.glass-sidebar {
+  background: rgba(11, 11, 15, 0.82);
+  backdrop-filter: blur(30px) saturate(190%);
+  -webkit-backdrop-filter: blur(30px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.6), inset 0 1px 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+:root[data-theme='light'] .glass-sidebar {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.08);
+}
+
+/* Glass Floating Pill Navigation (matching Image 1) */
+.glass-pill {
+  background: rgba(14, 14, 18, 0.85);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 35px -5px rgba(0, 0, 0, 0.5);
+}
+
+:root[data-theme='light'] .glass-pill {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.12);
 }
 
 /* Button tactile press effect */
@@ -148,7 +178,7 @@ body {
 
 /* Glowing text effects - Dark Mode */
 .gradient-text-indigo {
-  background: linear-gradient(135deg, #C7D2FE 0%, #818CF8 50%, #22D3EE 100%);
+  background: linear-gradient(135deg, #BAE6FD 0%, #60A5FA 50%, #2563EB 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -170,7 +200,7 @@ body {
 
 /* Glowing text effects - Light Mode (High Contrast & Readable) */
 :root[data-theme='light'] .gradient-text-indigo {
-  background: linear-gradient(135deg, #4338CA 0%, #6366F1 50%, #0284C7 100%);
+  background: linear-gradient(135deg, #1E40AF 0%, #2563EB 50%, #0284C7 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -192,7 +222,7 @@ body {
 
 /* Glow Shadows */
 .glow-indigo {
-  box-shadow: 0 0 25px rgba(108, 99, 245, 0.35);
+  box-shadow: 0 0 25px rgba(37, 99, 235, 0.4);
 }
 .glow-amber {
   box-shadow: 0 0 25px rgba(245, 165, 36, 0.35);

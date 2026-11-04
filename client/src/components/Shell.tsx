@@ -131,7 +131,7 @@ function NavLinks({ onNavigate, isAdmin }: { onNavigate?: () => void; isAdmin: b
   const { t } = useLanguage();
 
   return (
-    <nav className="flex flex-col gap-4 px-3 py-3 pb-16">
+    <nav className="flex flex-col gap-4 px-3 py-3">
       {NAV_GROUPS.map((group) => {
         const visibleItems = group.items.filter((item) => !item.adminOnly || isAdmin);
         if (!visibleItems.length) return null;
@@ -141,7 +141,7 @@ function NavLinks({ onNavigate, isAdmin }: { onNavigate?: () => void; isAdmin: b
             <div className="px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted/60 select-none">
               {group.title}
             </div>
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {visibleItems.map((item) => (
                 <NavLink
                   key={item.to}
@@ -151,23 +151,23 @@ function NavLinks({ onNavigate, isAdmin }: { onNavigate?: () => void; isAdmin: b
                     if (onNavigate) onNavigate();
                   }}
                   className={({ isActive }) =>
-                    `flex items-center justify-between px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-150 group ${
+                    `flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs sm:text-sm font-medium transition-all duration-200 group ${
                       isActive
-                        ? 'text-ink font-semibold bg-surface2/90 border border-line/70 shadow-sm'
-                        : 'text-muted hover:text-ink hover:bg-surface2/60'
+                        ? 'text-blue-400 font-semibold bg-blue-600/15 border border-blue-500/30 shadow-[0_0_18px_rgba(59,130,246,0.18)] dark:bg-blue-600/20 dark:border-blue-500/35 dark:text-blue-400'
+                        : 'text-muted hover:text-ink hover:bg-white/[0.04]'
                     }`
                   }
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <i
-                      className={`bi ${item.icon} text-base shrink-0 transition-transform group-hover:scale-105`}
+                      className={`bi ${item.icon} text-base shrink-0 transition-transform group-hover:scale-110 group-hover:text-blue-400`}
                     />
                     <span className="truncate">{t(item.labelKey)}</span>
                   </div>
                   {item.badge && (
                     <span
                       className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 ${
-                        item.badgeColor || 'bg-surface2 text-muted border border-line/60'
+                        item.badgeColor || 'bg-blue-500/15 text-blue-400 border border-blue-500/25'
                       }`}
                     >
                       {item.badge}
@@ -251,7 +251,7 @@ export default function Shell() {
   return (
     <div className="min-h-screen bg-bg flex flex-col">
       {/* Header */}
-      <header className="border-b border-line sticky top-0 z-30 bg-bg/90 backdrop-blur-md">
+      <header className="border-b border-line/60 sticky top-0 z-30 glass-panel">
         <div className="w-full flex items-center justify-between px-3 sm:px-6 h-16 gap-2">
           {/* Logo & Brand */}
           <Link
@@ -265,7 +265,7 @@ export default function Shell() {
                 alt="VietnamDong"
                 className="w-8 h-8 shrink-0 transition-transform group-hover:scale-105"
               />
-              <div className="absolute inset-0 rounded-full bg-indigo/25 blur-sm -z-10 group-hover:bg-indigo/40 transition" />
+              <div className="absolute inset-0 rounded-full bg-blue-500/25 blur-sm -z-10 group-hover:bg-blue-500/40 transition" />
             </div>
             <div className="flex flex-col">
               <span className="font-display font-bold text-sm sm:text-base tracking-tight gradient-text-indigo leading-none">
@@ -289,14 +289,14 @@ export default function Shell() {
                   to="/wallet"
                   onClick={playClickSound}
                   title="Xem số dư & Rút tiền"
-                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-surface2/90 border border-line/80 hover:border-amber/50 hover:shadow-[0_0_15px_rgba(245,165,36,0.15)] transition btn-press group shrink-0"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full glass-pill hover:border-blue-500/50 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] transition btn-press group shrink-0"
                 >
                   <CurrencyIcon size={16} />
                   <span className="font-mono text-xs sm:text-sm font-bold text-ink">
                     <AnimatedNumber value={me.balance_nova} />
                   </span>
-                  <span className="text-[10px] font-bold text-amber hidden xs:inline">VNC</span>
-                  <i className="bi bi-plus-circle-fill text-indigo text-xs ml-0.5 group-hover:scale-110 transition-transform hidden sm:inline" />
+                  <span className="text-[10px] font-bold text-blue-400 hidden xs:inline">VNC</span>
+                  <i className="bi bi-plus-circle-fill text-blue-500 text-xs ml-0.5 group-hover:scale-110 transition-transform hidden sm:inline" />
                 </Link>
 
                 {/* Streak Badge */}
@@ -314,13 +314,13 @@ export default function Shell() {
                   to="/profile"
                   onClick={playClickSound}
                   title="Hồ sơ & Cài đặt"
-                  className="flex items-center gap-1.5 px-1.5 py-1 rounded-xl hover:bg-surface2 transition btn-press border border-line/60 shrink-0"
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-full glass-pill hover:border-blue-500/40 transition btn-press shrink-0"
                 >
                   <AvatarFrame level={me.level} shape="circle">
                     {me.avatar_url ? (
                       <img src={me.avatar_url} alt={me.username} className="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover" />
                     ) : (
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-indigo/20 text-indigo flex items-center justify-center font-bold text-[9px] sm:text-[10px]">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center font-bold text-[9px] sm:text-[10px]">
                         {me.username.slice(0, 2).toUpperCase()}
                       </div>
                     )}
@@ -537,14 +537,19 @@ export default function Shell() {
 
       {/* Main Layout Area */}
       <div className="w-full flex flex-1 min-h-[calc(100vh-4rem)]">
-        {/* Desktop Sidebar (Collapsible with toggle & smooth independent scroll) */}
-        {desktopSidebarOpen && (
-          <aside className="w-64 shrink-0 border-r border-line hidden lg:flex lg:flex-col h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto overscroll-contain bg-surface/50 backdrop-blur-xl z-20 select-none touch-pan-y transition-all">
-            {/* Desktop Sidebar Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-line/60">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
-                <i className="bi bi-compass text-indigo" />
-                <span>Danh mục</span>
+        {/* Desktop Sidebar (Collapsible with toggle & smooth independent scroll - Image 4) */}
+        {desktopSidebarOpen ? (
+          <aside className="w-64 shrink-0 border-r border-line/60 hidden lg:flex lg:flex-col h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto overscroll-contain glass-sidebar z-20 select-none touch-pan-y transition-all">
+            {/* Desktop Sidebar Header (Image 4 Header with << button) */}
+            <div className="flex items-center justify-between px-4 py-3.5 border-b border-line/60">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-xs shadow-[0_0_12px_rgba(59,130,246,0.2)]">
+                  <i className="bi bi-compass" />
+                </div>
+                <div>
+                  <span className="font-display font-bold text-sm text-ink block leading-none">VietnamDong</span>
+                  <span className="text-[10px] text-muted font-mono uppercase tracking-wider block mt-0.5">VNC Portal</span>
+                </div>
               </div>
               <button
                 onClick={() => {
@@ -554,22 +559,85 @@ export default function Shell() {
                     localStorage.setItem('vnd_desktop_sidebar', 'false');
                   } catch {}
                 }}
-                className="w-7 h-7 rounded-lg hover:bg-surface2 text-muted hover:text-ink flex items-center justify-center transition btn-press"
-                title="Thu gọn menu điều hướng"
+                className="w-8 h-8 rounded-xl hover:bg-white/[0.06] text-muted hover:text-blue-400 flex items-center justify-center transition btn-press border border-line/40"
+                title="Thu gọn menu điều hướng (<<)"
                 aria-label="Thu gọn menu"
               >
-                <i className="bi bi-chevron-left text-xs" />
+                <i className="bi bi-chevron-double-left text-sm" />
               </button>
             </div>
-            <NavLinks isAdmin={isAdmin} />
+
+            {/* Nav List */}
+            <div className="flex-1 overflow-y-auto">
+              <NavLinks isAdmin={isAdmin} />
+            </div>
+
+            {/* Promo / Cashout Card (Image 4 'Upgrade to Pro' Style) */}
+            <div className="p-3 mt-auto">
+              <div className="relative rounded-2xl p-3.5 bg-gradient-to-b from-blue-900/25 via-blue-950/40 to-black/60 border border-blue-500/30 backdrop-blur-md overflow-hidden group">
+                <div className="absolute -top-10 -right-10 w-24 h-24 bg-blue-500/20 rounded-full blur-xl pointer-events-none group-hover:bg-blue-500/35 transition-all" />
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className="w-7 h-7 rounded-xl bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400 shadow-[0_0_12px_rgba(59,130,246,0.3)]">
+                    <i className="bi bi-lightning-charge-fill text-xs" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-ink truncate">VietnamDong Pro</div>
+                    <div className="text-[10px] text-blue-400/90 font-medium truncate">Đổi thưởng siêu tốc</div>
+                  </div>
+                </div>
+                <p className="text-[11px] text-muted leading-tight mb-2.5">
+                  Rút tiền tức thì về ngân hàng hoặc thẻ cào 24/7.
+                </p>
+                <Link
+                  to="/wallet"
+                  onClick={playClickSound}
+                  className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-[0_0_15px_rgba(37,99,235,0.35)] transition-all btn-press"
+                >
+                  <span>Rút tiền ngay</span>
+                  <i className="bi bi-arrow-right text-xs" />
+                </Link>
+              </div>
+            </div>
           </aside>
+        ) : (
+          /* Mini Collapsed Bar with >> expand button */
+          <div className="hidden lg:flex flex-col items-center py-4 px-2 w-14 shrink-0 border-r border-line/60 h-[calc(100vh-4rem)] sticky top-16 glass-sidebar z-20">
+            <button
+              onClick={() => {
+                playClickSound();
+                setDesktopSidebarOpen(true);
+                try {
+                  localStorage.setItem('vnd_desktop_sidebar', 'true');
+                } catch {}
+              }}
+              className="w-9 h-9 rounded-xl hover:bg-white/[0.08] text-blue-400 flex items-center justify-center transition btn-press border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)] mb-4"
+              title="Mở rộng menu (>>)"
+              aria-label="Mở menu"
+            >
+              <i className="bi bi-chevron-double-right text-sm" />
+            </button>
+            <div className="flex flex-col gap-3">
+              <NavLink to="/dashboard" title="Tổng quan" className={({isActive}) => `w-9 h-9 rounded-xl flex items-center justify-center text-sm transition ${isActive ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-muted hover:text-ink'}`}>
+                <i className="bi bi-grid-1x2-fill" />
+              </NavLink>
+              <NavLink to="/quests" title="Nhiệm vụ" className={({isActive}) => `w-9 h-9 rounded-xl flex items-center justify-center text-sm transition ${isActive ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-muted hover:text-ink'}`}>
+                <i className="bi bi-list-task" />
+              </NavLink>
+              <NavLink to="/lucky-wheel" title="Vòng quay" className={({isActive}) => `w-9 h-9 rounded-xl flex items-center justify-center text-sm transition ${isActive ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-muted hover:text-ink'}`}>
+                <i className="bi bi-stars" />
+              </NavLink>
+              <NavLink to="/wallet" title="Ví tiền" className={({isActive}) => `w-9 h-9 rounded-xl flex items-center justify-center text-sm transition ${isActive ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-muted hover:text-ink'}`}>
+                <i className="bi bi-wallet2" />
+              </NavLink>
+            </div>
+          </div>
         )}
 
         {/* Content Wrapper (Page Outlet + Footer on Desktop) */}
         <div className="flex-1 flex flex-col min-w-0">
           <main
             key={pathname}
-            className="page-enter flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-40 sm:pb-28 lg:pb-8 min-w-0 w-full max-w-6xl mx-auto overflow-x-hidden"
+            className="page-enter flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-36 sm:pb-28 lg:pb-8 min-w-0 w-full max-w-6xl mx-auto overflow-x-hidden"
           >
             <Outlet />
           </main>
@@ -579,14 +647,14 @@ export default function Shell() {
         </div>
       </div>
 
-      {/* Mobile Bottom Navigation Bar (Persistent on screens < lg) */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/90 backdrop-blur-xl border-t border-line/80 px-2 py-1.5 flex items-center justify-around shadow-[0_-4px_25px_rgba(0,0,0,0.15)] pb-[calc(0.4rem+env(safe-area-inset-bottom))]">
+      {/* Mobile Bottom Navigation Bar (Floating Pill Navigation - Image 1) */}
+      <nav className="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-40 rounded-full glass-pill px-3 py-1.5 flex items-center justify-around shadow-[0_12px_40px_rgba(0,0,0,0.65)] border border-white/10 backdrop-blur-2xl">
         <NavLink
           to="/dashboard"
           onClick={playClickSound}
           className={({ isActive }) =>
-            `flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all relative ${
-              isActive ? 'text-indigo dark:text-cyan' : 'text-muted hover:text-ink'
+            `flex flex-col items-center justify-center py-1.5 px-3 rounded-full text-[10px] font-semibold transition-all relative ${
+              isActive ? 'text-blue-400' : 'text-muted hover:text-ink'
             }`
           }
         >
@@ -594,7 +662,7 @@ export default function Shell() {
             <>
               <i className={`bi ${isActive ? 'bi-grid-1x2-fill' : 'bi-grid-1x2'} text-lg`} />
               <span className="mt-0.5 leading-none">Tổng quan</span>
-              {isActive && <span className="w-1 h-1 rounded-full bg-indigo dark:bg-cyan mt-1" />}
+              {isActive && <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_#3b82f6] mt-0.5" />}
             </>
           )}
         </NavLink>
@@ -603,8 +671,8 @@ export default function Shell() {
           to="/quests"
           onClick={playClickSound}
           className={({ isActive }) =>
-            `flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all relative ${
-              isActive ? 'text-indigo dark:text-cyan' : 'text-muted hover:text-ink'
+            `flex flex-col items-center justify-center py-1.5 px-3 rounded-full text-[10px] font-semibold transition-all relative ${
+              isActive ? 'text-blue-400' : 'text-muted hover:text-ink'
             }`
           }
         >
@@ -612,7 +680,7 @@ export default function Shell() {
             <>
               <i className={`bi ${isActive ? 'bi-list-task' : 'bi-list-check'} text-lg`} />
               <span className="mt-0.5 leading-none">Nhiệm vụ</span>
-              {isActive && <span className="w-1 h-1 rounded-full bg-indigo dark:bg-cyan mt-1" />}
+              {isActive && <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_#3b82f6] mt-0.5" />}
             </>
           )}
         </NavLink>
@@ -621,16 +689,16 @@ export default function Shell() {
           to="/lucky-wheel"
           onClick={playClickSound}
           className={({ isActive }) =>
-            `flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all relative ${
-              isActive ? 'text-amber font-bold' : 'text-amber/80 hover:text-amber'
+            `flex flex-col items-center justify-center py-1.5 px-3 rounded-full text-[10px] font-semibold transition-all relative ${
+              isActive ? 'text-blue-400' : 'text-muted hover:text-ink'
             }`
           }
         >
           {({ isActive }) => (
             <>
-              <i className="bi bi-stars text-xl text-amber animate-pulse-soft" />
-              <span className="mt-0.5 leading-none text-amber font-bold">Vòng quay</span>
-              {isActive && <span className="w-1 h-1 rounded-full bg-amber mt-1" />}
+              <i className="bi bi-stars text-lg text-blue-400 animate-pulse-soft" />
+              <span className="mt-0.5 leading-none">Vòng quay</span>
+              {isActive && <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_#3b82f6] mt-0.5" />}
             </>
           )}
         </NavLink>
@@ -639,8 +707,8 @@ export default function Shell() {
           to="/wallet"
           onClick={playClickSound}
           className={({ isActive }) =>
-            `flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all relative ${
-              isActive ? 'text-indigo dark:text-cyan' : 'text-muted hover:text-ink'
+            `flex flex-col items-center justify-center py-1.5 px-3 rounded-full text-[10px] font-semibold transition-all relative ${
+              isActive ? 'text-blue-400' : 'text-muted hover:text-ink'
             }`
           }
         >
@@ -648,7 +716,7 @@ export default function Shell() {
             <>
               <i className={`bi ${isActive ? 'bi-wallet2' : 'bi-wallet'} text-lg`} />
               <span className="mt-0.5 leading-none">Ví tiền</span>
-              {isActive && <span className="w-1 h-1 rounded-full bg-indigo dark:bg-cyan mt-1" />}
+              {isActive && <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_#3b82f6] mt-0.5" />}
             </>
           )}
         </NavLink>
@@ -658,7 +726,7 @@ export default function Shell() {
             playClickSound();
             setMobileOpen(true);
           }}
-          className="flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-semibold text-muted hover:text-ink transition"
+          className="flex flex-col items-center justify-center py-1.5 px-3 rounded-full text-[10px] font-semibold text-muted hover:text-ink transition"
           aria-label="Khám phá thêm"
         >
           <i className="bi bi-grid-3x3-gap text-lg" />

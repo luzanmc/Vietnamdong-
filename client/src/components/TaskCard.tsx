@@ -55,12 +55,12 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
 
   return (
     <>
-      <div className="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden flex flex-col justify-between group">
+      <div className="glass-card rounded-3xl p-4 sm:p-5 relative overflow-hidden flex flex-col justify-between group">
         <div>
           {/* Header row */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-surface2/80 border border-line/60 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-indigo">
+              <div className="w-10 h-10 rounded-2xl bg-blue-500/15 border border-blue-500/25 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-blue-400 shadow-[0_0_12px_rgba(59,130,246,0.2)]">
                 <i className="bi bi-link-45deg text-lg" />
               </div>
               <div className="min-w-0">
@@ -80,11 +80,11 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
             </div>
 
             {/* Reward badge */}
-            <div className="font-mono text-amber font-bold text-right shrink-0">
+            <div className="font-mono text-blue-400 font-bold text-right shrink-0">
               <div className="flex items-center gap-1.5 text-base sm:text-lg">
                 <CurrencyIcon size={18} />
                 <span>+{task.reward_nova}</span>
-                <span className="text-xs text-amber/80 font-normal">VNC</span>
+                <span className="text-xs text-blue-400/80 font-normal">VNC</span>
               </div>
               {novaToVndRate > 0 && (
                 <div className="text-[10px] text-muted font-body font-normal">
@@ -104,7 +104,7 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
             </div>
             <div className="h-1.5 rounded-full bg-surface2 border border-line/40 overflow-hidden relative">
               <div
-                className="h-full bg-indigo transition-all duration-300 rounded-full"
+                className="h-full bg-gradient-to-r from-blue-600 to-sky-400 transition-all duration-300 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.4)]"
                 style={{ width: `${pct}%` }}
               />
             </div>
@@ -115,7 +115,7 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
         <div className="mt-4 pt-3 border-t border-line/50 flex items-center justify-between gap-2.5">
           <span className="text-xs text-muted min-w-0 truncate">
             {atLimit ? (
-              <span className="text-amber flex items-center gap-1">
+              <span className="text-blue-400 flex items-center gap-1">
                 <i className="bi bi-check2-circle text-xs shrink-0" /> <span className="truncate">Đã hoàn thành hôm nay</span>
               </span>
             ) : (
@@ -128,7 +128,7 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
               type="button"
               onClick={() => setShowReport(true)}
               title="Báo link lỗi"
-              className="w-8 h-8 rounded-xl bg-surface2/80 hover:bg-rose/15 text-muted hover:text-rose border border-line/60 flex items-center justify-center transition btn-press"
+              className="w-8 h-8 rounded-full glass-pill hover:border-rose/50 text-muted hover:text-rose flex items-center justify-center transition btn-press"
             >
               <i className="bi bi-flag text-xs" />
             </button>
@@ -136,10 +136,10 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
             <button
               onClick={handleClick}
               disabled={busy || atLimit}
-              className={`flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl transition-all btn-press shrink-0 ${
+              className={`flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full transition-all btn-press shrink-0 ${
                 atLimit
-                  ? 'bg-surface2 text-muted border border-line/60 cursor-not-allowed opacity-60'
-                  : 'bg-indigo hover:brightness-110 text-white shadow-sm'
+                  ? 'glass-pill text-muted cursor-not-allowed opacity-60'
+                  : 'bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_15px_rgba(37,99,235,0.35)]'
               }`}
             >
               {busy ? (
@@ -165,14 +165,14 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
 
       {showReport && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="bg-surface border border-line/80 rounded-2xl w-full max-w-sm p-5 space-y-4 shadow-2xl relative">
+          <div className="glass-panel border border-white/10 rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl relative">
             <div className="flex items-center justify-between pb-2 border-b border-line/60">
               <h3 className="text-sm font-semibold flex items-center gap-2 text-ink">
-                <i className="bi bi-flag-fill text-rose" /> Báo cáo link lỗi
+                <i className="bi bi-flag-fill text-blue-400" /> Báo cáo link lỗi
               </h3>
               <button
                 onClick={() => setShowReport(false)}
-                className="w-7 h-7 rounded-lg text-muted hover:text-ink hover:bg-surface2 flex items-center justify-center transition"
+                className="w-7 h-7 rounded-full text-muted hover:text-ink hover:bg-white/[0.08] flex items-center justify-center transition"
               >
                 <i className="bi bi-x-lg text-xs" />
               </button>
@@ -187,10 +187,10 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
                 {REPORT_REASONS.map((r) => (
                   <label
                     key={r}
-                    className={`flex items-center gap-2 text-xs p-2.5 rounded-xl border cursor-pointer transition ${
+                    className={`flex items-center gap-2 text-xs p-2.5 rounded-2xl border cursor-pointer transition ${
                       reason === r
-                        ? 'bg-indigo/15 border-indigo/40 text-ink font-medium'
-                        : 'bg-surface2/70 border-line/60 text-muted hover:text-ink'
+                        ? 'bg-blue-600/15 border-blue-500/40 text-blue-400 font-medium'
+                        : 'glass-pill border-line/60 text-muted hover:text-ink'
                     }`}
                   >
                     <input
@@ -199,7 +199,7 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
                       value={r}
                       checked={reason === r}
                       onChange={() => setReason(r)}
-                      className="accent-indigo"
+                      className="accent-blue-500"
                     />
                     <span>{r}</span>
                   </label>
@@ -212,7 +212,7 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
                   value={customDetail}
                   onChange={(e) => setCustomDetail(e.target.value)}
                   placeholder="Mô tả chi tiết lỗi gặp phải..."
-                  className="w-full mt-2 bg-surface2/70 border border-line/60 rounded-xl p-2.5 text-xs text-ink focus:outline-none focus:border-indigo"
+                  className="w-full mt-2 glass-pill border border-line/60 rounded-2xl p-2.5 text-xs text-ink focus:outline-none focus:border-blue-500"
                   maxLength={200}
                 />
               )}
@@ -220,9 +220,9 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
 
             {reportResult && (
               <div
-                className={`p-2.5 rounded-xl text-xs flex items-center gap-2 ${
+                className={`p-2.5 rounded-2xl text-xs flex items-center gap-2 ${
                   reportResult.ok
-                    ? 'bg-cyan/15 border border-cyan/30 text-cyan'
+                    ? 'bg-blue-500/15 border border-blue-500/30 text-blue-400'
                     : 'bg-rose/15 border border-rose/30 text-rose'
                 }`}
               >
@@ -235,7 +235,7 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
               <button
                 type="button"
                 onClick={() => setShowReport(false)}
-                className="flex-1 py-2 rounded-xl bg-surface2 hover:bg-surface2/80 text-muted hover:text-ink text-xs font-semibold transition"
+                className="flex-1 py-2 rounded-full glass-pill hover:bg-white/[0.06] text-muted hover:text-ink text-xs font-semibold transition"
               >
                 Hủy
               </button>
@@ -243,7 +243,7 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
                 type="button"
                 disabled={submitting}
                 onClick={handleSendReport}
-                className="flex-1 py-2 rounded-xl bg-rose hover:brightness-110 text-white text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-sm"
+                className="flex-1 py-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(37,99,235,0.35)]"
               >
                 {submitting ? (
                   <>

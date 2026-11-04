@@ -16,18 +16,18 @@ export default function StatCard({
   value,
   suffix,
   icon,
-  iconColor = 'text-amber',
+  iconColor = 'text-blue-400',
   hint,
   trend,
 }: StatCardProps) {
   return (
-    <div className="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden flex flex-col justify-between group">
+    <div className="glass-card rounded-3xl p-4 sm:p-5 relative overflow-hidden flex flex-col justify-between group">
       <div>
         <div className="flex items-center justify-between text-xs text-muted mb-2.5 gap-2">
           <span className="font-semibold tracking-wider uppercase text-[11px] text-muted/80 truncate">
             {label}
           </span>
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-surface2/70 border border-line/60 shadow-sm transition-transform group-hover:scale-105 shrink-0">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-blue-500/10 border border-blue-500/20 shadow-sm transition-transform group-hover:scale-105 shrink-0">
             <i className={`bi ${icon} ${iconColor} text-sm`} />
           </div>
         </div>
@@ -53,7 +53,7 @@ export default function StatCard({
         <div className="flex items-center justify-between text-xs text-muted mt-3 pt-2.5 border-t border-line/50 gap-2">
           {hint && <span className="truncate text-[11px]">{hint}</span>}
           {trend && (
-            <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-surface2 text-muted border border-line/60 shrink-0 ml-auto">
+            <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0 ml-auto">
               {trend}
             </span>
           )}
