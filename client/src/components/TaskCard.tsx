@@ -4,6 +4,16 @@ import CurrencyIcon from './CurrencyIcon.js';
 import { useSettings, formatVnd } from '../context/SettingsContext.js';
 import { playClickSound } from '../utils/sound.js';
 import { api } from '../api/client.js';
+import {
+  IconLink,
+  IconFlame,
+  IconFlag,
+  IconLock,
+  IconPlayerPlay,
+  IconLoader2,
+  IconCircleCheck,
+  IconX,
+} from '@tabler/icons-react';
 
 interface TaskCardProps {
   task: Task;
@@ -55,39 +65,39 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
 
   return (
     <>
-      <div className="glass-card rounded-3xl p-4 sm:p-5 relative overflow-hidden flex flex-col justify-between group">
+      <div className="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden flex flex-col justify-between group border border-white/10 shadow-lg">
         <div>
           {/* Header row */}
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-2xl bg-blue-500/15 border border-blue-500/25 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-blue-400 shadow-[0_0_12px_rgba(59,130,246,0.2)]">
-                <i className="bi bi-link-45deg text-lg" />
+              <div className="w-10 h-10 rounded-xl bg-sky-500/15 border border-sky-500/25 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform text-sky-400 shadow-[0_0_12px_rgba(56,189,248,0.2)]">
+                <IconLink size={20} />
               </div>
               <div className="min-w-0">
                 <div className="font-semibold text-sm sm:text-base flex items-center gap-2">
-                  <span className="truncate text-ink">{task.name}</span>
+                  <span className="truncate text-white">{task.name}</span>
                   {!!task.is_hot && (
-                    <span className="text-[10px] font-semibold bg-rose/10 text-rose border border-rose/25 px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 flex items-center gap-1">
+                    <span className="text-[10px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/25 px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 flex items-center gap-1">
                       <span>HOT</span>
-                      <i className="bi bi-fire text-[10px]" />
+                      <IconFlame size={12} />
                     </span>
                   )}
                 </div>
-                <div className="text-xs text-muted truncate mt-0.5">
+                <div className="text-xs text-zinc-400 truncate mt-0.5">
                   Vượt link rút gọn để nhận thưởng VNC ngay
                 </div>
               </div>
             </div>
 
             {/* Reward badge */}
-            <div className="font-mono text-blue-400 font-bold text-right shrink-0">
+            <div className="font-mono text-sky-400 font-bold text-right shrink-0">
               <div className="flex items-center gap-1.5 text-base sm:text-lg">
                 <CurrencyIcon size={18} />
                 <span>+{task.reward_nova}</span>
-                <span className="text-xs text-blue-400/80 font-normal">VNC</span>
+                <span className="text-xs text-sky-400/80 font-normal">VNC</span>
               </div>
               {novaToVndRate > 0 && (
-                <div className="text-[10px] text-muted font-body font-normal">
+                <div className="text-[10px] text-zinc-400 font-body font-normal">
                   ~{formatVnd(task.reward_nova, novaToVndRate)}
                 </div>
               )}
@@ -96,15 +106,15 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
 
           {/* Progress Tracker */}
           <div className="mt-4">
-            <div className="flex items-center justify-between text-xs text-muted mb-1.5">
+            <div className="flex items-center justify-between text-xs text-zinc-400 mb-1.5">
               <span>Tiến độ hoàn thành</span>
-              <span className="font-mono font-medium text-ink">
+              <span className="font-mono font-medium text-white">
                 {task.done_today} / {task.daily_limit} lượt ({pct}%)
               </span>
             </div>
-            <div className="h-1.5 rounded-full bg-surface2 border border-line/40 overflow-hidden relative">
+            <div className="h-1.5 rounded-full bg-white/[0.06] border border-white/10 overflow-hidden relative">
               <div
-                className="h-full bg-gradient-to-r from-blue-600 to-sky-400 transition-all duration-300 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.4)]"
+                className="h-full bg-gradient-to-r from-sky-500 to-blue-400 transition-all duration-300 rounded-full shadow-[0_0_8px_rgba(56,189,248,0.4)]"
                 style={{ width: `${pct}%` }}
               />
             </div>
@@ -112,11 +122,12 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
         </div>
 
         {/* Action row */}
-        <div className="mt-4 pt-3 border-t border-line/50 flex items-center justify-between gap-2.5">
-          <span className="text-xs text-muted min-w-0 truncate">
+        <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between gap-2.5">
+          <span className="text-xs text-zinc-400 min-w-0 truncate">
             {atLimit ? (
-              <span className="text-blue-400 flex items-center gap-1">
-                <i className="bi bi-check2-circle text-xs shrink-0" /> <span className="truncate">Đã hoàn thành hôm nay</span>
+              <span className="text-sky-400 flex items-center gap-1 font-medium">
+                <IconCircleCheck size={14} className="shrink-0" />
+                <span className="truncate">Đã hoàn thành hôm nay</span>
               </span>
             ) : (
               <span className="truncate">Còn {task.daily_limit - task.done_today} lượt khả dụng</span>
@@ -128,33 +139,33 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
               type="button"
               onClick={() => setShowReport(true)}
               title="Báo link lỗi"
-              className="w-8 h-8 rounded-full glass-pill hover:border-rose/50 text-muted hover:text-rose flex items-center justify-center transition btn-press"
+              className="w-8 h-8 rounded-xl glass-pill hover:border-rose-500/50 text-zinc-400 hover:text-rose-400 flex items-center justify-center transition btn-press"
             >
-              <i className="bi bi-flag text-xs" />
+              <IconFlag size={15} />
             </button>
 
             <button
               onClick={handleClick}
               disabled={busy || atLimit}
-              className={`flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full transition-all btn-press shrink-0 ${
+              className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-xl transition-all btn-press shrink-0 ${
                 atLimit
-                  ? 'glass-pill text-muted cursor-not-allowed opacity-60'
-                  : 'bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_15px_rgba(37,99,235,0.35)]'
+                  ? 'glass-pill text-zinc-500 cursor-not-allowed opacity-60'
+                  : 'bg-sky-500 hover:bg-sky-400 text-white shadow-[0_0_15px_rgba(56,189,248,0.35)]'
               }`}
             >
               {busy ? (
                 <>
-                  <i className="bi bi-arrow-repeat animate-spin text-sm" />
+                  <IconLoader2 size={15} className="animate-spin" />
                   <span>Đang mở...</span>
                 </>
               ) : atLimit ? (
                 <>
-                  <i className="bi bi-lock-fill text-xs" />
+                  <IconLock size={14} />
                   <span>Hết lượt</span>
                 </>
               ) : (
                 <>
-                  <i className="bi bi-play-fill text-base" />
+                  <IconPlayerPlay size={14} />
                   <span>Làm ngay</span>
                 </>
               )}
@@ -165,32 +176,32 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
 
       {showReport && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="glass-panel border border-white/10 rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl relative">
-            <div className="flex items-center justify-between pb-2 border-b border-line/60">
-              <h3 className="text-sm font-semibold flex items-center gap-2 text-ink">
-                <i className="bi bi-flag-fill text-blue-400" /> Báo cáo link lỗi
+          <div className="glass-panel border border-white/10 rounded-2xl w-full max-w-sm p-5 space-y-4 shadow-2xl relative">
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <h3 className="text-sm font-semibold flex items-center gap-2 text-white">
+                <IconFlag size={16} className="text-sky-400" /> Báo cáo link lỗi
               </h3>
               <button
                 onClick={() => setShowReport(false)}
-                className="w-7 h-7 rounded-full text-muted hover:text-ink hover:bg-white/[0.08] flex items-center justify-center transition"
+                className="w-7 h-7 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] flex items-center justify-center transition"
               >
-                <i className="bi bi-x-lg text-xs" />
+                <IconX size={16} />
               </button>
             </div>
 
             <div>
-              <p className="text-xs text-muted mb-2">
-                Nhiệm vụ: <span className="font-semibold text-ink">{task.name}</span>
+              <p className="text-xs text-zinc-400 mb-2">
+                Nhiệm vụ: <span className="font-semibold text-white">{task.name}</span>
               </p>
-              <label className="text-[11px] text-muted block mb-1.5 font-medium">Chọn lý do báo cáo</label>
+              <label className="text-[11px] text-zinc-400 block mb-1.5 font-medium">Chọn lý do báo cáo</label>
               <div className="space-y-1.5">
                 {REPORT_REASONS.map((r) => (
                   <label
                     key={r}
-                    className={`flex items-center gap-2 text-xs p-2.5 rounded-2xl border cursor-pointer transition ${
+                    className={`flex items-center gap-2 text-xs p-2.5 rounded-xl border cursor-pointer transition ${
                       reason === r
-                        ? 'bg-blue-600/15 border-blue-500/40 text-blue-400 font-medium'
-                        : 'glass-pill border-line/60 text-muted hover:text-ink'
+                        ? 'bg-sky-500/15 border-sky-500/40 text-sky-400 font-medium'
+                        : 'glass-pill border-white/10 text-zinc-400 hover:text-white'
                     }`}
                   >
                     <input
@@ -199,7 +210,7 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
                       value={r}
                       checked={reason === r}
                       onChange={() => setReason(r)}
-                      className="accent-blue-500"
+                      className="accent-sky-500"
                     />
                     <span>{r}</span>
                   </label>
@@ -207,55 +218,45 @@ export default function TaskCard({ task, onStart, busy }: TaskCardProps) {
               </div>
 
               {reason === 'Khác' && (
-                <textarea
-                  rows={2}
-                  value={customDetail}
-                  onChange={(e) => setCustomDetail(e.target.value)}
-                  placeholder="Mô tả chi tiết lỗi gặp phải..."
-                  className="w-full mt-2 glass-pill border border-line/60 rounded-2xl p-2.5 text-xs text-ink focus:outline-none focus:border-blue-500"
-                  maxLength={200}
-                />
+                <div className="mt-2.5">
+                  <textarea
+                    rows={2}
+                    value={customDetail}
+                    onChange={(e) => setCustomDetail(e.target.value)}
+                    placeholder="Mô tả chi tiết lỗi gặp phải..."
+                    className="w-full text-xs p-2.5 rounded-xl bg-surface2 border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:border-sky-500 transition"
+                  />
+                </div>
               )}
             </div>
 
             {reportResult && (
               <div
-                className={`p-2.5 rounded-2xl text-xs flex items-center gap-2 ${
+                className={`text-xs p-2.5 rounded-xl border ${
                   reportResult.ok
-                    ? 'bg-blue-500/15 border border-blue-500/30 text-blue-400'
-                    : 'bg-rose/15 border border-rose/30 text-rose'
+                    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                    : 'bg-rose-500/15 text-rose-400 border-rose-500/30'
                 }`}
               >
-                <i className={`bi ${reportResult.ok ? 'bi-check-circle' : 'bi-exclamation-circle'}`} />
-                <span>{reportResult.msg}</span>
+                {reportResult.msg}
               </div>
             )}
 
-            <div className="flex gap-2 pt-1">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
               <button
                 type="button"
                 onClick={() => setShowReport(false)}
-                className="flex-1 py-2 rounded-full glass-pill hover:bg-white/[0.06] text-muted hover:text-ink text-xs font-semibold transition"
+                className="px-3.5 py-1.5 rounded-xl text-xs font-medium text-zinc-400 hover:text-white transition"
               >
                 Hủy
               </button>
               <button
                 type="button"
-                disabled={submitting}
                 onClick={handleSendReport}
-                className="flex-1 py-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(37,99,235,0.35)]"
+                disabled={submitting}
+                className="px-4 py-1.5 rounded-xl text-xs font-semibold bg-sky-500 hover:bg-sky-400 text-white transition disabled:opacity-50"
               >
-                {submitting ? (
-                  <>
-                    <i className="bi bi-arrow-repeat animate-spin text-xs" />
-                    <span>Đang gửi...</span>
-                  </>
-                ) : (
-                  <>
-                    <i className="bi bi-send" />
-                    <span>Gửi báo cáo</span>
-                  </>
-                )}
+                {submitting ? 'Đang gửi...' : 'Gửi báo cáo'}
               </button>
             </div>
           </div>

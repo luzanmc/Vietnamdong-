@@ -3,15 +3,15 @@
 @tailwind utilities;
 
 :root {
-  --color-bg: 7 7 9;
-  --color-surface: 15 15 19;
-  --color-surface2: 23 23 29;
-  --color-line: 38 38 46;
+  --color-bg: 6 7 10;
+  --color-surface: 13 14 19;
+  --color-surface2: 21 23 30;
+  --color-line: 34 37 46;
   --color-ink: 248 250 255;
   --color-muted: 148 155 170;
-  --color-indigo: 59 130 246;
-  --color-cyan: 56 189 248;
-  --color-amber: 59 130 246;
+  --color-indigo: 56 189 248;
+  --color-cyan: 125 211 252;
+  --color-amber: 56 189 248;
   --color-rose: 239 68 68;
   color-scheme: dark;
 }
@@ -24,9 +24,9 @@ html:not(.dark):root {
   --color-line: 226 232 240;
   --color-ink: 15 23 42;
   --color-muted: 100 116 139;
-  --color-indigo: 37 99 235;
+  --color-indigo: 14 165 233;
   --color-cyan: 2 132 199;
-  --color-amber: 37 99 235;
+  --color-amber: 14 165 233;
   --color-rose: 225 29 72;
   color-scheme: light;
 }
@@ -244,6 +244,20 @@ body {
 }
 .animate-slide-in {
   animation: slide-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.animate-slide-in-left {
+  animation: slide-in-left 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes float-gentle {
