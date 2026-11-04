@@ -11,10 +11,10 @@ export default function MusicTab() {
 
   return (
     <div
-      className={`hidden md:flex items-center gap-2 px-2.5 py-1 rounded-full border transition-all text-xs ${
+      className={`flex items-center gap-2 px-3 py-1.5 rounded-full glass-pill border transition-all text-xs shadow-xl ${
         isPlaying
-          ? 'bg-indigo/15 border-indigo/40 text-indigo shadow-[0_0_15px_rgba(85,167,255,0.2)]'
-          : 'bg-surface2/60 border-line/60 text-muted hover:text-ink hover:border-line'
+          ? 'border-blue-500/40 text-blue-400 shadow-[0_0_15px_rgba(37,99,235,0.25)]'
+          : 'border-white/10 text-muted hover:text-ink'
       }`}
     >
       {/* Source icon badge */}

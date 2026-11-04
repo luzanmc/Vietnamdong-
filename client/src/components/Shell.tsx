@@ -16,11 +16,6 @@ import AvatarFrame from './AvatarFrame.js';
 import UserName from './UserName.js';
 import { playClickSound, isSoundEnabled, toggleSound } from '../utils/sound.js';
 
-interface NavGroup {
-  title: string;
-  items: NavItem[];
-}
-
 interface NavItem {
   to: string;
   icon: string;
@@ -30,50 +25,24 @@ interface NavItem {
   adminOnly?: boolean;
 }
 
-const NAV_GROUPS: NavGroup[] = [
-  {
-    title: 'Khám phá',
-    items: [
-      { to: '/dashboard', icon: 'bi-grid-1x2-fill', labelKey: 'nav.dashboard' },
-      { to: '/chart', icon: 'bi-graph-up', labelKey: 'nav.chart' },
-      { to: '/daily-reward', icon: 'bi-gift-fill', labelKey: 'nav.daily', badge: 'HOT', badgeColor: 'bg-rose/10 text-rose border border-rose/25' },
-      { to: '/lucky-wheel', icon: 'bi-stars', labelKey: 'nav.spin', badge: 'FREE', badgeColor: 'bg-amber/10 text-amber border border-amber/25' },
-      { to: '/giftcode', icon: 'bi-ticket-perforated-fill', labelKey: 'nav.giftcode', badge: 'HOT', badgeColor: 'bg-amber/10 text-amber border border-amber/25' },
-      { to: '/quests', icon: 'bi-list-task', labelKey: 'nav.quests' },
-      { to: '/leaderboard', icon: 'bi-trophy-fill', labelKey: 'nav.leaderboard' },
-    ],
-  },
-
-  {
-    title: 'Tài chính',
-    items: [
-      { to: '/wallet', icon: 'bi-wallet2', labelKey: 'nav.wallet' },
-      { to: '/history', icon: 'bi-clock-history', labelKey: 'nav.history' },
-      { to: '/redeem', icon: 'bi-controller', labelKey: 'nav.redeem' },
-    ],
-  },
-  {
-    title: 'Cộng đồng',
-    items: [
-      { to: '/referral', icon: 'bi-people-fill', labelKey: 'nav.referral', badge: '20%', badgeColor: 'bg-indigo/10 text-indigo border border-indigo/25' },
-      { to: '/creator-code', icon: 'bi-tag-fill', labelKey: 'nav.creator' },
-      { to: '/vietsub-studio', icon: 'bi-badge-cc-fill', labelKey: 'nav.vietsub' },
-    ],
-  },
-  {
-    title: 'Hệ thống',
-    items: [
-      { to: '/profile', icon: 'bi-person-circle', labelKey: 'nav.profile' },
-      { to: '/achievements', icon: 'bi-award-fill', labelKey: 'nav.achievements' },
-      { to: '/faq', icon: 'bi-question-circle-fill', labelKey: 'nav.faq' },
-      { to: '/support', icon: 'bi-headset', labelKey: 'nav.support' },
-      { to: '/security', icon: 'bi-shield-check', labelKey: 'nav.security' },
-      { to: '/admin', icon: 'bi-shield-lock-fill', labelKey: 'nav.admin', adminOnly: true },
-    ],
-  },
+const PRIMARY_NAV: NavItem[] = [
+  { to: '/dashboard', icon: 'bi-grid-fill', labelKey: 'nav.dashboard' },
+  { to: '/quests', icon: 'bi-lightning-charge-fill', labelKey: 'nav.quests', badge: 'HOT', badgeColor: 'bg-blue-500/20 text-blue-400 border border-blue-500/30' },
+  { to: '/lucky-wheel', icon: 'bi-stars', labelKey: 'nav.spin', badge: 'FREE', badgeColor: 'bg-amber/15 text-amber border border-amber/30' },
+  { to: '/wallet', icon: 'bi-wallet2', labelKey: 'nav.wallet' },
+  { to: '/leaderboard', icon: 'bi-trophy-fill', labelKey: 'nav.leaderboard' },
+  { to: '/referral', icon: 'bi-people-fill', labelKey: 'nav.referral', badge: '20%', badgeColor: 'bg-blue-500/15 text-blue-400 border border-blue-500/25' },
+  { to: '/profile', icon: 'bi-gear-fill', labelKey: 'nav.profile' },
 ];
 
-function SoundToggle() {
+const ADMIN_NAV: NavItem = {
+  to: '/admin',
+  icon: 'bi-shield-lock-fill',
+  labelKey: 'nav.admin',
+  adminOnly: true,
+};
+
+function SoundToggle({ compact = false }: { compact?: boolean }) {
   const [enabled, setEnabled] = useState(isSoundEnabled);
 
   function handleToggle() {
@@ -87,14 +56,25 @@ function SoundToggle() {
       onClick={handleToggle}
       aria-label="Toggle Sound Effects"
       title={enabled ? 'Âm thanh: BẬT' : 'Âm thanh: TẮT'}
-      className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-surface2 transition btn-press"
+      className={compact 
+        ? "flex items-center justify-between w-full p-2.5 rounded-xl hover:bg-white/[0.06] text-xs font-medium text-muted hover:text-ink transition"
+        : "w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-surface2 transition btn-press"
+      }
     >
-      <i className={`bi ${enabled ? 'bi-volume-up-fill text-indigo' : 'bi-volume-mute-fill'}`} />
+      <div className="flex items-center gap-2">
+        <i className={`bi ${enabled ? 'bi-volume-up-fill text-blue-400' : 'bi-volume-mute-fill'} text-sm`} />
+        {compact && <span>Hiệu ứng âm thanh</span>}
+      </div>
+      {compact && (
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${enabled ? 'bg-blue-500/20 text-blue-400' : 'bg-surface2 text-muted'}`}>
+          {enabled ? 'BẬT' : 'TẮT'}
+        </span>
+      )}
     </button>
   );
 }
 
-function ThemeToggle() {
+function ThemeToggle({ compact = false }: { compact?: boolean }) {
   const { theme, toggle } = useTheme();
   return (
     <button
@@ -103,14 +83,25 @@ function ThemeToggle() {
         toggle();
       }}
       aria-label="Toggle theme"
-      className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-surface2 transition btn-press"
+      className={compact
+        ? "flex items-center justify-between w-full p-2.5 rounded-xl hover:bg-white/[0.06] text-xs font-medium text-muted hover:text-ink transition"
+        : "w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-surface2 transition btn-press"
+      }
     >
-      <i className={`bi ${theme === 'dark' ? 'bi-sun-fill text-amber' : 'bi-moon-stars-fill text-indigo'}`} />
+      <div className="flex items-center gap-2">
+        <i className={`bi ${theme === 'dark' ? 'bi-sun-fill text-amber' : 'bi-moon-stars-fill text-blue-400'} text-sm`} />
+        {compact && <span>Chế độ giao diện</span>}
+      </div>
+      {compact && (
+        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface2 text-muted uppercase">
+          {theme === 'dark' ? 'Dark' : 'Light'}
+        </span>
+      )}
     </button>
   );
 }
 
-function LanguageToggle() {
+function LanguageToggle({ compact = false }: { compact?: boolean }) {
   const { lang, toggle } = useLanguage();
   return (
     <button
@@ -119,72 +110,68 @@ function LanguageToggle() {
         toggle();
       }}
       aria-label="Switch language"
-      className="flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-ink transition px-2.5 py-1.5 rounded-lg hover:bg-surface2 btn-press border border-line/60"
+      className={compact
+        ? "flex items-center justify-between w-full p-2.5 rounded-xl hover:bg-white/[0.06] text-xs font-medium text-muted hover:text-ink transition"
+        : "flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-ink transition px-2.5 py-1.5 rounded-lg hover:bg-surface2 btn-press border border-line/60"
+      }
     >
-      <i className="bi bi-translate text-sm text-cyan" />
-      <span>{lang === 'vi' ? 'VI' : 'EN'}</span>
+      <div className="flex items-center gap-2">
+        <i className="bi bi-translate text-sm text-blue-400" />
+        {compact && <span>Ngôn ngữ hiển thị</span>}
+      </div>
+      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400">
+        {lang === 'vi' ? 'Tiếng Việt' : 'English'}
+      </span>
     </button>
   );
 }
 
 function NavLinks({ onNavigate, isAdmin }: { onNavigate?: () => void; isAdmin: boolean }) {
   const { t } = useLanguage();
+  const navItems = isAdmin ? [...PRIMARY_NAV, ADMIN_NAV] : PRIMARY_NAV;
 
   return (
-    <nav className="flex flex-col gap-4 px-3 py-3">
-      {NAV_GROUPS.map((group) => {
-        const visibleItems = group.items.filter((item) => !item.adminOnly || isAdmin);
-        if (!visibleItems.length) return null;
-
-        return (
-          <div key={group.title} className="space-y-1">
-            <div className="px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted/60 select-none">
-              {group.title}
-            </div>
-            <div className="space-y-1">
-              {visibleItems.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  onClick={() => {
-                    playClickSound();
-                    if (onNavigate) onNavigate();
-                  }}
-                  className={({ isActive }) =>
-                    `flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs sm:text-sm font-medium transition-all duration-200 group ${
-                      isActive
-                        ? 'text-blue-400 font-semibold bg-blue-600/15 border border-blue-500/30 shadow-[0_0_18px_rgba(59,130,246,0.18)] dark:bg-blue-600/20 dark:border-blue-500/35 dark:text-blue-400'
-                        : 'text-muted hover:text-ink hover:bg-white/[0.04]'
-                    }`
-                  }
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <i
-                      className={`bi ${item.icon} text-base shrink-0 transition-transform group-hover:scale-110 group-hover:text-blue-400`}
-                    />
-                    <span className="truncate">{t(item.labelKey)}</span>
-                  </div>
-                  {item.badge && (
-                    <span
-                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 ${
-                        item.badgeColor || 'bg-blue-500/15 text-blue-400 border border-blue-500/25'
-                      }`}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
-                </NavLink>
-              ))}
-            </div>
+    <nav className="flex flex-col gap-1.5 px-1 py-1">
+      {navItems.map((item) => (
+        <NavLink
+          key={item.to}
+          to={item.to}
+          onClick={() => {
+            playClickSound();
+            if (onNavigate) onNavigate();
+          }}
+          className={({ isActive }) =>
+            `flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs sm:text-sm font-medium transition-all duration-200 group ${
+              isActive
+                ? 'text-blue-400 font-bold bg-blue-600/20 border border-blue-500/35 shadow-[0_0_20px_rgba(37,99,235,0.25)]'
+                : 'text-zinc-400 hover:text-white hover:bg-white/[0.05]'
+            }`
+          }
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <i
+              className={`bi ${item.icon} text-lg shrink-0 transition-transform group-hover:scale-110 group-hover:text-blue-400`}
+            />
+            <span className="truncate">{t(item.labelKey)}</span>
           </div>
-        );
-      })}
+          {item.badge && (
+            <span
+              className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 ${
+                item.badgeColor || 'bg-blue-500/15 text-blue-400 border border-blue-500/25'
+              }`}
+            >
+              {item.badge}
+            </span>
+          )}
+        </NavLink>
+      ))}
     </nav>
   );
 }
 
 export default function Shell() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [desktopSidebarOpen, setDesktopSidebarOpen] = useState<boolean>(() => {
     try {
       const stored = localStorage.getItem('vnd_desktop_sidebar');
@@ -197,6 +184,7 @@ export default function Shell() {
   const [bannerModalOpen, setBannerModalOpen] = useState(false);
   const [isBannerClamped, setIsBannerClamped] = useState(false);
   const bannerTextRef = useRef<HTMLParagraphElement>(null);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
   const { me, logout } = useAuth();
   const { t } = useLanguage();
   const { announcement } = useSettings();
@@ -204,10 +192,22 @@ export default function Shell() {
   const { pathname } = useLocation();
   const isAdmin = me?.role === 'admin';
 
-  // Close mobile drawer on route change
+  // Close mobile drawer & profile menu on route change
   useEffect(() => {
     setMobileOpen(false);
+    setProfileMenuOpen(false);
   }, [pathname]);
+
+  // Click outside to close profile dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setProfileMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   function toggleMenu() {
     playClickSound();
@@ -250,116 +250,162 @@ export default function Shell() {
 
   return (
     <div className="min-h-screen bg-bg flex flex-col">
-      {/* Header */}
-      <header className="border-b border-line/60 sticky top-0 z-30 glass-panel">
-        <div className="w-full flex items-center justify-between px-3 sm:px-6 h-16 gap-2">
-          {/* Logo & Brand */}
+      {/* Minimalist Top Navbar (Image 01) */}
+      <header className="border-b border-line/60 sticky top-0 z-40 glass-panel">
+        <div className="w-full flex items-center justify-between px-4 sm:px-8 h-16">
+          {/* Brand Logo */}
           <Link
             to="/dashboard"
             onClick={playClickSound}
-            className="flex items-center gap-2.5 group cursor-pointer shrink-0"
+            className="flex items-center gap-3 group shrink-0"
           >
-            <div className="relative shrink-0">
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-blue-600 via-blue-500 to-sky-400 p-0.5 shadow-[0_0_20px_rgba(37,99,235,0.4)] group-hover:scale-105 transition-transform">
               <img
                 src="/logo-mark.png"
                 alt="VietnamDong"
-                className="w-8 h-8 shrink-0 transition-transform group-hover:scale-105"
+                className="w-full h-full rounded-[14px] object-cover"
               />
-              <div className="absolute inset-0 rounded-full bg-blue-500/25 blur-sm -z-10 group-hover:bg-blue-500/40 transition" />
             </div>
             <div className="flex flex-col">
-              <span className="font-display font-bold text-sm sm:text-base tracking-tight gradient-text-indigo leading-none">
+              <span className="font-display font-black text-base sm:text-lg tracking-tight gradient-text-indigo leading-none">
                 VietnamDong
               </span>
-              <span className="text-[9px] font-mono text-muted uppercase tracking-widest leading-none mt-0.5 hidden xs:inline">
-                VNC Rewards
+              <span className="text-[9px] font-mono text-zinc-400 uppercase tracking-widest leading-none mt-1 hidden xs:inline">
+                VNC Platform
               </span>
             </div>
           </Link>
 
-          {/* Music Tab Mini Player */}
-          <MusicTab />
-
-          {/* User Status, Balance & Quick Actions */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Clean Action Cluster */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {me && (
-              <>
-                {/* Quick Balance Pill */}
-                <Link
-                  to="/wallet"
-                  onClick={playClickSound}
-                  title="Xem số dư & Rút tiền"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full glass-pill hover:border-blue-500/50 hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] transition btn-press group shrink-0"
-                >
-                  <CurrencyIcon size={16} />
-                  <span className="font-mono text-xs sm:text-sm font-bold text-ink">
-                    <AnimatedNumber value={me.balance_nova} />
-                  </span>
-                  <span className="text-[10px] font-bold text-blue-400 hidden xs:inline">VNC</span>
-                  <i className="bi bi-plus-circle-fill text-blue-500 text-xs ml-0.5 group-hover:scale-110 transition-transform hidden sm:inline" />
-                </Link>
+              <Link
+                to="/wallet"
+                onClick={playClickSound}
+                title="Số dư & Rút tiền"
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-pill hover:border-blue-500/50 hover:shadow-[0_0_15px_rgba(59,130,246,0.25)] transition btn-press group shrink-0"
+              >
+                <CurrencyIcon size={16} />
+                <span className="font-mono text-xs sm:text-sm font-bold text-ink">
+                  <AnimatedNumber value={me.balance_nova} />
+                </span>
+                <span className="text-[10px] font-bold text-blue-400">VNC</span>
+              </Link>
+            )}
 
-                {/* Streak Badge */}
-                <Link
-                  to="/daily-reward"
-                  onClick={playClickSound}
-                  title="Chuỗi điểm danh"
-                  className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-rose/10 border border-rose/30 text-rose text-xs font-semibold hover:bg-rose/20 transition btn-press shrink-0"
-                >
-                  <i className="bi bi-fire text-rose text-sm animate-pulse-soft" />
-                  <span>{me.streak_days}d</span>
-                </Link>
+            <NotificationBell />
 
-                <Link
-                  to="/profile"
-                  onClick={playClickSound}
-                  title="Hồ sơ & Cài đặt"
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-full glass-pill hover:border-blue-500/40 transition btn-press shrink-0"
+            {/* Profile Menu Trigger */}
+            {me && (
+              <div className="relative" ref={profileMenuRef}>
+                <button
+                  onClick={() => {
+                    playClickSound();
+                    setProfileMenuOpen((prev) => !prev);
+                  }}
+                  className="flex items-center gap-1 p-0.5 rounded-full glass-pill hover:border-blue-500/50 transition btn-press"
+                  aria-label="Tài khoản cá nhân"
                 >
                   <AvatarFrame level={me.level} shape="circle">
                     {me.avatar_url ? (
-                      <img src={me.avatar_url} alt={me.username} className="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover" />
+                      <img src={me.avatar_url} alt={me.username} className="w-8 h-8 rounded-full object-cover" />
                     ) : (
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center font-bold text-[9px] sm:text-[10px]">
+                      <div className="w-8 h-8 rounded-full bg-blue-600/30 text-blue-400 flex items-center justify-center font-bold text-xs">
                         {me.username.slice(0, 2).toUpperCase()}
                       </div>
                     )}
                   </AvatarFrame>
-                  <LevelBadge level={me.level} size="xs" />
-                </Link>
-              </>
+                </button>
+
+                {/* Profile Popover Menu */}
+                {profileMenuOpen && (
+                  <div className="absolute right-0 top-12 w-72 rounded-3xl glass-panel p-4 shadow-2xl z-50 border border-white/10 animate-fade-in space-y-3">
+                    {/* User info */}
+                    <div className="flex items-center gap-3 pb-3 border-b border-white/10">
+                      <AvatarFrame level={me.level} shape="circle">
+                        {me.avatar_url ? (
+                          <img src={me.avatar_url} alt={me.username} className="w-10 h-10 rounded-full object-cover" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-blue-600/30 text-blue-400 flex items-center justify-center font-bold text-sm">
+                            {me.username.slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
+                      </AvatarFrame>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-bold text-sm text-ink truncate flex items-center gap-1.5">
+                          <UserName name={me.username} level={me.level} className="truncate" />
+                          <LevelBadge level={me.level} size="xs" />
+                        </div>
+                        <div className="text-[11px] text-zinc-400 mt-0.5 flex items-center gap-2">
+                          <span className="text-amber flex items-center gap-1 font-semibold">
+                            <i className="bi bi-fire text-xs" /> {me.streak_days}d streak
+                          </span>
+                          <span>•</span>
+                          <span>Cấp {me.level ?? 1}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Settings toggles */}
+                    <div className="space-y-1">
+                      <ThemeToggle compact />
+                      <SoundToggle compact />
+                      <LanguageToggle compact />
+                    </div>
+
+                    {/* Quick Profile Links */}
+                    <div className="pt-2 border-t border-white/10 space-y-1 text-xs">
+                      <Link
+                        to="/profile"
+                        onClick={() => { playClickSound(); setProfileMenuOpen(false); }}
+                        className="flex items-center gap-2.5 p-2 rounded-xl text-zinc-300 hover:text-white hover:bg-white/[0.06] transition"
+                      >
+                        <i className="bi bi-person-circle text-blue-400 text-sm" />
+                        <span>Hồ sơ & Đổi Avatar</span>
+                      </Link>
+                      <Link
+                        to="/history"
+                        onClick={() => { playClickSound(); setProfileMenuOpen(false); }}
+                        className="flex items-center gap-2.5 p-2 rounded-xl text-zinc-300 hover:text-white hover:bg-white/[0.06] transition"
+                      >
+                        <i className="bi bi-clock-history text-blue-400 text-sm" />
+                        <span>Lịch sử giao dịch</span>
+                      </Link>
+                      <Link
+                        to="/giftcode"
+                        onClick={() => { playClickSound(); setProfileMenuOpen(false); }}
+                        className="flex items-center gap-2.5 p-2 rounded-xl text-zinc-300 hover:text-white hover:bg-white/[0.06] transition"
+                      >
+                        <i className="bi bi-ticket-perforated text-blue-400 text-sm" />
+                        <span>Nhập mã Giftcode</span>
+                      </Link>
+                    </div>
+
+                    {/* Logout */}
+                    <div className="pt-2 border-t border-white/10">
+                      <button
+                        onClick={() => {
+                          setProfileMenuOpen(false);
+                          handleLogout();
+                        }}
+                        className="w-full flex items-center justify-center gap-2 p-2 rounded-xl text-xs font-semibold text-rose hover:bg-rose/15 transition"
+                      >
+                        <i className="bi bi-box-arrow-right" />
+                        <span>{t('nav.logout')}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
 
-            {/* Controls */}
-            <div className="hidden md:flex items-center gap-1 pl-1 border-l border-line/70">
-              <SoundToggle />
-              <LanguageToggle />
-            </div>
-
-            <div className="hidden sm:flex items-center">
-              <ThemeToggle />
-            </div>
-            <NotificationBell />
-
-            {/* Desktop Logout button */}
-            <button
-              onClick={handleLogout}
-              aria-label={t('nav.logout')}
-              title={t('nav.logout')}
-              className="hidden lg:flex items-center gap-1.5 text-xs text-muted hover:text-rose transition px-2.5 py-1.5 rounded-lg hover:bg-rose/10 btn-press shrink-0"
-            >
-              <i className="bi bi-box-arrow-right text-sm" />
-              <span>{t('nav.logout')}</span>
-            </button>
-
-            {/* Menu Toggle Button (Mobile Drawer & Desktop Sidebar) */}
+            {/* Mobile Menu Button */}
             <button
               onClick={toggleMenu}
-              className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-ink rounded-lg hover:bg-surface2 transition btn-press shrink-0"
+              className="lg:hidden w-9 h-9 flex items-center justify-center text-ink rounded-full glass-pill hover:border-blue-500/40 transition btn-press shrink-0"
               aria-label={t('nav.menu')}
-              title="Menu điều hướng"
             >
-              <i className="bi bi-list text-2xl" />
+              <i className="bi bi-list text-xl" />
             </button>
           </div>
         </div>
@@ -373,19 +419,17 @@ export default function Shell() {
               setBannerModalOpen(true);
             }
           }}
-          className={`bg-gradient-to-r from-indigo/15 via-cyan/15 to-indigo/15 border-b border-indigo/25 px-2 sm:px-4 py-1 flex items-center justify-between gap-1 sm:gap-2 backdrop-blur-sm ${
-            isBannerClamped ? 'cursor-pointer hover:bg-indigo/20 transition-colors' : ''
+          className={`bg-gradient-to-r from-blue-600/15 via-sky-500/15 to-blue-600/15 border-b border-blue-500/25 px-2 sm:px-4 py-1.5 flex items-center justify-between gap-1 sm:gap-2 backdrop-blur-sm ${
+            isBannerClamped ? 'cursor-pointer hover:bg-blue-600/20 transition-colors' : ''
           }`}
         >
-          <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-ink min-w-0 max-w-4xl mx-auto flex-1">
-            <div className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0">
-              <span className="w-6 h-6 rounded-full bg-indigo/20 flex items-center justify-center">
-                <i className="bi bi-megaphone-fill text-indigo text-xs" />
-              </span>
-            </div>
+          <div className="flex items-center gap-2 text-xs text-ink min-w-0 max-w-4xl mx-auto flex-1">
+            <span className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
+              <i className="bi bi-megaphone-fill text-blue-400 text-xs" />
+            </span>
             <p
               ref={bannerTextRef}
-              className="font-medium text-xs text-ink line-clamp-2 break-words [overflow-wrap:anywhere] min-w-0 flex-1 leading-snug"
+              className="font-medium text-xs text-ink line-clamp-1 break-words [overflow-wrap:anywhere] min-w-0 flex-1 leading-snug"
             >
               {announcement}
             </p>
@@ -397,7 +441,7 @@ export default function Shell() {
               playClickSound();
               setBannerDismissed(true);
             }}
-            className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0 text-muted hover:text-ink transition rounded-lg"
+            className="w-8 h-8 flex items-center justify-center shrink-0 text-muted hover:text-ink transition rounded-lg"
             aria-label="Đóng thông báo"
           >
             <i className="bi bi-x-lg text-xs" />
@@ -412,11 +456,11 @@ export default function Shell() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full sm:max-w-md bg-surface border border-line rounded-t-2xl sm:rounded-2xl p-4 shadow-2xl flex flex-col max-h-[60vh]"
+            className="w-full sm:max-w-md glass-panel border border-white/10 rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl flex flex-col max-h-[60vh]"
           >
-            <div className="flex items-center justify-between pb-3 border-b border-line">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <div className="flex items-center gap-2 font-semibold text-sm text-ink min-w-0">
-                <i className="bi bi-megaphone-fill text-indigo shrink-0" />
+                <i className="bi bi-megaphone-fill text-blue-400 shrink-0" />
                 <span className="truncate">Thông báo chung</span>
               </div>
               <button
@@ -425,7 +469,7 @@ export default function Shell() {
                   playClickSound();
                   setBannerModalOpen(false);
                 }}
-                className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-surface2 transition shrink-0"
+                className="w-8 h-8 flex items-center justify-center rounded-full text-muted hover:text-ink hover:bg-white/[0.08] transition shrink-0"
                 aria-label="Đóng"
               >
                 <i className="bi bi-x-lg text-xs" />
@@ -442,91 +486,39 @@ export default function Shell() {
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="absolute top-0 right-0 h-full w-80 max-w-[85vw] bg-surface/95 border-l border-line p-4 flex flex-col justify-between overflow-y-auto backdrop-blur-lg animate-slide-in">
+          <aside className="absolute top-0 right-0 h-full w-80 max-w-[85vw] glass-panel border-l border-white/10 p-5 flex flex-col justify-between overflow-y-auto backdrop-blur-2xl animate-slide-in">
             <div>
               {/* Drawer Header */}
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-line">
-                <div className="flex items-center gap-2">
-                  <img src="/logo-mark.png" alt="VietnamDong" className="w-7 h-7" />
-                  <span className="font-display font-bold text-sm gradient-text-indigo">Menu</span>
+              <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/10">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-2xl bg-gradient-to-tr from-blue-600 to-sky-400 p-0.5 shadow-[0_0_15px_rgba(37,99,235,0.4)]">
+                    <img src="/logo-mark.png" alt="VietnamDong" className="w-full h-full rounded-[14px] object-cover" />
+                  </div>
+                  <span className="font-display font-bold text-base gradient-text-indigo">Menu</span>
                 </div>
                 <button
                   onClick={() => setMobileOpen(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-surface2 transition"
+                  className="w-8 h-8 flex items-center justify-center rounded-full text-muted hover:text-ink hover:bg-white/[0.08] transition"
                 >
                   <i className="bi bi-x-lg text-sm" />
                 </button>
               </div>
 
-              {/* Mobile User Profile Summary - Apple Account Widget */}
-              {me && (
-                <Link
-                  to="/profile"
-                  onClick={() => {
-                    playClickSound();
-                    setMobileOpen(false);
-                  }}
-                  className="block p-3.5 rounded-2xl bg-surface2/60 border border-line mb-3 hover:border-line/80 transition"
-                >
-                  <div className="flex items-center gap-2.5 mb-2.5">
-                    <AvatarFrame level={me.level} shape="circle">
-                      {me.avatar_url ? (
-                        <img src={me.avatar_url} alt={me.username} className="w-9 h-9 rounded-full object-cover" />
-                      ) : (
-                        <div className="w-9 h-9 rounded-full bg-indigo/20 text-indigo flex items-center justify-center font-bold text-sm">
-                          {me.username.slice(0, 2).toUpperCase()}
-                        </div>
-                      )}
-                    </AvatarFrame>
-                    <div className="min-w-0 flex-1">
-                      <div className="font-semibold text-sm truncate flex items-center justify-between gap-1">
-                        <div className="flex items-center gap-1.5 truncate">
-                          <UserName name={me.username} level={me.level} className="truncate" />
-                          <LevelBadge level={me.level} size="xs" />
-                        </div>
-                        <i className="bi bi-gear-fill text-muted text-xs shrink-0" />
-                      </div>
-                      <div className="text-[11px] text-muted flex items-center gap-1.5 mt-0.5">
-                        <span className="w-2 h-2 rounded-full bg-cyan inline-block animate-pulse" />
-                        <span>{me.role === 'admin' ? 'Admin' : 'Thành viên'}</span>
-                        <span>•</span>
-                        <span>Cấp {me.level ?? 1}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-line/60">
-                    <div className="text-center p-2 rounded-xl bg-surface/70 border border-line/40">
-                      <div className="text-[10px] text-muted font-medium">Số dư</div>
-                      <div className="font-mono text-xs font-bold text-amber">{me.balance_nova} VNC</div>
-                    </div>
-                    <div className="text-center p-2 rounded-xl bg-surface/70 border border-line/40">
-                      <div className="text-[10px] text-muted font-medium">Chuỗi ngày</div>
-                      <div className="font-mono text-xs font-bold text-rose flex items-center justify-center gap-1">
-                        <span>{me.streak_days} ngày</span>
-                        <i className="bi bi-fire" />
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              )}
-
-              {/* Drawer Links */}
+              {/* Mobile Navigation Links */}
               <NavLinks onNavigate={() => setMobileOpen(false)} isAdmin={isAdmin} />
             </div>
 
-            {/* Drawer Footer Controls */}
-            <div className="pt-4 mt-4 border-t border-line space-y-2">
-              <div className="flex items-center justify-around py-1 bg-surface2/40 rounded-xl border border-line">
-                <SoundToggle />
-                <LanguageToggle />
-                <ThemeToggle />
-              </div>
+            {/* Drawer Footer */}
+            <div className="pt-4 border-t border-white/10 space-y-2">
+              <ThemeToggle compact />
+              <SoundToggle compact />
+              <LanguageToggle compact />
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold text-rose bg-rose/10 hover:bg-rose/20 transition btn-press"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold text-rose bg-rose/10 hover:bg-rose/20 transition btn-press mt-2"
               >
                 <i className="bi bi-box-arrow-right" /> {t('nav.logout')}
               </button>
@@ -537,103 +529,128 @@ export default function Shell() {
 
       {/* Main Layout Area */}
       <div className="w-full flex flex-1 min-h-[calc(100vh-4rem)]">
-        {/* Desktop Sidebar (Collapsible with toggle & smooth independent scroll - Image 4) */}
+        {/* Desktop Isolated Floating Sidebar (Image 04) */}
         {desktopSidebarOpen ? (
-          <aside className="w-64 shrink-0 border-r border-line/60 hidden lg:flex lg:flex-col h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto overscroll-contain glass-sidebar z-20 select-none touch-pan-y transition-all">
-            {/* Desktop Sidebar Header (Image 4 Header with << button) */}
-            <div className="flex items-center justify-between px-4 py-3.5 border-b border-line/60">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-xs shadow-[0_0_12px_rgba(59,130,246,0.2)]">
-                  <i className="bi bi-compass" />
+          <aside className="w-64 shrink-0 hidden lg:flex lg:flex-col h-[calc(100vh-5.5rem)] sticky top-20 my-3 ml-4 rounded-[2rem] glass-sidebar p-4 select-none z-20 justify-between shadow-2xl border border-white/10 transition-all duration-300">
+            <div>
+              {/* Desktop Sidebar Header */}
+              <div className="flex items-center justify-between pb-3.5 mb-2 border-b border-white/10 px-1">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-2xl bg-gradient-to-tr from-blue-600 to-sky-400 flex items-center justify-center text-white text-xs shadow-[0_0_15px_rgba(37,99,235,0.4)]">
+                    <i className="bi bi-grid-fill" />
+                  </div>
+                  <div>
+                    <span className="font-display font-bold text-sm text-ink block leading-tight">VietnamDong</span>
+                    <span className="text-[10px] text-zinc-400 font-mono tracking-wider block">VNC Portal</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="font-display font-bold text-sm text-ink block leading-none">VietnamDong</span>
-                  <span className="text-[10px] text-muted font-mono uppercase tracking-wider block mt-0.5">VNC Portal</span>
-                </div>
+                <button
+                  onClick={() => {
+                    playClickSound();
+                    setDesktopSidebarOpen(false);
+                    try { localStorage.setItem('vnd_desktop_sidebar', 'false'); } catch {}
+                  }}
+                  className="w-8 h-8 rounded-full hover:bg-white/[0.08] text-muted hover:text-white flex items-center justify-center transition btn-press"
+                  title="Thu gọn menu (<<)"
+                  aria-label="Thu gọn menu"
+                >
+                  <i className="bi bi-chevron-double-left text-sm" />
+                </button>
               </div>
-              <button
-                onClick={() => {
-                  playClickSound();
-                  setDesktopSidebarOpen(false);
-                  try {
-                    localStorage.setItem('vnd_desktop_sidebar', 'false');
-                  } catch {}
-                }}
-                className="w-8 h-8 rounded-xl hover:bg-white/[0.06] text-muted hover:text-blue-400 flex items-center justify-center transition btn-press border border-line/40"
-                title="Thu gọn menu điều hướng (<<)"
-                aria-label="Thu gọn menu"
-              >
-                <i className="bi bi-chevron-double-left text-sm" />
-              </button>
-            </div>
 
-            {/* Nav List */}
-            <div className="flex-1 overflow-y-auto">
+              {/* Nav List */}
               <NavLinks isAdmin={isAdmin} />
             </div>
 
-            {/* Promo / Cashout Card (Image 4 'Upgrade to Pro' Style) */}
-            <div className="p-3 mt-auto">
-              <div className="relative rounded-2xl p-3.5 bg-gradient-to-b from-blue-900/25 via-blue-950/40 to-black/60 border border-blue-500/30 backdrop-blur-md overflow-hidden group">
-                <div className="absolute -top-10 -right-10 w-24 h-24 bg-blue-500/20 rounded-full blur-xl pointer-events-none group-hover:bg-blue-500/35 transition-all" />
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-7 h-7 rounded-xl bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400 shadow-[0_0_12px_rgba(59,130,246,0.3)]">
-                    <i className="bi bi-lightning-charge-fill text-xs" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs font-bold text-ink truncate">VietnamDong Pro</div>
-                    <div className="text-[10px] text-blue-400/90 font-medium truncate">Đổi thưởng siêu tốc</div>
-                  </div>
+            {/* Promo Card (Image 04 - Upgrade to Pro Style) */}
+            <div className="pt-2">
+              <div className="relative rounded-2xl p-4 bg-gradient-to-b from-blue-900/35 via-blue-950/50 to-black/80 border border-blue-500/30 overflow-hidden group shadow-lg">
+                <div className="absolute -top-8 -right-8 w-20 h-20 bg-blue-500/25 rounded-full blur-xl pointer-events-none group-hover:bg-blue-500/40 transition-all" />
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <i className="bi bi-lightning-charge-fill text-blue-400" />
+                    <span>Đổi Thưởng VNC</span>
+                  </span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 </div>
-                <p className="text-[11px] text-muted leading-tight mb-2.5">
-                  Rút tiền tức thì về ngân hàng hoặc thẻ cào 24/7.
+                <p className="text-[11px] text-zinc-400 mb-3 leading-tight">
+                  Rút tiền về tài khoản ngân hàng & thẻ cào 24/7 tức thì.
                 </p>
                 <Link
                   to="/wallet"
                   onClick={playClickSound}
-                  className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-[0_0_15px_rgba(37,99,235,0.35)] transition-all btn-press"
+                  className="w-full block py-2 px-3 text-center rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-[0_0_15px_rgba(37,99,235,0.45)] transition btn-press"
                 >
-                  <span>Rút tiền ngay</span>
-                  <i className="bi bi-arrow-right text-xs" />
+                  Rút tiền ngay →
                 </Link>
               </div>
             </div>
           </aside>
         ) : (
-          /* Mini Collapsed Bar with >> expand button */
-          <div className="hidden lg:flex flex-col items-center py-4 px-2 w-14 shrink-0 border-r border-line/60 h-[calc(100vh-4rem)] sticky top-16 glass-sidebar z-20">
+          /* Collapsed Pill Bar (Image 04 - Center variation) */
+          <aside className="w-20 shrink-0 hidden lg:flex lg:flex-col h-[calc(100vh-5.5rem)] sticky top-20 my-3 ml-4 rounded-[2.5rem] glass-sidebar p-3 select-none z-20 justify-between items-center shadow-2xl border border-white/10 transition-all duration-300">
+            {/* Expand button on top */}
             <button
               onClick={() => {
                 playClickSound();
                 setDesktopSidebarOpen(true);
-                try {
-                  localStorage.setItem('vnd_desktop_sidebar', 'true');
-                } catch {}
+                try { localStorage.setItem('vnd_desktop_sidebar', 'true'); } catch {}
               }}
-              className="w-9 h-9 rounded-xl hover:bg-white/[0.08] text-blue-400 flex items-center justify-center transition btn-press border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)] mb-4"
+              className="w-10 h-10 rounded-2xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/35 flex items-center justify-center transition btn-press shadow-[0_0_15px_rgba(37,99,235,0.3)]"
               title="Mở rộng menu (>>)"
               aria-label="Mở menu"
             >
               <i className="bi bi-chevron-double-right text-sm" />
             </button>
-            <div className="flex flex-col gap-3">
-              <NavLink to="/dashboard" title="Tổng quan" className={({isActive}) => `w-9 h-9 rounded-xl flex items-center justify-center text-sm transition ${isActive ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-muted hover:text-ink'}`}>
-                <i className="bi bi-grid-1x2-fill" />
-              </NavLink>
-              <NavLink to="/quests" title="Nhiệm vụ" className={({isActive}) => `w-9 h-9 rounded-xl flex items-center justify-center text-sm transition ${isActive ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-muted hover:text-ink'}`}>
-                <i className="bi bi-list-task" />
-              </NavLink>
-              <NavLink to="/lucky-wheel" title="Vòng quay" className={({isActive}) => `w-9 h-9 rounded-xl flex items-center justify-center text-sm transition ${isActive ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-muted hover:text-ink'}`}>
-                <i className="bi bi-stars" />
-              </NavLink>
-              <NavLink to="/wallet" title="Ví tiền" className={({isActive}) => `w-9 h-9 rounded-xl flex items-center justify-center text-sm transition ${isActive ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-muted hover:text-ink'}`}>
-                <i className="bi bi-wallet2" />
-              </NavLink>
+
+            {/* Center Icons */}
+            <div className="flex flex-col gap-2 w-full items-center">
+              {(isAdmin ? [...PRIMARY_NAV, ADMIN_NAV] : PRIMARY_NAV).map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  onClick={playClickSound}
+                  title={t(item.labelKey)}
+                  className={({ isActive }) =>
+                    `w-11 h-11 rounded-2xl flex flex-col items-center justify-center transition relative ${
+                      isActive
+                        ? 'bg-blue-600/25 text-blue-400 border border-blue-500/40 shadow-[0_0_15px_rgba(37,99,235,0.3)]'
+                        : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
+                    }`
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      <i className={`bi ${item.icon} text-lg`} />
+                      {isActive && <span className="w-1 h-1 rounded-full bg-blue-400 shadow-[0_0_6px_#60a5fa] mt-0.5" />}
+                    </>
+                  )}
+                </NavLink>
+              ))}
             </div>
-          </div>
+
+            {/* Bottom Avatar with online dot */}
+            <Link
+              to="/profile"
+              onClick={playClickSound}
+              title="Trang cá nhân"
+              className="relative group p-1"
+            >
+              <AvatarFrame level={me?.level} shape="circle">
+                {me?.avatar_url ? (
+                  <img src={me.avatar_url} alt={me.username} className="w-8 h-8 rounded-full object-cover" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-blue-600/30 text-blue-400 flex items-center justify-center font-bold text-xs">
+                    {me?.username?.slice(0, 2).toUpperCase() || 'VN'}
+                  </div>
+                )}
+              </AvatarFrame>
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-black absolute -bottom-0.5 -right-0.5 shadow-sm" />
+            </Link>
+          </aside>
         )}
 
-        {/* Content Wrapper (Page Outlet + Footer on Desktop) */}
+        {/* Content Wrapper */}
         <div className="flex-1 flex flex-col min-w-0">
           <main
             key={pathname}
@@ -738,6 +755,11 @@ export default function Shell() {
       <div className="lg:hidden">
         <Footer />
       </div>
+      {/* Floating Discreet Music Pill */}
+      <div className="fixed right-4 bottom-20 lg:bottom-5 z-30 pointer-events-auto">
+        <MusicTab />
+      </div>
+
       <ErrorBoundary
         fallback={(reset) => (
           <div
