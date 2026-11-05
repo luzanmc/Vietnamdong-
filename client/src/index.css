@@ -812,7 +812,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .card{padding:16px}.side{width:240px}.it{padding:9px 12px}.big{font-size:34px}.st{padding:14px}.si{width:40px;height:40px}.hd h2{font-size:16px}.top{padding:8px 10px 8px 14px;gap:10px}
 a.btn{text-decoration:none}
 .top{top:12px;box-shadow:0 0 0 1px var(--line)}
-.side{overflow-y:auto;overflow-x:hidden;scrollbar-width:none}.side::-webkit-scrollbar{display:none}.nav{flex:1;overflow-y:auto;overflow-x:hidden;min-height:0}.sb{margin-top:auto}
+.side{overflow-y:auto;overflow-x:hidden;scrollbar-width:none}.side::-webkit-scrollbar{display:none}
 img.logo{background:none;border-radius:0;width:40px;height:40px;object-fit:contain;display:block;flex:none}
 .bn{flex:1;min-width:0;display:flex;flex-direction:column}.bn b{flex:none;line-height:1.1}.bn small{font-size:10px;color:var(--mute);letter-spacing:.5px;margin-top:3px}
 .side.mini .bn{display:none}
@@ -825,18 +825,11 @@ img.logo{background:none;border-radius:0;width:40px;height:40px;object-fit:conta
 .fab{width:54px;height:54px;margin:-26px 6px 0;border-radius:50%;background:linear-gradient(135deg,var(--pri2),var(--pri) 60%,#7c4dff);color:#fff;display:grid;place-items:center;box-shadow:0 8px 20px rgba(47,123,255,.45);border:4px solid var(--bg);flex:none}
 .fab svg{width:24px;height:24px}
 @media(max-width:860px){.tabs{display:flex}.app{padding-bottom:100px}.toasts{bottom:calc(92px + env(safe-area-inset-bottom,0px))}}
-.sb{margin-top:auto;display:flex;flex-direction:column;gap:10px;padding-top:12px}
-.m4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:100%}
-.m4 button{height:38px;border-radius:12px;background:var(--bg);color:var(--mute);display:grid;place-items:center;border:none;cursor:pointer;transition:all .2s}
-.m4 button:hover{color:var(--pri);background:var(--soft)}
-.m4 button.out-btn{color:#dc2626;background:#fee2e2}
-.m4 button.out-btn:hover{background:#ef4444;color:#fff}
-.side.mini .m4{display:flex;flex-direction:column;align-items:center;gap:6px}
-.side.mini .m4 button{width:38px}
+.sb{display:flex;flex-direction:column;gap:10px;padding-top:12px}
 .m3{display:flex;gap:8px;justify-content:center}
-.m3 button{width:38px;height:38px;border-radius:12px;background:var(--bg);color:var(--mute);display:grid;place-items:center}
+.m3 button{width:38px;height:38px;border-radius:12px;background:var(--bg);color:var(--mute);display:grid;place-items:center;border:none;cursor:pointer;transition:all .2s}
 .m3 button:hover{color:var(--pri);background:var(--soft)}
-.out{display:flex;align-items:center;justify-content:center;gap:8px;height:40px;border-radius:12px;background:#fee2e2;color:#dc2626;font-weight:700}
+.out{display:flex;align-items:center;justify-content:center;gap:8px;height:40px;border-radius:12px;background:#fee2e2;color:#dc2626;font-weight:700;border:none;cursor:pointer;transition:all .2s}
 .out:hover{background:#ef4444;color:#fff}
 .side.mini .upg,.side.mini .out span{display:none}.side.mini .m3{flex-direction:column;align-items:center}
 .pg{display:flex;flex-direction:column;gap:16px}.pg[hidden]{display:none}
@@ -857,8 +850,8 @@ details{border-bottom:1px solid var(--line);padding:12px 0}summary{cursor:pointe
 .wd{width:100%;height:100%;border-radius:50%;background:conic-gradient(#5ab8ff 0 45deg,#2f7bff 0 90deg,#7dd3fc 0 135deg,#4b6bff 0 180deg,#5ab8ff 0 225deg,#2f7bff 0 270deg,#7dd3fc 0 315deg,#4b6bff 0 360deg);transition:transform 3.5s cubic-bezier(.12,.7,.1,1);position:relative;border:6px solid var(--card);box-shadow:var(--sh)}
 .wd span{position:absolute;left:50%;top:50%;color:#fff;font-weight:800;font-size:13px}
 .pt{position:absolute;top:-8px;left:50%;margin-left:-10px;border:10px solid transparent;border-top:18px solid #ef4444;z-index:2}
-.mobile-only{display:none}
-@media(max-width:860px){.pc-only{display:none!important}.mobile-only{display:block!important}.sb{margin-top:6px}.card.blue.bc{grid-template-columns:1fr}}
+@media(min-width:861px){.nav{flex:1;overflow-y:auto;overflow-x:hidden;min-height:0}.sb{margin-top:auto}}
+@media(max-width:860px){.nav{flex:none;overflow:visible}.sb{margin-top:12px}.side{overflow-y:auto;overflow-x:hidden}.pc-only{display:none!important}.card.blue.bc{grid-template-columns:1fr}}
 @media(max-width:860px){.un,.ub>svg{display:none}.ub{padding:0}}@media(max-width:520px){.bal svg{display:none}.top{gap:8px}}
 
 

@@ -188,72 +188,22 @@ export default function Shell() {
               </Link>
             </div>
 
-            {/* Desktop only: 4 nút Giao diện, Âm thanh, Ngôn ngữ, Logout */}
-            <div className="m4 pc-only">
-              <button
-                className="tgl"
-                id="theme"
-                aria-label="Giao diện"
-                title={`Giao diện: ${theme === 'dark' ? 'Tối' : 'Sáng'}`}
-                onClick={() => { playClickSound(); toggleTheme(); }}
-              >
+            <div className="m3">
+              <button className="tgl" id="theme" aria-label="Sáng/Tối" onClick={() => { playClickSound(); toggleTheme(); }}>
                 <svg className="i"><use href={theme === 'dark' ? '#sun' : '#moon'} /></svg>
               </button>
-              <button
-                id="snd"
-                aria-label="Âm thanh"
-                title={`Âm thanh: ${soundOn ? 'Bật' : 'Tắt'}`}
-                onClick={handleSound}
-              >
+              <button id="snd" aria-label="Âm thanh" onClick={handleSound}>
                 <svg className="i"><use href={soundOn ? '#vol' : '#muted'} /></svg>
               </button>
-              <button
-                id="lang"
-                aria-label="Ngôn ngữ"
-                title={`Ngôn ngữ: ${lang === 'vi' ? 'Tiếng Việt' : 'English'}`}
-                onClick={() => { playClickSound(); toggleLanguage(); }}
-              >
+              <button id="lang" aria-label="Ngôn ngữ" onClick={() => { playClickSound(); toggleLanguage(); }}>
                 <svg className="i"><use href="#lang" /></svg>
               </button>
-              <button
-                id="out"
-                className="out-btn"
-                aria-label="Đăng xuất"
-                title="Đăng xuất"
-                onClick={handleLogout}
-              >
-                <svg className="i"><use href="#out" /></svg>
-              </button>
             </div>
 
-            {/* Mobile only: Giữ nguyên như cũ (.m3 + .out) */}
-            <div className="mobile-only">
-              <div className="m3">
-                <button
-                  className="tgl"
-                  id="theme-m"
-                  aria-label="Sáng/Tối"
-                  onClick={() => { playClickSound(); toggleTheme(); }}
-                >
-                  <svg className="i"><use href={theme === 'dark' ? '#sun' : '#moon'} /></svg>
-                </button>
-                <button id="snd-m" aria-label="Âm thanh" onClick={handleSound}>
-                  <svg className="i"><use href={soundOn ? '#vol' : '#muted'} /></svg>
-                </button>
-                <button
-                  id="lang-m"
-                  aria-label="Ngôn ngữ"
-                  onClick={() => { playClickSound(); toggleLanguage(); }}
-                >
-                  <svg className="i"><use href="#lang" /></svg>
-                </button>
-              </div>
-
-              <button className="out" onClick={handleLogout} style={{ marginTop: '10px' }}>
-                <svg className="i"><use href="#out" /></svg>
-                <span>Đăng xuất</span>
-              </button>
-            </div>
+            <button className="out" onClick={handleLogout}>
+              <svg className="i"><use href="#out" /></svg>
+              <span>Đăng xuất</span>
+            </button>
           </div>
         </aside>
 
