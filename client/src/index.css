@@ -789,8 +789,8 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .tk .h{display:flex;gap:12px;align-items:center}
 .tk h3{font-size:15px;font-weight:700}
 .tk .h small{color:var(--mute);font-size:12px}
-.hot{margin-left:auto;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;background:#ffe7e0;color:#e0471f;display:flex;gap:4px;align-items:center}
-.hot svg{width:13px;height:13px}
+.tk .hot,span.hot{margin-left:auto;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;background:#ffe7e0;color:#e0471f;display:flex;gap:4px;align-items:center}
+.tk .hot svg,span.hot svg{width:13px;height:13px}
 .rw{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--mute)}
 .rw b{color:var(--pri);font-size:16px}
 .tk .btn{justify-content:center;width:100%}

@@ -749,6 +749,13 @@ html:not(.dark) .vnd-landing-page,
   border-color: #6a74e8;
   background: linear-gradient(145deg, #2a2f6a33, var(--panel));
   box-shadow: 0 0 50px #6e7aff1a;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-size: 16px;
+  color: var(--text);
 }
 
 .vnd-landing-page .rate h3 {
