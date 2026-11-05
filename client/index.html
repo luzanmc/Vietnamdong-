@@ -1,127 +1,38 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-
-  <title>VietnamDong</title>
-  <meta name="description" content="VietnamDong - Nền Tảng Vượt Link Kiếm Tiền" />
-
-  <meta property="og:title" content="VietnamDong - Nền Tảng Vượt Link Kiếm Tiền" />
-  <meta property="og:description" content="VietnamDong - Nền tảng vượt ink kiếm tiền uy tín hàng đầu Việt Nam. Payout cao, thanh toán nhanh chóng và bảo mật." />
+  <title>VietnamDong - Nền Tảng Rút Gọn Link Kiếm Tiền</title>
+  <meta name="description" content="VietnamDong - Nền tảng rút gọn link kiếm tiền uy tín hàng đầu Việt Nam. Payout cao, thanh toán nhanh chóng và bảo mật." />
+  <meta property="og:title" content="VietnamDong - Nền Tảng Rút Gọn Link Kiếm Tiền" />
+  <meta property="og:description" content="VietnamDong - Nền tảng rút gọn link kiếm tiền uy tín hàng đầu Việt Nam. Payout cao, thanh toán nhanh chóng và bảo mật." />
   <meta property="og:image" content="https://vietnamdong.vercel.app/banners.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="676" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://vietnamdong.vercel.app" />
   <meta name="twitter:card" content="summary_large_image" />
-
   <link rel="icon" type="image/png" href="/favicon-32.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#dcefff">
-  <link rel="stylesheet" href="/style.css">
+  <meta name="theme-color" content="#0A0A0F">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
   <script src="https://www.youtube.com/iframe_api"></script>
+  <style>
+    .boot { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #0A0A0F; }
+    .boot-ring { width: 44px; height: 44px; border-radius: 9999px; border: 3px solid rgba(108,99,245,.25); border-top-color: #6C63F5; animation: boot-spin .9s linear infinite; }
+    @keyframes boot-spin { to { transform: rotate(360deg); } }
+  </style>
 </head>
-
 <body class="bg-bg text-ink font-body">
-
   <div id="root">
-    <div id="vnd404">
-
-      <nav class="vnd-nav">
-        <div class="vnd-brand">Vietnam<span>Dong</span></div>
-
-        <button class="vnd-theme" id="vnd-theme" aria-label="Toggle dark mode">
-          <svg id="vnd-theme-icon" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="4"/>
-            <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2"/>
-          </svg>
-        </button>
-      </nav>
-
-      <main class="vnd-hero">
-
-        <div class="vnd-content">
-
-          <div class="vnd-pill">
-            <i></i>
-            WELL, THIS IS AWKWARD
-          </div>
-
-          <div class="vnd-number">404</div>
-
-          <h1>Ai sau lưng kìa 🫣</h1>
-
-          <p class="vnd-desc">
-            I'm just as curious as you are,<br>
-            but not today.
-          </p>
-
-          <div class="vnd-actions">
-
-            <a class="vnd-btn vnd-primary" href="https://vietnamdong.vercel.app/">
-              <svg viewBox="0 0 24 24">
-                <path d="M19 12H5m7 7-7-7 7-7"/>
-              </svg>
-              Quay về trang chủ
-            </a>
-
-            <button class="vnd-btn vnd-secondary" id="vnd-more">
-              Tìm hiểu thêm
-              <svg viewBox="0 0 24 24">
-                <path d="M5 12h14m-7-7 7 7-7 7"/>
-              </svg>
-            </button>
-
-          </div>
-
-          <div class="vnd-info" id="vnd-info">
-            VietnamDong — nền tảng rút gọn liên kết.
-            Có vẻ bạn đã đi hơi xa khỏi trang cần tìm rồi!
-          </div>
-
-        </div>
-
-        <div class="vnd-art" aria-hidden="true">
-
-          <div class="vnd-glow"></div>
-          <div class="vnd-ring"></div>
-          <div class="vnd-ring vnd-ring-two"></div>
-
-          <div class="vnd-window">
-            <div class="vnd-window-top">
-              <i></i><i></i><i></i>
-            </div>
-
-            <div class="vnd-window-content">
-              <div class="vnd-window-404">404</div>
-            </div>
-
-            <span class="vnd-star">✦</span>
-          </div>
-
-          <div class="vnd-mini">
-            PAGE STATUS · <span>NOT FOUND</span>
-          </div>
-
-        </div>
-
-      </main>
-
-      <footer class="vnd-footer">
-        VIETNAMDONG · NOTHING TO SEE HERE
-      </footer>
-
+    <div class="boot">
+      <div class="boot-ring"></div>
     </div>
   </div>
-
-  <script src="/404.js"></script>
   <script type="module" src="/src/main.tsx"></script>
-
 </body>
 </html>

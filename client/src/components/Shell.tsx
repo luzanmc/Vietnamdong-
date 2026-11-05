@@ -188,7 +188,8 @@ export default function Shell() {
               </Link>
             </div>
 
-            <div className="m4">
+            {/* Desktop only: 4 nút Giao diện, Âm thanh, Ngôn ngữ, Logout */}
+            <div className="m4 pc-only">
               <button
                 className="tgl"
                 id="theme"
@@ -224,6 +225,35 @@ export default function Shell() {
                 <svg className="i"><use href="#out" /></svg>
               </button>
             </div>
+
+            {/* Mobile only: Giữ nguyên như cũ (.m3 + .out) */}
+            <div className="mobile-only">
+              <div className="m3">
+                <button
+                  className="tgl"
+                  id="theme-m"
+                  aria-label="Sáng/Tối"
+                  onClick={() => { playClickSound(); toggleTheme(); }}
+                >
+                  <svg className="i"><use href={theme === 'dark' ? '#sun' : '#moon'} /></svg>
+                </button>
+                <button id="snd-m" aria-label="Âm thanh" onClick={handleSound}>
+                  <svg className="i"><use href={soundOn ? '#vol' : '#muted'} /></svg>
+                </button>
+                <button
+                  id="lang-m"
+                  aria-label="Ngôn ngữ"
+                  onClick={() => { playClickSound(); toggleLanguage(); }}
+                >
+                  <svg className="i"><use href="#lang" /></svg>
+                </button>
+              </div>
+
+              <button className="out" onClick={handleLogout} style={{ marginTop: '10px' }}>
+                <svg className="i"><use href="#out" /></svg>
+                <span>Đăng xuất</span>
+              </button>
+            </div>
           </div>
         </aside>
 
@@ -245,15 +275,6 @@ export default function Shell() {
             </div>
             <button className="ic tgl" id="theme2" aria-label="Sáng/Tối" onClick={() => { playClickSound(); toggleTheme(); }}>
               <svg className="i"><use href={theme === 'dark' ? '#sun' : '#moon'} /></svg>
-            </button>
-            <button
-              className="ic"
-              id="langTop"
-              aria-label="Ngôn ngữ"
-              title={`Ngôn ngữ: ${lang === 'vi' ? 'Tiếng Việt' : 'English'}`}
-              onClick={() => { playClickSound(); toggleLanguage(); }}
-            >
-              <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--ink)' }}>{lang.toUpperCase()}</span>
             </button>
             <NotificationBell />
             <div className="usr" ref={userRef}>
