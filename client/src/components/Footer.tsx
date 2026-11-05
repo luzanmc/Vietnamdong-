@@ -13,11 +13,11 @@ export default function Footer() {
   const { t } = useLanguage();
 
   return (
-    <footer className="border-t border-line bg-surface mt-10">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-24 lg:pb-6">
+    <footer className="card mt-6" style={{ width: '100%' }}>
+      <div className="w-full">
         <div className="flex items-center gap-2 mb-3">
           <img src="/logo-mark.png" alt="VietnamDong" className="w-8 h-8" />
-          <span className="font-display font-semibold tracking-tight">VietnamDong</span>
+          <span className="font-display font-semibold tracking-tight text-ink font-bold">VietnamDong</span>
         </div>
         <p className="text-sm text-muted max-w-xl leading-relaxed">{t('footer.tagline')}</p>
 
@@ -87,7 +87,7 @@ export default function Footer() {
           <span>{t('footer.sovereignty')}</span>
         </div>
 
-        <div className="border-t border-line mt-6 pt-5 flex flex-col items-center gap-2 text-xs text-muted">
+        <div className="border-t border-line mt-6 pt-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted">
           <span>© {new Date().getFullYear()} VietnamDong. {t('footer.rights')}</span>
           <span className="inline-flex items-center gap-1.5 bg-surface2 border border-line rounded-full px-3 py-1 font-mono">
             <i className="bi bi-tag" /> {APP_VERSION}

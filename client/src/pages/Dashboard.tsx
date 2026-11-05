@@ -195,43 +195,80 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* 4. Two columns: Daily Check-in & VIP Progress */}
-      <section className="two">
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div className="si a"><svg className="i"><use href="#cal" /></svg></div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <b>Điểm danh hằng ngày</b>
+      {/* 4. Daily Check-in (7 horizontal cards) & VIP Progress */}
+      <section className="card">
+        <div className="hd">
+          <div>
+            <b style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <svg className="i" style={{ color: 'var(--pri)' }}><use href="#cal" /></svg>
+              Điểm danh hằng ngày
+              <span className="tag" style={{ marginLeft: '4px' }}>Chuỗi {me.streak_days ?? 0} ngày</span>
+            </b>
             <p style={{ color: 'var(--mute)', fontSize: '12px', marginTop: '2px' }}>
-              Nhận quà và mở khóa thưởng x2
+              Điểm danh liên tục 7 ngày để gia tăng VNC và mở khóa thưởng x2
             </p>
           </div>
           <Link className="btn" to="/daily-reward" onClick={playClickSound} id="checkin">
-            Điểm danh
+            Điểm danh ngay
           </Link>
         </div>
-        <div className="card">
-          <div className="hd">
-            <b style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <svg className="i" style={{ color: 'var(--pri)' }}><use href="#trophy" /></svg>
-              Tiến độ VIP cấp {me.level ?? 1}
-            </b>
-            <Link
-              to="/profile"
-              onClick={playClickSound}
-              style={{ color: 'var(--pri)', fontWeight: 600, fontSize: '13px', textDecoration: 'none' }}
-            >
-              Đặc quyền
-            </Link>
-          </div>
-          <div className="bar">
-            <i id="xpb" style={{ width: `${Math.min(100, me.levelProgress?.progressPercent ?? 0)}%` }} />
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--mute)', fontSize: '12px' }}>
-            <span>Tiến độ kinh nghiệm</span>
-            <span id="xpt">
-              {(me.xp ?? 0).toLocaleString('vi-VN')} / {(me.levelProgress?.nextLevelXp ?? 'Max').toLocaleString()} XP
-            </span>
-          </div>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(7, minmax(68px, 1fr))',
+            gap: '8px',
+            marginTop: '14px',
+            overflowX: 'auto',
+            paddingBottom: '4px',
+          }}
+        >
+          {[
+            { day: 1, reward: 100 },
+            { day: 2, reward: 150 },
+            { day: 3, reward: 200 },
+            { day: 4, reward: 250 },
+            { day: 5, reward: 300 },
+            { day: 6, reward: 400 },
+            { day: 7, reward: 1000 },
+          ].map((item, idx) => {
+            const streakCycle = (me.streak_days ?? 0) % 7 || ((me.streak_days ?? 0) > 0 ? 7 : 0);
+            const isDone = idx < streakCycle;
+            return (
+              <div key={item.day} className={`dy ${isDone ? 'ok' : ''}`}>
+                <small>Ngày {item.day}</small>
+                <b>+{item.reward}</b>
+                <svg className="i" style={{ width: '16px', height: '16px' }}>
+                  <use href={isDone ? '#check' : '#coin'} />
+                </svg>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* VIP Progress Card */}
+      <section className="card">
+        <div className="hd">
+          <b style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <svg className="i" style={{ color: 'var(--pri)' }}><use href="#trophy" /></svg>
+            Tiến độ VIP cấp {me.level ?? 1}
+          </b>
+          <Link
+            to="/profile"
+            onClick={playClickSound}
+            style={{ color: 'var(--pri)', fontWeight: 600, fontSize: '13px', textDecoration: 'none' }}
+          >
+            Đặc quyền
+          </Link>
+        </div>
+        <div className="bar">
+          <i id="xpb" style={{ width: `${Math.min(100, me.levelProgress?.progressPercent ?? 0)}%` }} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--mute)', fontSize: '12px' }}>
+          <span>Tiến độ kinh nghiệm</span>
+          <span id="xpt">
+            {(me.xp ?? 0).toLocaleString('vi-VN')} / {(me.levelProgress?.nextLevelXp ?? 'Max').toLocaleString()} XP
+          </span>
         </div>
       </section>
 

@@ -145,10 +145,10 @@ export default function BalanceCard({
   };
 
   return (
-    <div className={`stage vnc-stage ${className}`}>
+    <div className={`vnc-stage ${className}`}>
       <div
         id="card"
-        className={`card vnc-card ${isHolding ? 'scale-[0.985] transition-transform duration-300' : ''}`}
+        className={`vnc-card ${isHolding ? 'scale-[0.985] transition-transform duration-300' : ''}`}
         style={{
           background: effectiveBackground,
           backgroundSize: 'cover',

@@ -230,13 +230,14 @@ export default function Shell() {
               <i className="dot" id="dot" />
             </button>
             <div className="usr" ref={userRef}>
-              <button className="ub" id="ub" onClick={() => setMenuOpen(!menuOpen)}>
+              <button
+                className="ub"
+                id="ub"
+                onClick={() => setMenuOpen(!menuOpen)}
+                aria-label="Hồ sơ người dùng"
+                style={{ padding: '2px', border: 'none', background: 'transparent', cursor: 'pointer' }}
+              >
                 <div className="av">{me?.username?.[0]?.toUpperCase() || 'R'}</div>
-                <div className="un">
-                  <b>{me?.username || 'Người dùng'}</b>
-                  <small>Lv.{me?.level || 1} · VIP</small>
-                </div>
-                <svg className="i"><use href="#down" /></svg>
               </button>
               <div className={`menu ${menuOpen ? 'open' : ''}`} id="menu">
                 <Link to="/profile" onClick={() => playClickSound()}><svg className="i"><use href="#user" /></svg>Hồ sơ</Link>

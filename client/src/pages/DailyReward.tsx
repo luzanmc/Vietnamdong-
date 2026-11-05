@@ -120,24 +120,23 @@ export default function DailyReward() {
           <span>Mốc quà tăng dần mỗi ngày</span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 sm:gap-3">
-          {MILESTONES.map((m, idx) => {
-            const isCompleted = status.can_claim ? idx < todayMilestoneIndex : idx <= todayMilestoneIndex;
-            const isToday = idx === todayMilestoneIndex;
+        <div className="overflow-x-auto no-scrollbar pb-2">
+          <div className="grid grid-cols-7 gap-2 sm:gap-3 min-w-[620px]">
+            {MILESTONES.map((m, idx) => {
+              const isCompleted = status.can_claim ? idx < todayMilestoneIndex : idx <= todayMilestoneIndex;
+              const isToday = idx === todayMilestoneIndex;
 
-            return (
-              <div
-                key={m.day}
-                className={`rounded-2xl p-3.5 text-center flex flex-col items-center justify-between relative transition-all duration-300 ${
-                  m.isChest ? 'col-span-2 sm:col-span-1' : ''
-                } ${
-                  isToday
-                    ? 'glass-card border-2 border-amber shadow-[0_0_25px_rgba(245,165,36,0.3)] scale-[1.02]'
-                    : isCompleted
-                    ? 'bg-surface2/60 border border-line text-muted'
-                    : 'glass-card border border-line/70 opacity-75'
-                }`}
-              >
+              return (
+                <div
+                  key={m.day}
+                  className={`rounded-2xl p-3 text-center flex flex-col items-center justify-between relative transition-all duration-300 ${
+                    isToday
+                      ? 'glass-card border-2 border-amber shadow-[0_0_25px_rgba(245,165,36,0.3)] scale-[1.02]'
+                      : isCompleted
+                      ? 'bg-surface2/60 border border-line text-muted'
+                      : 'glass-card border border-line/70 opacity-75'
+                  }`}
+                >
                 {/* Day Badge */}
                 <div className="text-[11px] font-bold uppercase tracking-wider mb-2 text-muted">
                   Ngày {m.day}
@@ -182,6 +181,7 @@ export default function DailyReward() {
               </div>
             );
           })}
+          </div>
         </div>
       </div>
 
