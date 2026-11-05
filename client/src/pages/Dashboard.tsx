@@ -13,19 +13,19 @@ import UserName from '../components/UserName.js';
 import TurnstileWidget from '../components/TurnstileWidget.js';
 import type { Me, Wallet, Task } from '../types.js';
 import {
-  IconFlame,
   IconBolt,
+  IconFlame,
+  IconCrown,
+  IconChartBar,
+  IconCalendar,
+  IconTrophy,
+  IconArrowUpRight,
   IconTicket,
   IconGift,
-  IconArrowUpRight,
   IconShieldCheck,
   IconRefresh,
   IconInbox,
   IconX,
-  IconCrown,
-  IconTrophy,
-  IconChartBar,
-  IconCalendarCheck,
 } from '@tabler/icons-react';
 
 export default function Dashboard() {
@@ -55,7 +55,9 @@ export default function Dashboard() {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   async function handleStart(taskId: string, captchaToken?: string) {
     setBusyId(taskId);
@@ -87,43 +89,41 @@ export default function Dashboard() {
 
   const completedTodayCount = tasks.filter((t) => t.done_today >= t.daily_limit).length;
 
-  /* ─── Loading Skeleton ─── */
+  /* Loading State Skeleton */
   if (!me) {
     return (
-      <div className="w-full space-y-6">
-        {/* Hero skeleton */}
-        <div className="rounded-2xl overflow-hidden">
-          <Skeleton className="h-56 w-full rounded-2xl" />
-        </div>
-        {/* Stats row skeleton */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="space-y-4 max-w-6xl mx-auto w-full">
+        <Skeleton className="h-20 w-full rounded-2xl" />
+        <Skeleton className="h-60 w-full rounded-2xl" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-20 rounded-2xl" />
           ))}
         </div>
-        {/* Task grid skeleton */}
-        <Skeleton className="h-9 w-56 rounded-xl" />
+        <div className="grid sm:grid-cols-2 gap-3">
+          <Skeleton className="h-28 rounded-2xl" />
+          <Skeleton className="h-28 rounded-2xl" />
+        </div>
         <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
             <TaskCardSkeleton key={i} />
           ))}
         </div>
-
-        {error && (
-          <Alert type="error">{error}</Alert>
-        )}
       </div>
     );
   }
 
-  /* ─── Error (no data at all) ─── */
+  /* Error with no data */
   if (error && !me) {
     return (
-      <div className="max-w-md mx-auto py-12">
+      <div className="max-w-md mx-auto py-12 text-center">
         <Alert type="error">{error}</Alert>
         <button
-          onClick={() => { setError(null); load(); }}
-          className="mt-4 px-4 py-2 bg-sky-500 hover:bg-sky-400 text-white text-sm font-medium rounded-xl transition btn-press flex items-center gap-2"
+          onClick={() => {
+            setError(null);
+            load();
+          }}
+          className="mt-4 px-4 py-2 bg-indigo hover:brightness-110 text-white text-xs font-bold rounded-xl transition inline-flex items-center gap-2"
         >
           <IconRefresh size={16} /> Thử lại
         </button>
@@ -131,274 +131,281 @@ export default function Dashboard() {
     );
   }
 
-  /* ══════════════════════════════════════════════════════════
-     MAIN DASHBOARD — proper fintech layout
-     Desktop: hero with card on RIGHT (flex-row, no order hacks)
-     Mobile:  hero stacks vertically — text first, card below
-  ══════════════════════════════════════════════════════════ */
+  const balNova = wallet?.balance_nova ?? me.balance_nova ?? 0;
+  const balVnd = wallet?.balance_vnd ?? balNova * 1000;
+
   return (
-    <div className="w-full space-y-5">
+    <div className="space-y-4 max-w-6xl mx-auto w-full">
+      {/* ======================================================== */}
+      {/* 1. WELCOME SECTION (.card.wel from VND-Dashboard)        */}
+      {/* ======================================================== */}
+      <section className="bg-surface border border-line rounded-2xl p-4 sm:p-5 shadow-[0_4px_20px_rgba(47,123,255,0.04)] relative overflow-hidden">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <span className="text-muted text-xs sm:text-sm font-medium">Xin chào,</span>
+          <UserName name={me.username} level={me.level} className="text-base sm:text-lg font-bold text-ink" />
+          <LevelBadge level={me.level} size="xs" />
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-500 border border-emerald-500/25 ml-auto sm:ml-2">
+            ● Hệ thống 24/7
+          </span>
+        </div>
+        <p className="text-muted text-xs sm:text-[13px] mt-1.5 leading-relaxed">
+          Hoàn thành nhiệm vụ vượt link để tích lũy VNC và quy đổi tiền mặt tức thì.
+        </p>
+      </section>
 
-      {/* ════════════════════════════════════════════════
-          SECTION 1 — HERO BANNER
-          flex-col on mobile, flex-row on lg+
-          Card stays RIGHT — no CSS order tricks
-      ════════════════════════════════════════════════ */}
-      <div className="relative rounded-2xl overflow-hidden border border-white/[0.08] shadow-2xl">
-        {/* Background gradient layer */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#06070a] via-[#0d1117] to-[#0a0f1a] pointer-events-none" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-sky-500/[0.08] rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-blue-600/[0.06] rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
-
-        {/* Content: flex-row on desktop, flex-col on mobile */}
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-stretch">
-
-          {/* LEFT: Welcome + balance text + quick actions */}
-          <div className="flex-1 min-w-0 p-6 sm:p-8 flex flex-col justify-between gap-5">
-            {/* Top: greeting row */}
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-medium text-zinc-400">Xin chào,</span>
-                <UserName name={me.username} level={me.level} className="text-base sm:text-lg font-bold text-white" />
-                <LevelBadge level={me.level} size="xs" />
-                <span className="ml-auto px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 flex items-center gap-1 shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Hệ thống 24/7
+      {/* ======================================================== */}
+      {/* 2. BLUE BALANCE BANNER (.card.blue from VND-Dashboard)   */}
+      {/* ======================================================== */}
+      <section className="card-blue-vnd p-5 sm:p-6 relative">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          {/* Left Column: Balance & Quick Actions */}
+          <div className="lg:col-span-7 flex flex-col justify-between gap-4">
+            <div>
+              <div className="text-white/80 text-xs font-medium tracking-wide">Số dư khả dụng</div>
+              <div className="flex items-baseline gap-2 mt-1">
+                <CurrencyIcon size={24} className="text-white shrink-0" />
+                <span className="font-extrabold text-3xl sm:text-4xl text-white tracking-tight font-mono">
+                  {balNova.toLocaleString('vi-VN')}
                 </span>
+                <span className="text-sm sm:text-base font-bold text-sky-200">VNC</span>
               </div>
-              <p className="text-xs text-zinc-500 leading-relaxed max-w-sm">
-                Hoàn thành nhiệm vụ vượt link để tích lũy VNC và quy đổi tiền mặt tức thì.
-              </p>
-            </div>
-
-            {/* Middle: Big balance display */}
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Số dư khả dụng</span>
-              <div className="flex items-baseline gap-2">
-                <CurrencyIcon size={22} />
-                <span className="font-mono text-3xl sm:text-4xl font-black text-white tracking-tight">
-                  {(wallet?.balance_nova ?? 0).toLocaleString('vi-VN')}
-                </span>
-                <span className="text-sm font-bold text-sky-400">VNC</span>
-              </div>
-              <div className="text-xs text-zinc-500 font-medium font-mono">
-                ≈ {(wallet?.balance_vnd ?? 0).toLocaleString('vi-VN')} VNĐ
+              <div className="text-white/80 text-xs sm:text-[13px] mt-1 font-mono">
+                ≈ {balVnd.toLocaleString('vi-VN')} VNĐ
               </div>
             </div>
 
-            {/* Bottom: Action buttons */}
-            <div className="flex flex-wrap gap-2">
+            {/* Action buttons row */}
+            <div className="flex flex-wrap gap-2.5 pt-1">
               <Link
                 to="/wallet"
                 onClick={playClickSound}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs sm:text-sm shadow-[0_0_20px_rgba(56,189,248,0.3)] transition-all btn-press shrink-0"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-[#1d5fe0] font-bold text-xs sm:text-[13px] shadow-md transition active:scale-95"
               >
                 <IconArrowUpRight size={16} stroke={2.5} />
-                Rút tiền ngay
+                <span>Rút tiền</span>
               </Link>
               <Link
                 to="/giftcode"
                 onClick={playClickSound}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] text-white font-semibold text-xs sm:text-sm transition-all btn-press shrink-0"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 border border-white/30 text-white font-semibold text-xs sm:text-[13px] backdrop-blur-sm transition active:scale-95"
               >
-                <IconTicket size={15} className="text-sky-400" />
-                Nhập Giftcode
+                <IconTicket size={16} />
+                <span>Giftcode</span>
               </Link>
               <Link
                 to="/redeem"
                 onClick={playClickSound}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] text-white font-semibold text-xs sm:text-sm transition-all btn-press shrink-0"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 border border-white/30 text-white font-semibold text-xs sm:text-[13px] backdrop-blur-sm transition active:scale-95"
               >
-                <IconGift size={15} className="text-sky-400" />
-                Đổi thưởng
+                <IconGift size={16} />
+                <span>Đổi thưởng</span>
               </Link>
             </div>
           </div>
 
-          {/* RIGHT: Balance Card — fixed width, never shrinks or stacks */}
-          <div className="lg:w-80 xl:w-88 shrink-0 p-6 sm:p-8 lg:pl-0 flex flex-col items-center justify-center gap-3">
-            <div className="w-full max-w-xs lg:max-w-none">
+          {/* Right Column: Interactive Balance Card */}
+          <div className="lg:col-span-5 flex flex-col items-center lg:items-end justify-center">
+            <div className="w-full max-w-[310px]">
               <BalanceCard
-                novaAmount={wallet?.balance_nova ?? me.balance_nova}
-                vndAmount={wallet?.balance_vnd}
+                novaAmount={balNova}
+                vndAmount={balVnd}
                 cardId={me?.card_id || undefined}
                 showEditButton
               />
             </div>
-            <div className="flex items-center justify-between w-full max-w-xs lg:max-w-none px-1 text-[10px] text-zinc-500 font-mono">
-              <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
+            <div className="flex items-center justify-between w-full max-w-[310px] px-1 mt-2 text-[10px] text-white/80 font-mono">
+              <span className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" />
                 Chạm thẻ đổi VNC/VNĐ
               </span>
               <span>Giữ thẻ để đổi nền</span>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ════════════════════════════════════════════════
-          SECTION 2 — KPI STATS ROW (4 mini cards)
-      ════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {/* Nhiệm vụ hôm nay */}
-        <div className="glass-card rounded-2xl p-4 border border-white/[0.08] flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-sky-500/15 border border-sky-500/20 flex items-center justify-center text-sky-400 shrink-0">
-            <IconBolt size={18} />
+      {/* ======================================================== */}
+      {/* 3. STATS GRID (.stats from VND-Dashboard)                */}
+      {/* ======================================================== */}
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* Stat 1: Nhiệm vụ xong */}
+        <div className="bg-surface border border-line rounded-2xl p-3.5 sm:p-4 flex items-center gap-3 shadow-[0_4px_20px_rgba(47,123,255,0.04)]">
+          <div className="w-11 h-11 rounded-xl bg-surface2 text-indigo flex items-center justify-center shrink-0">
+            <IconBolt size={20} stroke={2.2} />
           </div>
           <div className="min-w-0">
-            <div className="text-[10px] font-medium text-zinc-500 truncate">Nhiệm vụ xong</div>
-            <div className="font-mono text-base font-bold text-white">
-              {completedTodayCount}
-              <span className="text-zinc-500 font-medium text-xs">/{tasks.length}</span>
-            </div>
+            <small className="text-muted text-[11px] font-medium block truncate">Nhiệm vụ xong</small>
+            <b className="text-base sm:text-lg font-bold text-ink block font-mono">
+              {completedTodayCount}/{tasks.length}
+            </b>
           </div>
         </div>
 
-        {/* Chuỗi streak */}
-        <div className="glass-card rounded-2xl p-4 border border-white/[0.08] flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-amber-400/15 border border-amber-400/20 flex items-center justify-center text-amber-400 shrink-0">
-            <IconFlame size={18} />
+        {/* Stat 2: Chuỗi streak */}
+        <div className="bg-surface border border-line rounded-2xl p-3.5 sm:p-4 flex items-center gap-3 shadow-[0_4px_20px_rgba(47,123,255,0.04)]">
+          <div className="w-11 h-11 rounded-xl bg-amber-400/15 text-amber-500 flex items-center justify-center shrink-0">
+            <IconFlame size={20} stroke={2.2} />
           </div>
           <div className="min-w-0">
-            <div className="text-[10px] font-medium text-zinc-500 truncate">Chuỗi streak</div>
-            <div className="font-mono text-base font-bold text-amber-400">
-              {me.streak_days}
-              <span className="text-zinc-500 font-medium text-xs"> ngày</span>
-            </div>
+            <small className="text-muted text-[11px] font-medium block truncate">Chuỗi streak</small>
+            <b className="text-base sm:text-lg font-bold text-ink block font-mono">
+              {me.streak_days} ngày
+            </b>
           </div>
         </div>
 
-        {/* Cấp VIP */}
-        <div className="glass-card rounded-2xl p-4 border border-white/[0.08] flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-purple-400/15 border border-purple-400/20 flex items-center justify-center text-purple-400 shrink-0">
-            <IconCrown size={18} />
+        {/* Stat 3: Cấp VIP */}
+        <div className="bg-surface border border-line rounded-2xl p-3.5 sm:p-4 flex items-center gap-3 shadow-[0_4px_20px_rgba(47,123,255,0.04)]">
+          <div className="w-11 h-11 rounded-xl bg-purple-500/15 text-purple-500 flex items-center justify-center shrink-0">
+            <IconCrown size={20} stroke={2.2} />
           </div>
           <div className="min-w-0">
-            <div className="text-[10px] font-medium text-zinc-500 truncate">Cấp VIP</div>
-            <div className="font-mono text-base font-bold text-white">
+            <small className="text-muted text-[11px] font-medium block truncate">Cấp VIP</small>
+            <b className="text-base sm:text-lg font-bold text-ink block font-mono">
               Lv.{me.level ?? 1}
-            </div>
+            </b>
           </div>
         </div>
 
-        {/* XP Progress */}
-        <div className="glass-card rounded-2xl p-4 border border-white/[0.08] flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-emerald-400/15 border border-emerald-400/20 flex items-center justify-center text-emerald-400 shrink-0">
-            <IconChartBar size={18} />
+        {/* Stat 4: Kinh nghiệm */}
+        <div className="bg-surface border border-line rounded-2xl p-3.5 sm:p-4 flex items-center gap-3 shadow-[0_4px_20px_rgba(47,123,255,0.04)]">
+          <div className="w-11 h-11 rounded-xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center shrink-0">
+            <IconChartBar size={20} stroke={2.2} />
           </div>
           <div className="min-w-0">
-            <div className="text-[10px] font-medium text-zinc-500 truncate">Kinh nghiệm</div>
-            <div className="font-mono text-base font-bold text-white">
-              {me.xp ?? 0}
-              <span className="text-zinc-500 font-medium text-xs"> XP</span>
-            </div>
+            <small className="text-muted text-[11px] font-medium block truncate">Kinh nghiệm</small>
+            <b className="text-base sm:text-lg font-bold text-ink block font-mono">
+              {me.xp ?? 0} XP
+            </b>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ════════════════════════════════════════════════
-          SECTION 3 — QUICK ACCESS ROW
-          Điểm danh + VIP Progress
-      ════════════════════════════════════════════════ */}
-      <div className="grid sm:grid-cols-2 gap-3">
-        {/* Daily Streak Check-in */}
-        <div className="glass-card rounded-2xl p-4 border border-white/[0.08] shadow-lg flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-amber-400/15 border border-amber-400/20 flex items-center justify-center text-amber-400 shrink-0">
-              <IconCalendarCheck size={20} />
-            </div>
-            <div className="min-w-0">
-              <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                Điểm danh hằng ngày
-                <span className="font-mono text-amber-400 font-extrabold">{me.streak_days} ngày 🔥</span>
-              </div>
-              <p className="text-[11px] text-zinc-500 mt-0.5 truncate">Điểm danh để nhận quà & mở khóa x2 bonus</p>
-            </div>
+      {/* ======================================================== */}
+      {/* 4. TWO-CARD ROW (.two from VND-Dashboard)                */}
+      {/* ======================================================== */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+        {/* Điểm danh hằng ngày card */}
+        <div className="bg-surface border border-line rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 shadow-[0_4px_20px_rgba(47,123,255,0.04)]">
+          <div className="w-11 h-11 rounded-xl bg-amber-400/15 text-amber-500 flex items-center justify-center shrink-0">
+            <IconCalendar size={22} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <b className="text-sm font-bold text-ink block truncate">Điểm danh hằng ngày</b>
+            <p className="text-muted text-xs mt-0.5 truncate">
+              Nhận quà và mở khóa thưởng x2 mỗi ngày
+            </p>
           </div>
           <Link
             to="/daily-reward"
             onClick={playClickSound}
-            className="px-3 py-1.5 rounded-xl bg-amber-400/15 hover:bg-amber-400/25 text-amber-300 border border-amber-400/25 text-xs font-bold transition btn-press shrink-0"
+            className="px-3.5 py-2 rounded-xl bg-indigo text-white font-bold text-xs hover:brightness-110 shadow-sm transition active:scale-95 shrink-0"
           >
             Điểm danh
           </Link>
         </div>
 
-        {/* VIP Level Progress */}
-        <div className="glass-card rounded-2xl p-4 border border-white/[0.08] shadow-lg space-y-3">
+        {/* Tiến độ VIP card */}
+        <div className="bg-surface border border-line rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-3 shadow-[0_4px_20px_rgba(47,123,255,0.04)]">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <IconTrophy size={15} className="text-sky-400" />
-              <span className="text-xs font-bold text-white">Cấp {me.level ?? 1} VIP — Tiến độ</span>
-            </div>
-            <Link to="/profile" className="text-sky-400 hover:underline text-[11px] font-semibold">
-              Đặc quyền →
+            <b className="text-sm font-bold text-ink flex items-center gap-2">
+              <IconTrophy size={18} className="text-indigo" />
+              <span>Tiến độ VIP cấp {me.level ?? 1}</span>
+            </b>
+            <Link
+              to="/profile"
+              onClick={playClickSound}
+              className="text-xs font-semibold text-indigo hover:underline"
+            >
+              Đặc quyền
             </Link>
           </div>
+
           <div className="space-y-1.5">
-            <div className="h-2 rounded-full bg-white/[0.06] border border-white/[0.08] overflow-hidden">
+            <div className="h-2 rounded-full bg-surface2 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-sky-500 to-blue-400 rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(56,189,248,0.5)]"
-                style={{ width: `${me.levelProgress?.progressPercent ?? 0}%` }}
+                className="h-full rounded-full bg-gradient-to-r from-cyan to-indigo transition-all duration-500"
+                style={{ width: `${Math.min(100, me.levelProgress?.progressPercent ?? 0)}%` }}
               />
             </div>
-            <div className="flex justify-between text-[10px] text-zinc-500 font-mono">
+            <div className="flex justify-between text-xs text-muted font-mono">
               <span>Tiến độ kinh nghiệm</span>
               <span>{me.xp ?? 0} / {me.levelProgress?.nextLevelXp ?? 'Max'} XP</span>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ════════════════════════════════════════════════
-          SECTION 4 — TASK HUB (Full Width)
-      ════════════════════════════════════════════════ */}
-      <div className="space-y-4">
-        {/* Section header + filter */}
+      {/* ======================================================== */}
+      {/* 5. TASKS HUB (.tasks from VND-Dashboard)                 */}
+      {/* ======================================================== */}
+      <section className="space-y-3 pt-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="font-display text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-              <IconBolt size={22} className="text-sky-400" />
-              Nhiệm vụ vượt link hôm nay
+            <h2 className="text-base sm:text-lg font-bold text-ink flex items-center gap-2">
+              <IconBolt size={20} className="text-indigo" />
+              <span>Nhiệm vụ vượt link hôm nay</span>
             </h2>
-            <p className="text-xs text-zinc-500 mt-0.5">
-              Bấm "Làm ngay" để nhận VNC tự động sau khi vượt link.
+            <p className="text-muted text-xs mt-0.5">
+              Bấm “Làm ngay” để nhận VNC sau khi vượt link.
             </p>
           </div>
 
-          {/* Apple-style segmented filter */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-white/[0.04] border border-white/[0.08] self-start sm:self-auto shadow-inner">
-            {([
-              { key: 'all', label: `Tất cả (${tasks.length})` },
-              { key: 'hot', label: 'HOT 🔥', icon: null },
-              { key: 'available', label: 'Còn lượt' },
-            ] as const).map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => { playClickSound(); setFilter(key); }}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all btn-press whitespace-nowrap ${
-                  filter === key
-                    ? 'bg-sky-500 text-white shadow-[0_0_12px_rgba(56,189,248,0.35)]'
-                    : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+          {/* Segmented Filter Control (.seg) */}
+          <div className="flex gap-1 p-1 rounded-xl bg-surface border border-line shadow-sm self-start sm:self-auto">
+            <button
+              onClick={() => {
+                playClickSound();
+                setFilter('all');
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                filter === 'all'
+                  ? 'bg-indigo text-white shadow-sm'
+                  : 'text-muted hover:text-ink'
+              }`}
+            >
+              Tất cả ({tasks.length})
+            </button>
+            <button
+              onClick={() => {
+                playClickSound();
+                setFilter('hot');
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 ${
+                filter === 'hot'
+                  ? 'bg-indigo text-white shadow-sm'
+                  : 'text-muted hover:text-ink'
+              }`}
+            >
+              <span>HOT</span>
+              <IconFlame size={13} className="text-amber-400" />
+            </button>
+            <button
+              onClick={() => {
+                playClickSound();
+                setFilter('available');
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                filter === 'available'
+                  ? 'bg-indigo text-white shadow-sm'
+                  : 'text-muted hover:text-ink'
+              }`}
+            >
+              Còn lượt
+            </button>
           </div>
         </div>
 
         {error && <Alert type="error">{error}</Alert>}
 
-        {/* Task grid */}
         {filteredTasks.length === 0 ? (
-          <div className="glass-card rounded-2xl p-10 text-center text-zinc-400 border border-white/[0.08] shadow-xl">
-            <IconInbox size={40} className="mb-3 mx-auto text-zinc-600" />
-            <div className="text-sm font-semibold text-white">Không có nhiệm vụ nào phù hợp</div>
-            <p className="text-xs text-zinc-500 mt-1">Vui lòng quay lại sau hoặc chọn bộ lọc khác.</p>
+          <div className="bg-surface border border-line rounded-2xl p-10 text-center text-muted shadow-sm">
+            <IconInbox size={40} className="mb-2 mx-auto text-muted/60" />
+            <div className="text-sm font-semibold text-ink">Không có nhiệm vụ nào phù hợp.</div>
+            <p className="text-xs text-muted mt-1">Vui lòng quay lại sau hoặc chọn bộ lọc khác.</p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3.5 sm:gap-4">
             {filteredTasks.map((task) => (
               <TaskCard
                 key={task.id}
@@ -409,34 +416,34 @@ export default function Dashboard() {
             ))}
           </div>
         )}
-      </div>
+      </section>
 
-      {/* ════════════════════════════════════════════════
-          SECURITY CHALLENGE MODAL
-      ════════════════════════════════════════════════ */}
+      {/* Cloudflare Security Challenge Modal */}
       {challengeTaskId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
-          <div className="glass-panel border border-white/15 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <IconShieldCheck size={18} className="text-sky-400" />
-                Xác minh bảo mật Cloudflare
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-surface border border-line rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-line">
+              <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+                <IconShieldCheck size={18} className="text-indigo" />
+                <span>Xác minh bảo mật</span>
               </h3>
               <button
                 onClick={() => setChallengeTaskId(null)}
-                className="w-7 h-7 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] flex items-center justify-center transition"
+                className="w-7 h-7 rounded-lg text-muted hover:text-ink hover:bg-surface2 flex items-center justify-center transition"
               >
                 <IconX size={16} />
               </button>
             </div>
-            <p className="text-xs text-zinc-400 leading-relaxed">
+            <p className="text-xs text-muted leading-relaxed">
               Hệ thống yêu cầu xác minh an toàn trước khi cấp link nhiệm vụ. Vui lòng bấm xác minh bên dưới.
             </p>
             <div className="flex justify-center py-2">
               <TurnstileWidget
                 reset={captchaReset}
                 onToken={(token) => {
-                  if (token) handleStart(challengeTaskId, token);
+                  if (token) {
+                    handleStart(challengeTaskId, token);
+                  }
                 }}
               />
             </div>

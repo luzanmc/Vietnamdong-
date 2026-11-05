@@ -3,32 +3,45 @@
 @tailwind utilities;
 
 :root {
-  --color-bg: 6 7 10;
-  --color-surface: 13 14 19;
-  --color-surface2: 21 23 30;
-  --color-line: 34 37 46;
-  --color-ink: 248 250 255;
-  --color-muted: 148 155 170;
-  --color-indigo: 56 189 248;
-  --color-cyan: 125 211 252;
-  --color-amber: 56 189 248;
+  --color-bg: 238 245 255;
+  --color-surface: 255 255 255;
+  --color-surface2: 232 241 255;
+  --color-line: 227 236 251;
+  --color-ink: 15 27 51;
+  --color-muted: 107 122 153;
+  --color-indigo: 47 123 255;
+  --color-cyan: 56 189 248;
+  --color-amber: 245 158 11;
   --color-rose: 239 68 68;
-  color-scheme: dark;
+  --pri: #2f7bff;
+  --pri2: #38bdf8;
+  --card: #ffffff;
+  --soft: #e8f1ff;
+  --line-hex: #e3ecfb;
+  --sh: 0 8px 30px rgba(47, 123, 255, 0.08);
+  color-scheme: light;
 }
 
-:root[data-theme='light'],
-html:not(.dark):root {
-  --color-bg: 248 250 253;
-  --color-surface: 255 255 255;
-  --color-surface2: 241 245 249;
-  --color-line: 226 232 240;
-  --color-ink: 15 23 42;
-  --color-muted: 100 116 139;
-  --color-indigo: 14 165 233;
-  --color-cyan: 2 132 199;
-  --color-amber: 14 165 233;
-  --color-rose: 225 29 72;
-  color-scheme: light;
+:root[data-theme='dark'],
+html.dark:root,
+html[data-theme='dark']:root {
+  --color-bg: 11 19 34;
+  --color-surface: 18 28 49;
+  --color-surface2: 23 39 70;
+  --color-line: 31 45 73;
+  --color-ink: 232 238 252;
+  --color-muted: 143 160 194;
+  --color-indigo: 47 123 255;
+  --color-cyan: 56 189 248;
+  --color-amber: 245 158 11;
+  --color-rose: 239 68 68;
+  --pri: #2f7bff;
+  --pri2: #38bdf8;
+  --card: #121c31;
+  --soft: #172746;
+  --line-hex: #1f2d49;
+  --sh: 0 8px 30px rgba(0, 0, 0, 0.3);
+  color-scheme: dark;
 }
 
 html {
@@ -732,4 +745,179 @@ html:not(.dark) .vnc-card:hover {
     transform: none !important;
   }
 }
+
+/* ==========================================================================
+   VND-Dashboard Theme & Component Styles
+   ========================================================================== */
+
+/* Upgraded VIP Banner */
+.upg-vnd {
+  border-radius: 16px;
+  padding: 16px;
+  background: linear-gradient(145deg, #1b3a8a 0%, #2f7bff 60%, #38bdf8 100%);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(47, 123, 255, 0.3);
+}
+.upg-vnd > * {
+  position: relative;
+  z-index: 1;
+}
+.upg-vnd i.shape {
+  position: absolute;
+  z-index: 0;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.upg-vnd .o1 {
+  width: 70px;
+  height: 70px;
+  right: -14px;
+  top: -14px;
+  transform: rotate(18deg);
+}
+.upg-vnd .o2 {
+  width: 46px;
+  height: 46px;
+  right: 30px;
+  bottom: 34px;
+  transform: rotate(-14deg);
+  opacity: 0.7;
+}
+
+/* Blue Balance Banner */
+.card-blue-vnd {
+  background: linear-gradient(135deg, #5ab8ff 0%, #2f7bff 60%, #4b6bff 100%);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(47, 123, 255, 0.16);
+}
+.card-blue-vnd::after {
+  content: "";
+  position: absolute;
+  right: -60px;
+  top: -60px;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  pointer-events: none;
+}
+.card-blue-vnd::before {
+  content: "";
+  position: absolute;
+  right: 60px;
+  bottom: -90px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+}
+.card-blue-vnd > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Bottom Tab Bar (Mobile) */
+.tabs-vnd {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  background: rgb(var(--color-surface));
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(15, 27, 51, 0.18);
+  border: 1px solid rgb(var(--color-line));
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 40;
+}
+.tb-vnd {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border-radius: 16px;
+  color: rgb(var(--color-muted));
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.tb-vnd.active {
+  color: rgb(var(--color-indigo));
+  background: rgb(var(--color-surface2));
+}
+.fab-vnd {
+  width: 54px;
+  height: 54px;
+  margin: -26px 6px 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #38bdf8, #2f7bff 60%, #7c4dff);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 20px rgba(47, 123, 255, 0.45);
+  border: 4px solid rgb(var(--color-bg));
+  flex: none;
+  transition: transform 0.15s ease;
+}
+.fab-vnd:active {
+  transform: scale(0.95);
+}
+
+/* Conic Wheel Styles */
+.wheel-stage-vnd {
+  position: relative;
+  width: 260px;
+  height: 260px;
+  margin: 0 auto;
+}
+.wd-vnd {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(
+    #5ab8ff 0 45deg,
+    #2f7bff 0 90deg,
+    #7dd3fc 0 135deg,
+    #4b6bff 0 180deg,
+    #5ab8ff 0 225deg,
+    #2f7bff 0 270deg,
+    #7dd3fc 0 315deg,
+    #4b6bff 0 360deg
+  );
+  transition: transform 3.5s cubic-bezier(0.12, 0.7, 0.1, 1);
+  position: relative;
+  border: 6px solid rgb(var(--color-surface));
+  box-shadow: 0 10px 30px rgba(47, 123, 255, 0.25);
+}
+.wd-vnd span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.pt-vnd {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  margin-left: -10px;
+  border: 10px solid transparent;
+  border-top: 18px solid #ef4444;
+  z-index: 20;
+}
+
 
