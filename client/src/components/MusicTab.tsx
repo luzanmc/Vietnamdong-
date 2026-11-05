@@ -1,27 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useMusic } from '../context/MusicContext.js';
 import { playClickSound } from '../utils/sound.js';
-import {
-  IconBrandYoutube,
-  IconBrandSpotify,
-  IconMusic,
-  IconPlayerPlay,
-  IconPlayerTrackNext,
-  IconPictureInPicture,
-  IconAdjustmentsHorizontal,
-} from '@tabler/icons-react';
 
 export default function MusicTab() {
-  const {
-    isPlaying,
-    togglePlay,
-    currentTrack,
-    trackTitle,
-    enabled,
-    nextTrack,
-    showMiniPlayer,
-    setShowMiniPlayer,
-  } = useMusic();
+  const { isPlaying, togglePlay, currentTrack, trackTitle, enabled, nextTrack, showMiniPlayer, setShowMiniPlayer } = useMusic();
 
   if (!enabled) return null;
 
@@ -29,24 +11,24 @@ export default function MusicTab() {
 
   return (
     <div
-      className={`flex items-center gap-2 px-3 py-1.5 rounded-full glass-pill border transition-all text-xs shadow-md ${
+      className={`hidden md:flex items-center gap-2 px-2.5 py-1 rounded-full border transition-all text-xs ${
         isPlaying
-          ? 'border-sky-500/40 text-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.2)]'
-          : 'border-white/10 text-zinc-400 hover:text-white'
+          ? 'bg-indigo/15 border-indigo/40 text-indigo shadow-[0_0_15px_rgba(85,167,255,0.2)]'
+          : 'bg-surface2/60 border-line/60 text-muted hover:text-ink hover:border-line'
       }`}
     >
       {/* Source icon badge */}
       {sourceType === 'youtube' ? (
         <span className="text-red-500 font-bold flex items-center" title="YouTube">
-          <IconBrandYoutube size={16} />
+          <i className="bi bi-youtube text-sm" />
         </span>
       ) : sourceType === 'spotify' ? (
         <span className="text-emerald-400 font-bold flex items-center" title="Spotify">
-          <IconBrandSpotify size={16} />
+          <i className="bi bi-spotify text-sm" />
         </span>
       ) : (
-        <span className="text-sky-400 font-bold flex items-center" title="Audio">
-          <IconMusic size={15} />
+        <span className="text-indigo font-bold flex items-center" title="MP3 Audio">
+          <i className="bi bi-music-note-beamed text-xs" />
         </span>
       )}
 
@@ -62,26 +44,17 @@ export default function MusicTab() {
       >
         {isPlaying ? (
           <span className="flex items-end gap-[2px] h-3.5 w-3 px-0.5">
-            <span
-              className="w-1 bg-sky-400 rounded-full animate-bounce h-2"
-              style={{ animationDuration: '0.6s' }}
-            />
-            <span
-              className="w-1 bg-cyan-300 rounded-full animate-bounce h-3.5"
-              style={{ animationDuration: '0.4s' }}
-            />
-            <span
-              className="w-1 bg-sky-400 rounded-full animate-bounce h-2.5"
-              style={{ animationDuration: '0.8s' }}
-            />
+            <span className="w-1 bg-indigo rounded-full animate-bounce h-2" style={{ animationDuration: '0.6s' }} />
+            <span className="w-1 bg-cyan rounded-full animate-bounce h-3.5" style={{ animationDuration: '0.4s' }} />
+            <span className="w-1 bg-indigo rounded-full animate-bounce h-2.5" style={{ animationDuration: '0.8s' }} />
           </span>
         ) : (
-          <IconPlayerPlay size={14} className="text-zinc-400 hover:text-white" />
+          <i className="bi bi-play-fill text-muted text-sm" />
         )}
       </button>
 
       {/* Track Title */}
-      <span className="max-w-[90px] sm:max-w-[130px] truncate font-medium text-[11px] select-none text-white">
+      <span className="max-w-[100px] lg:max-w-[140px] truncate font-medium text-[11px] select-none text-ink">
         {trackTitle}
       </span>
 
@@ -92,9 +65,9 @@ export default function MusicTab() {
           nextTrack();
         }}
         title="Bài tiếp theo"
-        className="text-zinc-400 hover:text-white transition p-0.5"
+        className="text-muted hover:text-ink transition p-0.5"
       >
-        <IconPlayerTrackNext size={14} />
+        <i className="bi bi-skip-forward-fill text-xs" />
       </button>
 
       {/* Mini player toggle (PIP for YouTube / Spotify) */}
@@ -105,9 +78,9 @@ export default function MusicTab() {
             setShowMiniPlayer(!showMiniPlayer);
           }}
           title={showMiniPlayer ? 'Ẩn màn hình nhỏ' : 'Hiện màn hình phát nhỏ (PIP)'}
-          className={`p-0.5 transition ${showMiniPlayer ? 'text-sky-400' : 'text-zinc-400 hover:text-white'}`}
+          className={`p-0.5 transition ${showMiniPlayer ? 'text-indigo' : 'text-muted hover:text-ink'}`}
         >
-          <IconPictureInPicture size={14} />
+          <i className="bi bi-pip text-xs" />
         </button>
       )}
 
@@ -115,10 +88,10 @@ export default function MusicTab() {
       <Link
         to="/profile?tab=music"
         onClick={playClickSound}
-        title="Tùy chỉnh danh sách nhạc"
-        className="text-zinc-400 hover:text-sky-400 p-0.5 transition"
+        title="Tùy chỉnh danh sách nhạc trên Profile"
+        className="text-muted hover:text-indigo p-0.5 transition"
       >
-        <IconAdjustmentsHorizontal size={14} />
+        <i className="bi bi-sliders text-xs" />
       </Link>
     </div>
   );

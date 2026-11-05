@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { api, ApiError } from '../api/client.js';
 import { Skeleton } from '../components/Skeleton.js';
 import { useLanguage } from '../context/LanguageContext.js';
@@ -8,49 +8,43 @@ import CurrencyIcon from '../components/CurrencyIcon.js';
 import { triggerConfetti } from '../components/Confetti.js';
 import { playClickSound, playWheelTick, playWinFanfare, playCoinSound } from '../utils/sound.js';
 import type { SpinStatus, SpinSegment } from '../types.js';
-import {
-  IconSparkles,
-  IconClock,
-  IconTrophy,
-  IconGift,
-  IconArrowRight,
-  IconRefresh,
-} from '@tabler/icons-react';
 
-const DEFAULT_SEGMENTS: SpinSegment[] = [
-  { label: '50 VNC', reward: 50, weight: 10, color: '#5ab8ff' },
-  { label: '100 VNC', reward: 100, weight: 15, color: '#2f7bff' },
-  { label: '0 VNC', reward: 0, weight: 30, color: '#7dd3fc' },
-  { label: '200 VNC', reward: 200, weight: 12, color: '#4b6bff' },
-  { label: '500 VNC', reward: 500, weight: 8, color: '#5ab8ff' },
-  { label: '100 VNC', reward: 100, weight: 15, color: '#2f7bff' },
-  { label: '20 VNC', reward: 20, weight: 20, color: '#7dd3fc' },
-  { label: '1000 VNC', reward: 1000, weight: 5, color: '#4b6bff' },
-];
+const SLICE_COLORS = ['#6366F1', '#06B6D4', '#F59E0B', '#EC4899', '#10B981', '#8B5CF6'];
 
 export default function LuckyWheel() {
   const { t } = useLanguage();
   const { refresh } = useAuth();
   const { success: toastSuccess, error: toastError } = useToast();
-
   const [status, setStatus] = useState<SpinStatus | null>(null);
-  const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
+  const [spinning, setSpinning] = useState(false);
   const [wonPrize, setWonPrize] = useState<{ reward: number; label: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const wheelRef = useRef<HTMLDivElement>(null);
-  const rotationRef = useRef(0);
   const animFrameRef = useRef<number | null>(null);
+  const rotationRef = useRef(0);
 
   useEffect(() => {
     api.spinStatus().then(setStatus).catch(() => {});
     return () => {
-      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
     };
   }, []);
 
-  const segments: SpinSegment[] = status?.segments?.length ? status.segments : DEFAULT_SEGMENTS;
+  const segments: SpinSegment[] = status?.segments?.length
+    ? status.segments
+    : [
+        { label: '0 VNC', reward: 0, weight: 30, color: '#242430' },
+        { label: '1 VNC', reward: 1, weight: 28, color: '#6C63F5' },
+        { label: '2 VNC', reward: 2, weight: 20, color: '#22D3EE' },
+        { label: '5 VNC', reward: 5, weight: 12, color: '#F5A524' },
+        { label: '10 VNC', reward: 10, weight: 7, color: '#FB6A8A' },
+        { label: '50 VNC', reward: 50, weight: 3, color: '#F5A524' },
+      ];
+
   const numSegments = segments.length;
   const segmentAngle = 360 / numSegments;
 
@@ -62,17 +56,18 @@ export default function LuckyWheel() {
     setWonPrize(null);
 
     let currentAngle = rotationRef.current;
-    let speed = 20;
+    let speed = 20; // High instant speed (deg/frame)
     let lastTickAngle = currentAngle;
     let isDecelerating = false;
     let targetAngle = 0;
     let decelStartAngle = 0;
     let decelStartTime = 0;
-    const DECEL_DURATION = 3500;
+    const DECEL_DURATION = 3500; // ms for buttery smooth slowdown
 
     let apiResult: { segmentIndex: number; reward: number } | null = null;
     let apiError: string | null = null;
 
+    // Send API in background while wheel spins immediately!
     api.spin()
       .then((res) => {
         apiResult = res;
@@ -82,32 +77,39 @@ export default function LuckyWheel() {
       });
 
     const step = (now: number) => {
+      // Play wheel click sound as segments pass by
       if (Math.abs(currentAngle - lastTickAngle) >= segmentAngle) {
         playWheelTick(700 + Math.floor(Math.random() * 80));
         lastTickAngle = currentAngle;
       }
 
       if (!isDecelerating) {
+        // Instant spinning phase
         currentAngle += speed;
 
         if (apiResult !== null || apiError !== null) {
-          isDecelerating = true;
-          decelStartAngle = currentAngle;
-          decelStartTime = now;
-
           if (apiError) {
+            isDecelerating = true;
+            decelStartAngle = currentAngle;
+            decelStartTime = now;
             targetAngle = currentAngle + 360 * 1.5;
           } else if (apiResult) {
-            // Pointer is at top (0 deg / 12 o'clock). Each slice i spans [i*angle, (i+1)*angle]
+            isDecelerating = true;
+            decelStartAngle = currentAngle;
+            decelStartTime = now;
+
+            // Target alignment calculation: pointer is at top (-90 deg)
             const sliceCenter = apiResult.segmentIndex * segmentAngle + segmentAngle / 2;
             const targetMod = (360 - sliceCenter + 360) % 360;
             const currentMod = currentAngle % 360;
             let diff = targetMod - currentMod;
             if (diff < 0) diff += 360;
-            targetAngle = currentAngle + diff + 360 * 4; // 4 extra exciting spins
+            // Add 3 full rotations for thrilling gradual deceleration
+            targetAngle = currentAngle + diff + 360 * 3;
           }
         }
       } else {
+        // Deceleration phase using smooth cubic ease-out
         const elapsed = now - decelStartTime;
         const progress = Math.min(elapsed / DECEL_DURATION, 1);
         const ease = 1 - Math.pow(1 - progress, 3.2);
@@ -136,7 +138,7 @@ export default function LuckyWheel() {
             if (apiResult.reward > 0) {
               playWinFanfare();
               triggerConfetti();
-              toastSuccess(`Chúc mừng bạn trúng +${apiResult.reward} VNC!`, 'Vòng quay may mắn');
+              toastSuccess(`Chúc mừng bạn trúng ${apiResult.reward} VNC!`, 'Vòng quay may mắn');
             } else {
               playCoinSound();
               toastSuccess('Chúc bạn may mắn lần sau!', 'Vòng quay');
@@ -158,160 +160,225 @@ export default function LuckyWheel() {
 
   if (!status) {
     return (
-      <div className="max-w-md mx-auto py-10 space-y-6 text-center">
-        <Skeleton className="h-8 w-48 mx-auto rounded-xl" />
-        <Skeleton className="h-64 w-64 mx-auto rounded-full" />
+      <div className="max-w-md mx-auto py-10 space-y-6">
+        <Skeleton className="h-8 w-48 mx-auto rounded-lg" />
+        <Skeleton className="h-80 w-80 mx-auto rounded-full" />
         <Skeleton className="h-12 w-48 mx-auto rounded-xl" />
       </div>
     );
   }
 
-  // Pre-generate conic background based on segments
-  const conicColors = segments
-    .map((seg, i) => {
-      const c = seg.color || (i % 2 === 0 ? '#5ab8ff' : '#2f7bff');
-      const startDeg = i * segmentAngle;
-      const endDeg = (i + 1) * segmentAngle;
-      return `${c} ${startDeg}deg ${endDeg}deg`;
-    })
-    .join(', ');
-
   return (
-    <div className="max-w-xl mx-auto py-4 space-y-6">
-      {/* Title & Header */}
-      <div className="text-center space-y-1.5">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-400/15 text-amber-500 border border-amber-400/30">
-          <IconSparkles size={14} />
+    <div className="max-w-xl mx-auto py-4 text-center">
+      {/* Title */}
+      <div className="mb-6">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber/15 text-amber border border-amber/30 mb-2">
+          <i className="bi bi-stars" />
           <span>Vòng quay may mắn hàng ngày</span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-ink">
-          Vòng quay may mắn
+        <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-ink flex items-center justify-center gap-2">
+          {t('spin.title')}
         </h1>
-        <p className="text-muted text-xs sm:text-sm max-w-sm mx-auto">
-          Mỗi ngày nhận 1 lượt quay miễn phí trúng thưởng VNC cực đã!
+        <p className="text-xs sm:text-sm text-muted mt-1 max-w-sm mx-auto">
+          Mỗi ngày nhận 1 lượt quay miễn phí trúng tới <span className="text-amber font-bold">50 VNC</span>!
         </p>
       </div>
 
-      {/* Main Wheel Card (matching VND-Dashboard .card) */}
-      <div className="bg-surface border border-line rounded-2xl p-6 sm:p-8 shadow-[0_8px_30px_rgba(47,123,255,0.08)] flex flex-col items-center">
-        {/* Wheel Stage with Pointer */}
-        <div className="relative w-[260px] h-[260px] sm:w-[280px] sm:h-[280px] my-2 flex items-center justify-center">
-          {/* Top Pointer Pin (.pt from VND-Dashboard) */}
-          <div className="pt-vnd" />
+      {/* Wheel Stage */}
+      <div className="relative w-[280px] h-[280px] xs:w-80 xs:h-80 sm:w-96 sm:h-96 max-w-[calc(100vw-2.5rem)] max-h-[calc(100vw-2.5rem)] mx-auto mb-8 flex items-center justify-center">
+        {/* Glowing backdrop halo */}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-indigo/25 via-amber/20 to-cyan/25 blur-2xl -z-10 pointer-events-none animate-pulse-soft" />
 
-          {/* Conic Wheel Disc (.wd from VND-Dashboard) */}
+        {/* Pointer Pin (at the top, pointing down into the rim) */}
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-b from-amber to-amber-600 shadow-[0_0_15px_rgba(245,165,36,0.8)] border-2 border-white flex items-center justify-center">
+            <div className="w-2.5 h-2.5 rounded-full bg-white shadow-inner" />
+          </div>
+          <div className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[18px] border-t-amber -mt-1 drop-shadow-md" />
+        </div>
+
+        {/* Outer Ring with LED Bulbs */}
+        <div className="absolute inset-0 rounded-full p-2 border-4 border-amber/60 bg-gradient-to-b from-surface to-surface2 shadow-[0_0_35px_rgba(0,0,0,0.5)] flex items-center justify-center">
+          {/* 12 LED Dots along rim */}
+          {Array.from({ length: 12 }).map((_, i) => {
+            const angle = (360 / 12) * i;
+            return (
+              <div
+                key={i}
+                className="absolute w-2.5 h-2.5 rounded-full border border-white/60 shadow-sm transition-all"
+                style={{
+                  top: `calc(50% - 4px + ${Math.sin((angle * Math.PI) / 180) * 47}%)`,
+                  left: `calc(50% - 4px + ${Math.cos((angle * Math.PI) / 180) * 47}%)`,
+                  backgroundColor: i % 2 === 0 ? '#F5A524' : '#22D3EE',
+                  boxShadow: spinning
+                    ? '0 0 10px #F5A524, 0 0 5px #fff'
+                    : '0 0 4px rgba(255,255,255,0.6)',
+                }}
+              />
+            );
+          })}
+
+          {/* Rotating Wheel Canvas / SVG */}
           <div
             ref={wheelRef}
-            className="wd-vnd overflow-hidden"
+            className="w-full h-full rounded-full overflow-hidden shadow-inner"
             style={{
-              background: `conic-gradient(${conicColors})`,
               transform: `rotate(${rotation}deg)`,
               willChange: 'transform',
             }}
           >
-            {segments.map((seg, idx) => {
-              const rotationDeg = idx * segmentAngle + segmentAngle / 2;
-              return (
-                <span
-                  key={idx}
-                  style={{
-                    transform: `translate(-50%, -50%) rotate(${rotationDeg}deg) translateY(-92px)`,
-                  }}
-                  className="font-bold text-xs sm:text-sm tracking-tight text-white select-none pointer-events-none drop-shadow"
-                >
-                  {seg.reward > 0 ? `${seg.reward}` : '0'}
-                </span>
-              );
-            })}
-          </div>
+            <svg viewBox="0 0 400 400" className="w-full h-full select-none">
+              <defs>
+                <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="#000" floodOpacity="0.5" />
+                </filter>
+              </defs>
 
-          {/* Center Hub */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-            <div className="w-14 h-14 rounded-full bg-surface border-4 border-white dark:border-slate-800 shadow-xl flex flex-col items-center justify-center">
-              <CurrencyIcon size={18} />
-              <span className="text-[9px] font-bold text-indigo tracking-wider">SPIN</span>
-            </div>
+              {segments.map((seg, i) => {
+                const startAngle = i * segmentAngle - 90;
+                const endAngle = (i + 1) * segmentAngle - 90;
+                const startRad = (startAngle * Math.PI) / 180;
+                const endRad = (endAngle * Math.PI) / 180;
+
+                const x1 = 200 + 195 * Math.cos(startRad);
+                const y1 = 200 + 195 * Math.sin(startRad);
+                const x2 = 200 + 195 * Math.cos(endRad);
+                const y2 = 200 + 195 * Math.sin(endRad);
+
+                const textAngle = startAngle + segmentAngle / 2;
+                const textRad = (textAngle * Math.PI) / 180;
+                const textX = 200 + 130 * Math.cos(textRad);
+                const textY = 200 + 130 * Math.sin(textRad);
+
+                const fillColor = seg.color || SLICE_COLORS[i % SLICE_COLORS.length];
+
+                return (
+                  <g key={i}>
+                    {/* Slice Wedge */}
+                    <path
+                      d={`M 200 200 L ${x1} ${y1} A 195 195 0 0 1 ${x2} ${y2} Z`}
+                      fill={fillColor}
+                      stroke="rgba(255,255,255,0.25)"
+                      strokeWidth="2.5"
+                    />
+
+                    {/* Slice Label & Icon */}
+                    <g
+                      transform={`translate(${textX}, ${textY}) rotate(${textAngle + 90})`}
+                      textAnchor="middle"
+                      filter="url(#shadow)"
+                    >
+                      <text
+                        fill="#FFFFFF"
+                        fontSize={seg.reward >= 50 ? '22' : '17'}
+                        fontWeight="bold"
+                        fontFamily="Space Grotesk, sans-serif"
+                        dy="0"
+                      >
+                        {seg.reward > 0 ? `+${seg.reward}` : '0'}
+                      </text>
+                      <text
+                        fill="#FEE2E2"
+                        fontSize="11"
+                        fontWeight="600"
+                        fontFamily="Inter, sans-serif"
+                        dy="14"
+                        opacity="0.9"
+                      >
+                        VNC
+                      </text>
+                    </g>
+                  </g>
+                );
+              })}
+            </svg>
           </div>
         </div>
 
-        {error && (
-          <div className="text-xs text-rose-500 font-medium mt-3 text-center">
-            {error}
+        {/* Center Metallic Spin Hub */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-surface to-surface2 border-4 border-amber shadow-2xl flex flex-col items-center justify-center shrink-0">
+            <CurrencyIcon size={24} />
+            <span className="text-[10px] font-mono font-bold text-amber mt-0.5">SPIN</span>
           </div>
-        )}
-
-        {/* Spin Button */}
-        <div className="text-center mt-6 w-full max-w-xs space-y-2">
-          <button
-            onClick={doSpin}
-            disabled={!status.can_spin || spinning}
-            className={`
-              w-full py-3 px-6 rounded-xl font-bold text-sm transition-all shadow-md active:scale-95 flex items-center justify-center gap-2
-              ${
-                status.can_spin && !spinning
-                  ? 'bg-indigo hover:brightness-110 text-white shadow-[0_6px_20px_rgba(47,123,255,0.4)]'
-                  : 'bg-surface2 text-muted border border-line cursor-not-allowed opacity-60'
-              }
-            `}
-          >
-            {spinning ? (
-              <>
-                <IconRefresh size={16} className="animate-spin" />
-                <span>Đang quay thưởng...</span>
-              </>
-            ) : status.can_spin ? (
-              <>
-                <IconSparkles size={16} />
-                <span>Quay ngay (1 lượt miễn phí)</span>
-              </>
-            ) : (
-              <>
-                <IconClock size={16} />
-                <span>Đã quay hôm nay (0 lượt)</span>
-              </>
-            )}
-          </button>
-
-          {!status.can_spin && (
-            <p className="text-[11px] text-muted">
-              Lượt quay mới sẽ được cấp tự động sau 00:00 hằng ngày.
-            </p>
-          )}
         </div>
       </div>
 
-      {/* Prize Modal Celebration */}
+      {/* Error alert */}
+      {error && <div className="max-w-sm mx-auto mb-4 text-xs text-rose">{error}</div>}
+
+      {/* Action Button */}
+      <div className="max-w-xs mx-auto">
+        <button
+          onClick={doSpin}
+          disabled={!status.can_spin || spinning}
+          className={`w-full py-3.5 px-6 rounded-2xl font-display font-bold text-base transition-all btn-press shadow-xl flex items-center justify-center gap-2 ${
+            status.can_spin && !spinning
+              ? 'bg-gradient-to-r from-amber-500 via-amber to-amber-600 hover:brightness-110 text-black shadow-amber/30 hover:shadow-[0_0_30px_rgba(245,165,36,0.6)]'
+              : 'bg-surface2 text-muted border border-line cursor-not-allowed opacity-60'
+          }`}
+        >
+          {spinning ? (
+            <>
+              <i className="bi bi-arrow-repeat animate-spin text-lg" />
+              <span>Đang quay thưởng...</span>
+            </>
+          ) : status.can_spin ? (
+            <>
+              <i className="bi bi-play-circle-fill text-lg" />
+              <span>{t('spin.spin_button')} (Miễn phí)</span>
+            </>
+          ) : (
+            <>
+              <i className="bi bi-clock-history text-lg" />
+              <span>Đã quay hôm nay</span>
+            </>
+          )}
+        </button>
+        {!status.can_spin && (
+          <p className="text-[11px] text-muted mt-2">
+            Lượt quay sẽ được làm mới vào lúc 00:00 ngày mai.
+          </p>
+        )}
+      </div>
+
+      {/* Won Prize Celebration Modal */}
       {wonPrize && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-surface border border-line rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center space-y-4 shadow-2xl relative">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-400/20 text-amber-500 flex items-center justify-center">
-              <CurrencyIcon size={36} />
-            </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-md animate-slide-in">
+          <div className="glass-panel rounded-3xl p-6 sm:p-8 max-w-sm w-full max-h-[90dvh] overflow-y-auto border border-amber/40 shadow-2xl text-center relative">
+            {/* Ambient gold glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-amber/20 rounded-full blur-2xl -z-10 pointer-events-none" />
 
-            <div>
-              <h3 className="text-lg font-bold text-ink">
-                {wonPrize.reward > 0 ? 'Chúc mừng bạn trúng thưởng!' : 'Chúc bạn may mắn lần sau!'}
-              </h3>
-              <div className="text-3xl font-extrabold text-amber-500 my-2 font-mono flex items-center justify-center gap-1">
-                <span>+{wonPrize.reward}</span>
-                <span className="text-base text-muted font-normal">VNC</span>
+            <div className="relative z-10">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-amber/20 border border-amber/40 flex items-center justify-center mb-4 animate-bounce-subtle">
+                <CurrencyIcon size={36} />
               </div>
-              <p className="text-xs text-muted leading-relaxed">
-                {wonPrize.reward > 0
-                  ? 'Phần thưởng VNC đã được tự động cộng vào số dư ví của bạn.'
-                  : 'Đừng buồn nhé, hãy quay lại vào ngày mai để thử vận may tiếp!'}
-              </p>
-            </div>
 
-            <button
-              onClick={() => {
-                playClickSound();
-                setWonPrize(null);
-              }}
-              className="w-full py-2.5 rounded-xl bg-indigo text-white font-bold text-xs hover:brightness-110 shadow-sm transition active:scale-95"
-            >
-              Tuyệt vời, nhận ngay!
-            </button>
+              <h3 className="font-display text-xl font-bold text-ink">
+                {wonPrize.reward > 0 ? 'Chúc mừng bạn trúng thưởng!' : 'Chúc may mắn lần sau!'}
+              </h3>
+
+              <div className="font-mono text-3xl font-extrabold text-amber my-3 flex items-center justify-center gap-2">
+                <span>+{wonPrize.reward}</span>
+                <span className="text-lg font-body font-normal text-muted">VNC</span>
+              </div>
+
+              <p className="text-xs text-muted leading-relaxed mb-6">
+                {wonPrize.reward > 0
+                  ? 'Phần thưởng VNC đã được cộng trực tiếp vào ví của bạn.'
+                  : 'Đừng buồn, hãy quay lại vào ngày mai để thử lại vận may nhé!'}
+              </p>
+
+              <button
+                onClick={() => {
+                  playClickSound();
+                  setWonPrize(null);
+                }}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo to-indigo/90 hover:brightness-110 text-white font-semibold text-sm transition btn-press shadow-md"
+              >
+                Tuyệt vời, cảm ơn!
+              </button>
+            </div>
           </div>
         </div>
       )}

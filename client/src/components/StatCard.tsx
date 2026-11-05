@@ -16,44 +16,47 @@ export default function StatCard({
   value,
   suffix,
   icon,
-  iconColor = 'text-blue-400',
+  iconColor = 'text-amber',
   hint,
   trend,
 }: StatCardProps) {
   return (
-    <div className="glass-card rounded-3xl p-4 sm:p-5 relative overflow-hidden flex flex-col justify-between group">
-      <div>
-        <div className="flex items-center justify-between text-xs text-muted mb-2.5 gap-2">
-          <span className="font-semibold tracking-wider uppercase text-[11px] text-muted/80 truncate">
-            {label}
-          </span>
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-blue-500/10 border border-blue-500/20 shadow-sm transition-transform group-hover:scale-105 shrink-0">
-            <i className={`bi ${icon} ${iconColor} text-sm`} />
-          </div>
-        </div>
+    <div className="glass-card rounded-2xl p-3.5 sm:p-5 relative overflow-hidden group">
+      {/* Ambient background glow circle */}
+      <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full bg-indigo/5 group-hover:bg-indigo/15 blur-xl transition -z-10 pointer-events-none" />
 
-        <div className="font-mono font-mono-nums text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight flex items-center gap-1.5 text-ink min-w-0">
-          {suffix === 'VNC' && (
-            <span className="shrink-0 flex items-center">
-              <CurrencyIcon size={20} />
-            </span>
-          )}
-          <span className="truncate min-w-0">
-            {typeof value === 'number' ? <AnimatedNumber value={value} /> : value}
-          </span>
-          {suffix && suffix !== 'VNC' && (
-            <span className="text-xs sm:text-sm text-muted font-body font-normal shrink-0">
-              {suffix}
-            </span>
-          )}
+      <div className="flex items-center justify-between text-xs text-muted mb-2 relative z-10 gap-2">
+        <span className="font-semibold tracking-wide uppercase text-[10px] sm:text-[11px] truncate">
+          {label}
+        </span>
+        <div
+          className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center bg-surface2/80 border border-line/60 shadow-sm transition-transform group-hover:scale-110 shrink-0"
+        >
+          <i className={`bi ${icon} ${iconColor} text-xs sm:text-sm`} />
         </div>
       </div>
 
+      <div className="font-mono font-mono-nums text-lg sm:text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-1.5 relative z-10 min-w-0">
+        {suffix === 'VNC' && (
+          <span className="shrink-0">
+            <CurrencyIcon size={18} />
+          </span>
+        )}
+        <span className="text-ink truncate min-w-0">
+          {typeof value === 'number' ? <AnimatedNumber value={value} /> : value}
+        </span>
+        {suffix && suffix !== 'VNC' && (
+          <span className="text-xs sm:text-sm text-muted font-body font-medium shrink-0">
+            {suffix}
+          </span>
+        )}
+      </div>
+
       {(hint || trend) && (
-        <div className="flex items-center justify-between text-xs text-muted mt-3 pt-2.5 border-t border-line/50 gap-2">
-          {hint && <span className="truncate text-[11px]">{hint}</span>}
+        <div className="flex items-center justify-between text-[11px] text-muted mt-2 pt-2 border-t border-line/40 relative z-10 gap-1.5">
+          {hint && <span className="truncate text-[10px] sm:text-[11px]">{hint}</span>}
           {trend && (
-            <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0 ml-auto">
+            <span className="text-cyan font-mono font-semibold ml-auto shrink-0 bg-cyan/10 px-1.5 py-0.5 rounded text-[10px]">
               {trend}
             </span>
           )}

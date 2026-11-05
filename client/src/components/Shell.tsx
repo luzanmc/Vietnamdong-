@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Outlet, NavLink, useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
 import { useLanguage } from '../context/LanguageContext.js';
@@ -15,598 +15,658 @@ import LevelBadge from './LevelBadge.js';
 import AvatarFrame from './AvatarFrame.js';
 import UserName from './UserName.js';
 import { playClickSound, isSoundEnabled, toggleSound } from '../utils/sound.js';
-import {
-  IconLayoutDashboard,
-  IconBolt,
-  IconSparkles,
-  IconWallet,
-  IconGift,
-  IconTicket,
-  IconSubtitles,
-  IconCode,
-  IconFlame,
-  IconTrophy,
-  IconChartBar,
-  IconUsers,
-  IconHistory,
-  IconHeadset,
-  IconHelpCircle,
-  IconShieldCheck,
-  IconShieldLock,
-  IconMenu2,
-  IconChevronsLeft,
-  IconChevronsRight,
-  IconArrowRight,
-  IconSun,
-  IconMoon,
-  IconVolume,
-  IconVolumeOff,
-  IconLanguage,
-  IconLogout,
-  IconUser,
-  IconX,
-  IconSearch,
-  IconCoin,
-  IconCrown,
-  IconCheck,
-  IconChevronDown,
-  IconTrendingUp,
-} from '@tabler/icons-react';
-
-interface NavItem {
-  to: string;
-  icon: React.ComponentType<{ size?: number; className?: string; stroke?: number }>;
-  label: string;
-  badge?: string;
-  badgeColor?: string;
-  adminOnly?: boolean;
-}
 
 interface NavGroup {
   title: string;
   items: NavItem[];
 }
 
+interface NavItem {
+  to: string;
+  icon: string;
+  labelKey: string;
+  badge?: string;
+  badgeColor?: string;
+  adminOnly?: boolean;
+}
+
 const NAV_GROUPS: NavGroup[] = [
   {
-    title: 'Chính',
+    title: 'Khám phá',
     items: [
-      { to: '/dashboard', icon: IconLayoutDashboard, label: 'Dashboard' },
-      { to: '/quests', icon: IconBolt, label: 'Nhiệm vụ', badge: 'HOT', badgeColor: 'bg-rose-500/15 text-rose-500' },
-      { to: '/lucky-wheel', icon: IconSparkles, label: 'Vòng quay', badge: 'FREE', badgeColor: 'bg-amber-400/15 text-amber-500' },
-      { to: '/wallet', icon: IconWallet, label: 'Ví tiền' },
+      { to: '/dashboard', icon: 'bi-grid-1x2-fill', labelKey: 'nav.dashboard' },
+      { to: '/chart', icon: 'bi-graph-up', labelKey: 'nav.chart' },
+      { to: '/daily-reward', icon: 'bi-gift-fill', labelKey: 'nav.daily', badge: 'HOT', badgeColor: 'bg-rose text-white' },
+      { to: '/lucky-wheel', icon: 'bi-stars', labelKey: 'nav.spin', badge: 'FREE', badgeColor: 'bg-amber text-black' },
+      { to: '/giftcode', icon: 'bi-ticket-perforated-fill', labelKey: 'nav.giftcode', badge: 'HOT', badgeColor: 'bg-amber text-black' },
+      { to: '/quests', icon: 'bi-list-task', labelKey: 'nav.quests' },
+      { to: '/leaderboard', icon: 'bi-trophy-fill', labelKey: 'nav.leaderboard' },
     ],
   },
+
   {
-    title: 'Tiện ích',
+    title: 'Tài chính',
     items: [
-      { to: '/redeem', icon: IconGift, label: 'Đổi thưởng' },
-      { to: '/giftcode', icon: IconTicket, label: 'Giftcode', badge: 'HOT', badgeColor: 'bg-rose-500/15 text-rose-500' },
-      { to: '/daily-reward', icon: IconFlame, label: 'Điểm danh', badge: 'STREAK', badgeColor: 'bg-amber-400/15 text-amber-500' },
-      { to: '/vietsub-studio', icon: IconSubtitles, label: 'Vietsub Studio' },
-      { to: '/creator-code', icon: IconCode, label: 'Creator Code' },
+      { to: '/wallet', icon: 'bi-wallet2', labelKey: 'nav.wallet' },
+      { to: '/history', icon: 'bi-clock-history', labelKey: 'nav.history' },
+      { to: '/redeem', icon: 'bi-controller', labelKey: 'nav.redeem' },
     ],
   },
   {
     title: 'Cộng đồng',
     items: [
-      { to: '/achievements', icon: IconTrophy, label: 'Thành tựu' },
-      { to: '/leaderboard', icon: IconChartBar, label: 'Xếp hạng' },
-      { to: '/referral', icon: IconUsers, label: 'Giới thiệu', badge: '20%', badgeColor: 'bg-sky-500/15 text-sky-500' },
+      { to: '/referral', icon: 'bi-people-fill', labelKey: 'nav.referral', badge: '20%', badgeColor: 'bg-cyan text-black' },
+      { to: '/creator-code', icon: 'bi-tag-fill', labelKey: 'nav.creator' },
+      { to: '/vietsub-studio', icon: 'bi-badge-cc-fill', labelKey: 'nav.vietsub' },
     ],
   },
   {
     title: 'Hệ thống',
     items: [
-      { to: '/history', icon: IconHistory, label: 'Lịch sử' },
-      { to: '/chart', icon: IconTrendingUp, label: 'Biểu đồ VNC' },
-      { to: '/security', icon: IconShieldCheck, label: 'Bảo mật' },
-      { to: '/support', icon: IconHeadset, label: 'Hỗ trợ' },
-      { to: '/faq', icon: IconHelpCircle, label: 'FAQ' },
-      { to: '/admin', icon: IconShieldLock, label: 'Quản trị', adminOnly: true },
+      { to: '/profile', icon: 'bi-person-circle', labelKey: 'nav.profile' },
+      { to: '/achievements', icon: 'bi-award-fill', labelKey: 'nav.achievements' },
+      { to: '/faq', icon: 'bi-question-circle-fill', labelKey: 'nav.faq' },
+      { to: '/support', icon: 'bi-headset', labelKey: 'nav.support' },
+      { to: '/security', icon: 'bi-shield-check', labelKey: 'nav.security' },
+      { to: '/admin', icon: 'bi-shield-lock-fill', labelKey: 'nav.admin', adminOnly: true },
     ],
   },
 ];
 
-export default function Shell() {
-  const { me, logout } = useAuth();
-  const { t, lang, toggle: toggleLanguage } = useLanguage();
-  const { theme, toggle: toggleTheme } = useTheme();
-  const location = useLocation();
-  const navigate = useNavigate();
+function SoundToggle() {
+  const [enabled, setEnabled] = useState(isSoundEnabled);
 
-  const [mini, setMini] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [soundOn, setSoundOn] = useState(isSoundEnabled());
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const userMenuRef = useRef<HTMLDivElement>(null);
-
-  // Close menus on route change
-  useEffect(() => {
-    setMobileOpen(false);
-    setUserMenuOpen(false);
-  }, [location.pathname]);
-
-  // Click outside listener for user dropdown
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
-        setUserMenuOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  function handleSoundToggle() {
+  function handleToggle() {
     const next = toggleSound();
-    setSoundOn(next);
+    setEnabled(next);
     if (next) playClickSound();
   }
 
-  function handleLangToggle() {
-    playClickSound();
-    toggleLanguage();
-  }
+  return (
+    <button
+      onClick={handleToggle}
+      aria-label="Toggle Sound Effects"
+      title={enabled ? 'Âm thanh: BẬT' : 'Âm thanh: TẮT'}
+      className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-surface2 transition btn-press"
+    >
+      <i className={`bi ${enabled ? 'bi-volume-up-fill text-indigo' : 'bi-volume-mute-fill'}`} />
+    </button>
+  );
+}
 
-  function handleLogout() {
-    playClickSound();
-    logout();
-    navigate('/login');
-  }
+function ThemeToggle() {
+  const { theme, toggle } = useTheme();
+  return (
+    <button
+      onClick={() => {
+        playClickSound();
+        toggle();
+      }}
+      aria-label="Toggle theme"
+      className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-surface2 transition btn-press"
+    >
+      <i className={`bi ${theme === 'dark' ? 'bi-sun-fill text-amber' : 'bi-moon-stars-fill text-indigo'}`} />
+    </button>
+  );
+}
 
-  function handleSearchSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-    const q = searchQuery.trim().toLowerCase();
-    // Quick search route
-    if (q.includes('vòng') || q.includes('quay') || q.includes('spin') || q.includes('wheel')) {
-      navigate('/lucky-wheel');
-    } else if (q.includes('rút') || q.includes('ví') || q.includes('wallet')) {
-      navigate('/wallet');
-    } else if (q.includes('gift') || q.includes('code')) {
-      navigate('/giftcode');
-    } else if (q.includes('điểm') || q.includes('danh') || q.includes('streak')) {
-      navigate('/daily-reward');
-    } else {
-      navigate(`/quests?q=${encodeURIComponent(searchQuery.trim())}`);
+function LanguageToggle() {
+  const { lang, toggle } = useLanguage();
+  return (
+    <button
+      onClick={() => {
+        playClickSound();
+        toggle();
+      }}
+      aria-label="Switch language"
+      className="flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-ink transition px-2.5 py-1.5 rounded-lg hover:bg-surface2 btn-press border border-line/60"
+    >
+      <i className="bi bi-translate text-sm text-cyan" />
+      <span>{lang === 'vi' ? 'VI' : 'EN'}</span>
+    </button>
+  );
+}
+
+function NavLinks({ onNavigate, isAdmin }: { onNavigate?: () => void; isAdmin: boolean }) {
+  const { t } = useLanguage();
+
+  return (
+    <nav className="flex flex-col gap-5 px-3 py-2 pb-16">
+      {NAV_GROUPS.map((group) => {
+        const visibleItems = group.items.filter((item) => !item.adminOnly || isAdmin);
+        if (!visibleItems.length) return null;
+
+        return (
+          <div key={group.title}>
+            <div className="px-3 mb-1.5 text-[10px] font-bold uppercase tracking-wider text-muted/70">
+              {group.title}
+            </div>
+            <div className="flex flex-col gap-0.5">
+              {visibleItems.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => {
+                    playClickSound();
+                    if (onNavigate) onNavigate();
+                  }}
+                  className={({ isActive }) =>
+                    `flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-all group ${
+                      isActive
+                        ? 'text-indigo dark:text-cyan bg-indigo/10 dark:bg-indigo/25 border border-indigo/30 dark:border-indigo/40 shadow-sm font-semibold'
+                        : 'text-muted hover:text-ink hover:bg-surface2/80 hover:translate-x-0.5'
+                    }`
+                  }
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <i
+                      className={`bi ${item.icon} text-base shrink-0 transition-transform group-hover:scale-110`}
+                    />
+                    <span className="truncate">{t(item.labelKey)}</span>
+                  </div>
+                  {item.badge && (
+                    <span
+                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider shrink-0 ${
+                        item.badgeColor || 'bg-indigo text-white'
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </NavLink>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </nav>
+  );
+}
+
+export default function Shell() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = useState<boolean>(() => {
+    try {
+      const stored = localStorage.getItem('vnd_desktop_sidebar');
+      return stored !== null ? stored === 'true' : true;
+    } catch {
+      return true;
     }
-    setSearchQuery('');
+  });
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [bannerModalOpen, setBannerModalOpen] = useState(false);
+  const [isBannerClamped, setIsBannerClamped] = useState(false);
+  const bannerTextRef = useRef<HTMLParagraphElement>(null);
+  const { me, logout } = useAuth();
+  const { t } = useLanguage();
+  const { announcement } = useSettings();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isAdmin = me?.role === 'admin';
+
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  function toggleMenu() {
+    playClickSound();
+    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+      setDesktopSidebarOpen((prev) => {
+        const next = !prev;
+        try {
+          localStorage.setItem('vnd_desktop_sidebar', String(next));
+        } catch {}
+        return next;
+      });
+    } else {
+      setMobileOpen(true);
+    }
+  }
+
+  useEffect(() => {
+    const el = bannerTextRef.current;
+    if (!el || !announcement) {
+      setIsBannerClamped(false);
+      return;
+    }
+    const check = () => {
+      setIsBannerClamped(el.scrollHeight > el.clientHeight + 1);
+    };
+    check();
+    const frameId = requestAnimationFrame(check);
+    window.addEventListener('resize', check);
+    return () => {
+      cancelAnimationFrame(frameId);
+      window.removeEventListener('resize', check);
+    };
+  }, [announcement]);
+
+  async function handleLogout() {
+    playClickSound();
+    await logout();
+    navigate('/login', { replace: true });
   }
 
   return (
-    <div className="min-h-screen bg-bg text-ink flex flex-col antialiased">
-      {/* Mobile Drawer Backdrop Scrim */}
-      {mobileOpen && (
-        <div
-          onClick={() => setMobileOpen(false)}
-          className="fixed inset-0 bg-[#0a142d]/60 backdrop-blur-sm z-50 lg:hidden transition-opacity"
-        />
-      )}
-
-      {/* Main Flex App Wrapper (matching VND-Dashboard .app) */}
-      <div className="flex gap-4 p-3 sm:p-4 min-h-screen flex-1">
-        {/* ========================================================= */}
-        {/* SIDEBAR (.side from VND-Dashboard)                        */}
-        {/* ========================================================= */}
-        <aside
-          className={`
-            fixed lg:sticky top-3 sm:top-4 z-50 lg:z-30 h-[calc(100dvh-24px)] sm:h-[calc(100dvh-32px)]
-            bg-surface border border-line rounded-2xl shadow-[0_8px_30px_rgba(47,123,255,0.08)]
-            flex flex-col p-4 transition-all duration-300 overflow-y-auto no-scrollbar
-            ${mini ? 'w-[76px]' : 'w-[260px]'}
-            ${mobileOpen ? 'left-3 sm:left-4 translate-x-0' : '-translate-x-[120%] lg:translate-x-0'}
-          `}
-        >
-          {/* Brand header */}
-          <div className={`flex items-center gap-2.5 pb-3 border-b border-line ${mini ? 'justify-center' : 'justify-between'}`}>
-            <Link
-              to="/dashboard"
-              onClick={playClickSound}
-              className="flex items-center gap-2.5 min-w-0 text-decoration-none group"
-            >
+    <div className="min-h-screen bg-bg flex flex-col">
+      {/* Header */}
+      <header className="border-b border-line sticky top-0 z-30 bg-bg/90 backdrop-blur-md">
+        <div className="w-full flex items-center justify-between px-3 sm:px-6 h-16 gap-2">
+          {/* Logo & Brand */}
+          <Link
+            to="/dashboard"
+            onClick={playClickSound}
+            className="flex items-center gap-2.5 group cursor-pointer shrink-0"
+          >
+            <div className="relative shrink-0">
               <img
                 src="/logo-mark.png"
                 alt="VietnamDong"
-                className="w-9 h-9 object-contain rounded-xl shrink-0 group-hover:scale-105 transition-transform"
+                className="w-8 h-8 shrink-0 transition-transform group-hover:scale-105"
               />
-              {!mini && (
-                <div className="flex flex-col min-w-0">
-                  <span className="font-extrabold text-[15px] leading-tight text-ink tracking-tight truncate">
-                    VietnamDong
+              <div className="absolute inset-0 rounded-full bg-indigo/25 blur-sm -z-10 group-hover:bg-indigo/40 transition" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-display font-bold text-sm sm:text-base tracking-tight gradient-text-indigo leading-none">
+                VietnamDong
+              </span>
+              <span className="text-[9px] font-mono text-muted uppercase tracking-widest leading-none mt-0.5 hidden xs:inline">
+                VNC Rewards
+              </span>
+            </div>
+          </Link>
+
+          {/* Music Tab Mini Player */}
+          <MusicTab />
+
+          {/* User Status, Balance & Quick Actions */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {me && (
+              <>
+                {/* Quick Balance Pill */}
+                <Link
+                  to="/wallet"
+                  onClick={playClickSound}
+                  title="Xem số dư & Rút tiền"
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-surface2/90 border border-line/80 hover:border-amber/50 hover:shadow-[0_0_15px_rgba(245,165,36,0.15)] transition btn-press group shrink-0"
+                >
+                  <CurrencyIcon size={16} />
+                  <span className="font-mono text-xs sm:text-sm font-bold text-ink">
+                    <AnimatedNumber value={me.balance_nova} />
                   </span>
-                  <span className="text-[10px] text-muted tracking-wide font-medium">
-                    VNC Platform
-                  </span>
-                </div>
-              )}
-            </Link>
+                  <span className="text-[10px] font-bold text-amber hidden xs:inline">VNC</span>
+                  <i className="bi bi-plus-circle-fill text-indigo text-xs ml-0.5 group-hover:scale-110 transition-transform hidden sm:inline" />
+                </Link>
 
-            {/* Collapse toggle (desktop only) */}
-            <button
-              onClick={() => {
-                playClickSound();
-                setMini(!mini);
-              }}
-              title={mini ? 'Mở rộng menu' : 'Thu gọn menu'}
-              className="hidden lg:flex w-7 h-7 rounded-lg text-muted hover:text-indigo hover:bg-surface2 items-center justify-center transition"
-            >
-              {mini ? <IconChevronsRight size={16} /> : <IconChevronsLeft size={16} />}
-            </button>
+                {/* Streak Badge */}
+                <Link
+                  to="/daily-reward"
+                  onClick={playClickSound}
+                  title="Chuỗi điểm danh"
+                  className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-rose/10 border border-rose/30 text-rose text-xs font-semibold hover:bg-rose/20 transition btn-press shrink-0"
+                >
+                  <i className="bi bi-fire text-rose text-sm animate-pulse-soft" />
+                  <span>{me.streak_days}d</span>
+                </Link>
 
-            {/* Mobile close button */}
-            <button
-              onClick={() => setMobileOpen(false)}
-              className="lg:hidden w-7 h-7 rounded-lg text-muted hover:text-ink hover:bg-surface2 flex items-center justify-center transition"
-            >
-              <IconX size={18} />
-            </button>
-          </div>
-
-          {/* Navigation Items (Grouped) */}
-          <nav className="flex-1 py-3 flex flex-col gap-1 overflow-y-auto no-scrollbar">
-            {NAV_GROUPS.map((group, gIdx) => {
-              const visibleItems = group.items.filter((it) => !it.adminOnly || me?.role === 'admin');
-              if (visibleItems.length === 0) return null;
-
-              return (
-                <div key={gIdx} className="space-y-0.5 mb-2">
-                  {!mini && (
-                    <div className="text-[11px] font-bold text-muted uppercase tracking-wider px-3 pt-2 pb-1">
-                      {group.title}
-                    </div>
-                  )}
-
-                  {visibleItems.map((item) => {
-                    const IconComp = item.icon;
-                    return (
-                      <NavLink
-                        key={item.to}
-                        to={item.to}
-                        onClick={playClickSound}
-                        title={mini ? item.label : undefined}
-                        className={({ isActive }) => `
-                          flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-xs sm:text-[13px]
-                          transition-all relative text-decoration-none group
-                          ${
-                            isActive
-                              ? 'bg-surface2 text-indigo font-bold shadow-sm'
-                              : 'text-muted hover:text-ink hover:bg-surface2/60'
-                          }
-                          ${mini ? 'justify-center px-0' : ''}
-                        `}
-                      >
-                        {({ isActive }) => (
-                          <>
-                            {/* Left active line indicator */}
-                            {isActive && (
-                              <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-md bg-indigo" />
-                            )}
-                            <IconComp
-                              size={18}
-                              stroke={isActive ? 2.2 : 1.8}
-                              className={`shrink-0 transition-transform group-hover:scale-110 ${
-                                isActive ? 'text-indigo' : 'text-muted group-hover:text-ink'
-                              }`}
-                            />
-                            {!mini && (
-                              <>
-                                <span className="truncate">{item.label}</span>
-                                {item.badge && (
-                                  <span
-                                    className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ${
-                                      item.badgeColor || 'bg-surface2 text-indigo'
-                                    }`}
-                                  >
-                                    {item.badge}
-                                  </span>
-                                )}
-                              </>
-                            )}
-                          </>
-                        )}
-                      </NavLink>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </nav>
-
-          {/* Bottom Sidebar Box (.sb) */}
-          <div className="pt-2 border-t border-line flex flex-col gap-2.5 shrink-0">
-            {/* VIP Upgrade Banner (.upg from VND-Dashboard) */}
-            {!mini && (
-              <div className="upg-vnd text-white">
-                <i className="shape o1" />
-                <i className="shape o2" />
-                <div className="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-wide px-2 py-0.5 rounded-full bg-white/20 border border-white/30 mb-2">
-                  <IconCrown size={12} className="text-amber-300" />
-                  <span>VIP</span>
-                </div>
-                <b className="block text-sm font-extrabold leading-tight">Nâng cấp VIP</b>
-                <p className="text-[11px] text-white/80 mt-0.5 mb-2.5 leading-snug">
-                  Mở khóa thưởng x2 và rút tiền siêu tốc.
-                </p>
-                <ul className="space-y-1.5 mb-3 text-[11px] text-white/90">
-                  <li className="flex items-center gap-1.5">
-                    <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                      <IconCheck size={11} stroke={3} />
-                    </span>
-                    <span>Thưởng nhiệm vụ x2</span>
-                  </li>
-                  <li className="flex items-center gap-1.5">
-                    <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                      <IconCheck size={11} stroke={3} />
-                    </span>
-                    <span>Rút tiền ưu tiên</span>
-                  </li>
-                </ul>
                 <Link
                   to="/profile"
                   onClick={playClickSound}
-                  className="w-full py-2 px-3 rounded-xl bg-white text-indigo font-bold text-xs flex items-center justify-center gap-1.5 shadow-md hover:bg-slate-50 transition active:scale-95"
+                  title="Hồ sơ & Cài đặt"
+                  className="flex items-center gap-1.5 px-1.5 py-1 rounded-xl hover:bg-surface2 transition btn-press border border-line/60 shrink-0"
                 >
-                  <span>Xem đặc quyền</span>
-                  <IconArrowRight size={14} />
+                  <AvatarFrame level={me.level} shape="circle">
+                    {me.avatar_url ? (
+                      <img src={me.avatar_url} alt={me.username} className="w-5 h-5 sm:w-6 sm:h-6 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-indigo/20 text-indigo flex items-center justify-center font-bold text-[9px] sm:text-[10px]">
+                        {me.username.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                  </AvatarFrame>
+                  <LevelBadge level={me.level} size="xs" />
                 </Link>
-              </div>
+              </>
             )}
 
-            {/* Quick 3 Controls: Theme, Sound, Lang (.m3) */}
-            <div className={`flex gap-1.5 ${mini ? 'flex-col items-center' : 'justify-center'}`}>
-              <button
-                onClick={() => {
-                  playClickSound();
-                  toggleTheme();
-                }}
-                title={theme === 'dark' ? 'Chuyển sang giao diện Sáng' : 'Chuyển sang giao diện Tối'}
-                className="w-9 h-9 rounded-xl bg-surface2 text-muted hover:text-indigo hover:bg-surface2/80 flex items-center justify-center transition active:scale-95"
-              >
-                {theme === 'dark' ? <IconSun size={17} /> : <IconMoon size={17} />}
-              </button>
-              <button
-                onClick={handleSoundToggle}
-                title={soundOn ? 'Âm thanh: BẬT' : 'Âm thanh: TẮT'}
-                className="w-9 h-9 rounded-xl bg-surface2 text-muted hover:text-indigo hover:bg-surface2/80 flex items-center justify-center transition active:scale-95"
-              >
-                {soundOn ? <IconVolume size={17} /> : <IconVolumeOff size={17} />}
-              </button>
-              <button
-                onClick={handleLangToggle}
-                title={lang === 'vi' ? 'Ngôn ngữ: Tiếng Việt' : 'Language: English'}
-                className="w-9 h-9 rounded-xl bg-surface2 text-muted hover:text-indigo hover:bg-surface2/80 flex items-center justify-center transition active:scale-95"
-              >
-                <IconLanguage size={17} />
-              </button>
+            {/* Controls */}
+            <div className="hidden md:flex items-center gap-1 pl-1 border-l border-line/70">
+              <SoundToggle />
+              <LanguageToggle />
             </div>
 
-            {/* Logout button (.out) */}
-            <button
-              onClick={handleLogout}
-              className={`
-                flex items-center justify-center gap-2 h-9 rounded-xl
-                bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white
-                font-bold text-xs transition-all active:scale-95
-                ${mini ? 'w-9 p-0 mx-auto' : 'w-full px-3'}
-              `}
-              title="Đăng xuất"
-            >
-              <IconLogout size={16} />
-              {!mini && <span>Đăng xuất</span>}
-            </button>
-          </div>
-        </aside>
-
-        {/* ========================================================= */}
-        {/* MAIN COLUMN (.main from VND-Dashboard)                     */}
-        {/* ========================================================= */}
-        <div className="flex-1 min-w-0 flex flex-col gap-4">
-          {/* Top Navbar (.top from VND-Dashboard) */}
-          <header className="sticky top-3 sm:top-4 z-40 bg-surface border border-line rounded-2xl shadow-[0_4px_20px_rgba(47,123,255,0.06)] px-3 sm:px-4 py-2.5 flex items-center gap-3">
-            {/* Mobile Hamburger */}
-            <button
-              onClick={() => {
-                playClickSound();
-                setMobileOpen(true);
-              }}
-              className="lg:hidden w-9 h-9 rounded-xl bg-surface2 text-muted hover:text-ink flex items-center justify-center transition"
-              aria-label="Menu"
-            >
-              <IconMenu2 size={20} />
-            </button>
-
-            {/* Search Input (.search) */}
-            <form onSubmit={handleSearchSubmit} className="hidden sm:flex flex-1 max-w-xs items-center gap-2 bg-surface2 rounded-xl px-3 h-9 text-muted border border-transparent focus-within:border-indigo/50 transition">
-              <IconSearch size={16} className="shrink-0" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Tìm nhiệm vụ, tính năng..."
-                className="bg-transparent border-0 outline-none text-xs text-ink placeholder:text-muted w-full font-body"
-              />
-            </form>
-
-            {/* Spacer */}
-            <div className="flex-1 sm:hidden" />
-
-            {/* Integrated Music Player Tab */}
-            <div className="hidden md:flex items-center">
-              <MusicTab />
+            <div className="hidden sm:flex items-center">
+              <ThemeToggle />
             </div>
-
-            {/* Quick Balance Pill (.bal) */}
-            <Link
-              to="/wallet"
-              onClick={playClickSound}
-              className="flex items-center gap-1.5 px-3 h-9 rounded-xl bg-surface2 text-indigo font-bold text-xs sm:text-[13px] border border-line hover:border-indigo/40 transition active:scale-95"
-              title="Ví của bạn"
-            >
-              <CurrencyIcon size={16} />
-              <AnimatedNumber value={me?.balance_nova ?? 0} />
-              <span className="text-[11px] font-semibold opacity-90">VNC</span>
-            </Link>
-
-            {/* Theme Toggle Button */}
-            <button
-              onClick={() => {
-                playClickSound();
-                toggleTheme();
-              }}
-              className="w-9 h-9 rounded-xl bg-surface2 text-muted hover:text-indigo flex items-center justify-center transition active:scale-95"
-              aria-label="Đổi giao diện Sáng/Tối"
-            >
-              {theme === 'dark' ? <IconSun size={18} /> : <IconMoon size={18} />}
-            </button>
-
-            {/* Notification Bell with Badge */}
             <NotificationBell />
 
-            {/* User Profile Menu (.usr from VND-Dashboard) */}
-            <div className="relative" ref={userMenuRef}>
+            {/* Desktop Logout button */}
+            <button
+              onClick={handleLogout}
+              aria-label={t('nav.logout')}
+              title={t('nav.logout')}
+              className="hidden lg:flex items-center gap-1.5 text-xs text-muted hover:text-rose transition px-2.5 py-1.5 rounded-lg hover:bg-rose/10 btn-press shrink-0"
+            >
+              <i className="bi bi-box-arrow-right text-sm" />
+              <span>{t('nav.logout')}</span>
+            </button>
+
+            {/* Menu Toggle Button (Mobile Drawer & Desktop Sidebar) */}
+            <button
+              onClick={toggleMenu}
+              className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-ink rounded-lg hover:bg-surface2 transition btn-press shrink-0"
+              aria-label={t('nav.menu')}
+              title="Menu điều hướng"
+            >
+              <i className="bi bi-list text-2xl" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {announcement && !bannerDismissed && (
+        <div
+          onClick={() => {
+            if (isBannerClamped) {
+              playClickSound();
+              setBannerModalOpen(true);
+            }
+          }}
+          className={`bg-gradient-to-r from-indigo/15 via-cyan/15 to-indigo/15 border-b border-indigo/25 px-2 sm:px-4 py-1 flex items-center justify-between gap-1 sm:gap-2 backdrop-blur-sm ${
+            isBannerClamped ? 'cursor-pointer hover:bg-indigo/20 transition-colors' : ''
+          }`}
+        >
+          <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-ink min-w-0 max-w-4xl mx-auto flex-1">
+            <div className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0">
+              <span className="w-6 h-6 rounded-full bg-indigo/20 flex items-center justify-center">
+                <i className="bi bi-megaphone-fill text-indigo text-xs" />
+              </span>
+            </div>
+            <p
+              ref={bannerTextRef}
+              className="font-medium text-xs text-ink line-clamp-2 break-words [overflow-wrap:anywhere] min-w-0 flex-1 leading-snug"
+            >
+              {announcement}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              playClickSound();
+              setBannerDismissed(true);
+            }}
+            className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0 text-muted hover:text-ink transition rounded-lg"
+            aria-label="Đóng thông báo"
+          >
+            <i className="bi bi-x-lg text-xs" />
+          </button>
+        </div>
+      )}
+
+      {bannerModalOpen && announcement && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4 backdrop-blur-sm"
+          onClick={() => setBannerModalOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full sm:max-w-md bg-surface border border-line rounded-t-2xl sm:rounded-2xl p-4 shadow-2xl flex flex-col max-h-[60vh]"
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-line">
+              <div className="flex items-center gap-2 font-semibold text-sm text-ink min-w-0">
+                <i className="bi bi-megaphone-fill text-indigo shrink-0" />
+                <span className="truncate">Thông báo chung</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  playClickSound();
+                  setBannerModalOpen(false);
+                }}
+                className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-surface2 transition shrink-0"
+                aria-label="Đóng"
+              >
+                <i className="bi bi-x-lg text-xs" />
+              </button>
+            </div>
+            <div className="overflow-y-auto max-h-[60vh] py-3 text-xs sm:text-sm text-ink leading-relaxed break-words [overflow-wrap:anywhere]">
+              {announcement}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Drawer */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            onClick={() => setMobileOpen(false)}
+          />
+          <aside className="absolute top-0 right-0 h-full w-80 max-w-[85vw] bg-surface/95 border-l border-line p-4 flex flex-col justify-between overflow-y-auto backdrop-blur-lg animate-slide-in">
+            <div>
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between pb-3 mb-3 border-b border-line">
+                <div className="flex items-center gap-2">
+                  <img src="/logo-mark.png" alt="VietnamDong" className="w-7 h-7" />
+                  <span className="font-display font-bold text-sm gradient-text-indigo">Menu</span>
+                </div>
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-surface2 transition"
+                >
+                  <i className="bi bi-x-lg text-sm" />
+                </button>
+              </div>
+
+              {/* Mobile User Profile Summary */}
+              {me && (
+                <Link
+                  to="/profile"
+                  onClick={() => {
+                    playClickSound();
+                    setMobileOpen(false);
+                  }}
+                  className="block p-3.5 rounded-xl bg-surface2/60 border border-line mb-3 hover:border-indigo/40 transition"
+                >
+                  <div className="flex items-center gap-2.5 mb-2.5">
+                    <AvatarFrame level={me.level} shape="circle">
+                      {me.avatar_url ? (
+                        <img src={me.avatar_url} alt={me.username} className="w-9 h-9 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-9 h-9 rounded-full bg-indigo/20 text-indigo flex items-center justify-center font-bold text-sm">
+                          {me.username.slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                    </AvatarFrame>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-semibold text-sm truncate flex items-center justify-between gap-1">
+                        <div className="flex items-center gap-1.5 truncate">
+                          <UserName name={me.username} level={me.level} className="truncate" />
+                          <LevelBadge level={me.level} size="xs" />
+                        </div>
+                        <i className="bi bi-gear-fill text-muted text-xs shrink-0" />
+                      </div>
+                      <div className="text-[11px] text-muted flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-cyan inline-block animate-pulse" />
+                        <span>{me.role === 'admin' ? 'Admin' : 'Thành viên'}</span>
+                        <span>•</span>
+                        <span>Cấp {me.level ?? 1}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-line/60">
+                    <div className="text-center p-1.5 rounded-lg bg-bg/50">
+                      <div className="text-[10px] text-muted">Số dư</div>
+                      <div className="font-mono text-xs font-bold text-amber">{me.balance_nova} VNC</div>
+                    </div>
+                    <div className="text-center p-1.5 rounded-lg bg-bg/50">
+                      <div className="text-[10px] text-muted">Chuỗi ngày</div>
+                      <div className="font-mono text-xs font-bold text-rose flex items-center justify-center gap-1">
+                        <span>{me.streak_days} ngày</span>
+                        <i className="bi bi-fire" />
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              )}
+
+              {/* Drawer Links */}
+              <NavLinks onNavigate={() => setMobileOpen(false)} isAdmin={isAdmin} />
+            </div>
+
+            {/* Drawer Footer Controls */}
+            <div className="pt-4 mt-4 border-t border-line space-y-2">
+              <div className="flex items-center justify-around py-1 bg-surface2/40 rounded-xl border border-line">
+                <SoundToggle />
+                <LanguageToggle />
+                <ThemeToggle />
+              </div>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold text-rose bg-rose/10 hover:bg-rose/20 transition btn-press"
+              >
+                <i className="bi bi-box-arrow-right" /> {t('nav.logout')}
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
+
+      {/* Main Layout Area */}
+      <div className="w-full flex flex-1 min-h-[calc(100vh-4rem)]">
+        {/* Desktop Sidebar (Collapsible with toggle & smooth independent scroll) */}
+        {desktopSidebarOpen && (
+          <aside className="w-64 shrink-0 border-r border-line hidden lg:flex lg:flex-col h-[calc(100vh-4rem)] sticky top-16 overflow-y-auto overscroll-contain bg-surface/40 backdrop-blur-md z-20 select-none touch-pan-y transition-all">
+            {/* Desktop Sidebar Header */}
+            <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-line/60">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted">Điều hướng</span>
               <button
                 onClick={() => {
                   playClickSound();
-                  setUserMenuOpen(!userMenuOpen);
+                  setDesktopSidebarOpen(false);
+                  try {
+                    localStorage.setItem('vnd_desktop_sidebar', 'false');
+                  } catch {}
                 }}
-                className="flex items-center gap-2 p-1 sm:pr-2.5 rounded-xl hover:bg-surface2 transition active:scale-95"
+                className="w-7 h-7 rounded-lg hover:bg-surface2 text-muted hover:text-ink flex items-center justify-center transition btn-press"
+                title="Thu gọn menu điều hướng"
+                aria-label="Thu gọn menu"
               >
-                {/* User Avatar */}
-                <AvatarFrame
-                  level={me?.level}
-                  frame={me?.avatar_frame}
-                  className="w-8 h-8"
-                >
-                  {me?.avatar_url ? (
-                    <img src={me.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full rounded-full bg-gradient-to-tr from-cyan to-indigo flex items-center justify-center text-white font-bold text-xs select-none">
-                      {me?.username?.[0]?.toUpperCase() || 'U'}
-                    </div>
-                  )}
-                </AvatarFrame>
-
-                <div className="hidden sm:flex flex-col text-left">
-                  <span className="text-xs font-bold text-ink leading-tight truncate max-w-[100px]">
-                    {me?.username || 'Tài khoản'}
-                  </span>
-                  <span className="text-[10px] text-muted font-medium">
-                    Lv.{me?.level || 1} · VIP
-                  </span>
-                </div>
-
-                <IconChevronDown size={14} className="text-muted hidden sm:block" />
+                <i className="bi bi-x-lg text-xs" />
               </button>
-
-              {/* Dropdown Menu (.menu) */}
-              {userMenuOpen && (
-                <div className="absolute right-0 top-11 w-48 bg-surface border border-line rounded-2xl shadow-[0_16px_40px_rgba(15,27,51,0.18)] p-1.5 z-50 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-150">
-                  <Link
-                    to="/profile"
-                    onClick={playClickSound}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-ink hover:bg-surface2 transition"
-                  >
-                    <IconUser size={16} className="text-indigo" />
-                    <span>Hồ sơ cá nhân</span>
-                  </Link>
-                  <Link
-                    to="/history"
-                    onClick={playClickSound}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-ink hover:bg-surface2 transition"
-                  >
-                    <IconHistory size={16} className="text-indigo" />
-                    <span>Lịch sử giao dịch</span>
-                  </Link>
-                  <Link
-                    to="/wallet"
-                    onClick={playClickSound}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-ink hover:bg-surface2 transition"
-                  >
-                    <IconWallet size={16} className="text-indigo" />
-                    <span>Ví tiền & Rút</span>
-                  </Link>
-                  <div className="h-px bg-line my-1" />
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-rose-500 hover:bg-rose-500/10 transition text-left w-full"
-                  >
-                    <IconLogout size={16} />
-                    <span>Đăng xuất</span>
-                  </button>
-                </div>
-              )}
             </div>
-          </header>
+            <NavLinks isAdmin={isAdmin} />
+          </aside>
+        )}
 
-          {/* Page Body / Router Outlet */}
-          <main className="flex-1 pb-16 lg:pb-6">
+        {/* Content Wrapper (Page Outlet + Footer on Desktop) */}
+        <div className="flex-1 flex flex-col min-w-0">
+          <main
+            key={pathname}
+            className="page-enter flex-1 px-3 sm:px-8 py-5 sm:py-6 pb-40 sm:pb-28 lg:pb-8 min-w-0 w-full max-w-7xl mx-auto overflow-x-hidden"
+          >
             <Outlet />
           </main>
-
-          {/* Footer (User explicitly requested to keep original footer of the web) */}
-          <Footer />
+          <div className="hidden lg:block border-t border-line/60">
+            <Footer />
+          </div>
         </div>
       </div>
 
-      {/* ========================================================= */}
-      {/* MOBILE BOTTOM TAB BAR (.tabs from VND-Dashboard)           */}
-      {/* ========================================================= */}
-      <nav className="tabs-vnd lg:hidden">
-        {/* 1. Trang chủ */}
+      {/* Mobile Bottom Navigation Bar (Persistent on screens < lg) */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/90 backdrop-blur-xl border-t border-line/80 px-2 py-1.5 flex items-center justify-around shadow-[0_-4px_25px_rgba(0,0,0,0.15)] pb-[calc(0.4rem+env(safe-area-inset-bottom))]">
         <NavLink
           to="/dashboard"
           onClick={playClickSound}
-          className={({ isActive }) => `tb-vnd ${isActive ? 'active' : ''}`}
+          className={({ isActive }) =>
+            `flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all relative ${
+              isActive ? 'text-indigo dark:text-cyan' : 'text-muted hover:text-ink'
+            }`
+          }
         >
-          <IconLayoutDashboard size={20} />
-          <span>Trang chủ</span>
+          {({ isActive }) => (
+            <>
+              <i className={`bi ${isActive ? 'bi-grid-1x2-fill' : 'bi-grid-1x2'} text-lg`} />
+              <span className="mt-0.5 leading-none">Tổng quan</span>
+              {isActive && <span className="w-1 h-1 rounded-full bg-indigo dark:bg-cyan mt-1" />}
+            </>
+          )}
         </NavLink>
 
-        {/* 2. Nhiệm vụ */}
         <NavLink
           to="/quests"
           onClick={playClickSound}
-          className={({ isActive }) => `tb-vnd ${isActive ? 'active' : ''}`}
+          className={({ isActive }) =>
+            `flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all relative ${
+              isActive ? 'text-indigo dark:text-cyan' : 'text-muted hover:text-ink'
+            }`
+          }
         >
-          <IconBolt size={20} />
-          <span>Nhiệm vụ</span>
+          {({ isActive }) => (
+            <>
+              <i className={`bi ${isActive ? 'bi-list-task' : 'bi-list-check'} text-lg`} />
+              <span className="mt-0.5 leading-none">Nhiệm vụ</span>
+              {isActive && <span className="w-1 h-1 rounded-full bg-indigo dark:bg-cyan mt-1" />}
+            </>
+          )}
         </NavLink>
 
-        {/* 3. Center Elevated FAB: Vòng quay (.fab from VND-Dashboard) */}
         <NavLink
           to="/lucky-wheel"
           onClick={playClickSound}
-          className="fab-vnd"
-          aria-label="Vòng quay may mắn"
+          className={({ isActive }) =>
+            `flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all relative ${
+              isActive ? 'text-amber font-bold' : 'text-amber/80 hover:text-amber'
+            }`
+          }
         >
-          <IconSparkles size={24} />
+          {({ isActive }) => (
+            <>
+              <i className="bi bi-stars text-xl text-amber animate-pulse-soft" />
+              <span className="mt-0.5 leading-none text-amber font-bold">Vòng quay</span>
+              {isActive && <span className="w-1 h-1 rounded-full bg-amber mt-1" />}
+            </>
+          )}
         </NavLink>
 
-        {/* 4. Ví tiền */}
         <NavLink
           to="/wallet"
           onClick={playClickSound}
-          className={({ isActive }) => `tb-vnd ${isActive ? 'active' : ''}`}
+          className={({ isActive }) =>
+            `flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all relative ${
+              isActive ? 'text-indigo dark:text-cyan' : 'text-muted hover:text-ink'
+            }`
+          }
         >
-          <IconWallet size={20} />
-          <span>Ví</span>
+          {({ isActive }) => (
+            <>
+              <i className={`bi ${isActive ? 'bi-wallet2' : 'bi-wallet'} text-lg`} />
+              <span className="mt-0.5 leading-none">Ví tiền</span>
+              {isActive && <span className="w-1 h-1 rounded-full bg-indigo dark:bg-cyan mt-1" />}
+            </>
+          )}
         </NavLink>
 
-        {/* 5. Hồ sơ */}
-        <NavLink
-          to="/profile"
-          onClick={playClickSound}
-          className={({ isActive }) => `tb-vnd ${isActive ? 'active' : ''}`}
+        <button
+          onClick={() => {
+            playClickSound();
+            setMobileOpen(true);
+          }}
+          className="flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-semibold text-muted hover:text-ink transition"
+          aria-label="Khám phá thêm"
         >
-          <IconUser size={20} />
-          <span>Hồ sơ</span>
-        </NavLink>
+          <i className="bi bi-grid-3x3-gap text-lg" />
+          <span className="mt-0.5 leading-none">Khám phá</span>
+        </button>
       </nav>
 
-      {/* Background Music Player Bridge */}
+      {/* Mobile Footer */}
+      <div className="lg:hidden">
+        <Footer />
+      </div>
       <ErrorBoundary
         fallback={(reset) => (
           <div
@@ -617,8 +677,10 @@ export default function Shell() {
               type="button"
               onClick={reset}
               className="h-9 px-3 rounded-full bg-surface2/90 border border-line text-muted hover:text-ink shadow-lg flex items-center justify-center gap-1.5 transition backdrop-blur-md text-xs font-semibold"
-              title="Thử lại âm thanh"
+              title="Thử lại"
+              aria-label="Thử lại"
             >
+              <i className="bi bi-arrow-clockwise text-xs" />
               <span>Thử lại</span>
             </button>
           </div>
