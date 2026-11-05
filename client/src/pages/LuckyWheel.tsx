@@ -5,18 +5,10 @@ import { useAuth } from '../context/AuthContext.js';
 import { useToast } from '../context/ToastContext.js';
 import { triggerConfetti } from '../components/Confetti.js';
 import { playClickSound, playWheelTick, playWinFanfare, playCoinSound } from '../utils/sound.js';
-import type { SpinStatus, SpinSegment } from '../types.js';
+import type { SpinStatus } from '../types.js';
 
-const DEFAULT_SEGMENTS: SpinSegment[] = [
-  { label: '50 VNC', reward: 50, weight: 10, color: '#5ab8ff' },
-  { label: '100 VNC', reward: 100, weight: 10, color: '#2f7bff' },
-  { label: '0 VNC', reward: 0, weight: 20, color: '#7dd3fc' },
-  { label: '200 VNC', reward: 200, weight: 10, color: '#4b6bff' },
-  { label: '500 VNC', reward: 500, weight: 5, color: '#5ab8ff' },
-  { label: '100 VNC', reward: 100, weight: 10, color: '#2f7bff' },
-  { label: '20 VNC', reward: 20, weight: 20, color: '#7dd3fc' },
-  { label: '1000 VNC', reward: 1000, weight: 5, color: '#4b6bff' },
-];
+// Exact 8 values from VND-Dashboard.html: const W = [50, 100, 0, 200, 500, 100, 20, 1000]
+const W = [50, 100, 0, 200, 500, 100, 20, 1000];
 
 export default function LuckyWheel() {
   const { refresh } = useAuth();
@@ -34,9 +26,6 @@ export default function LuckyWheel() {
     };
   }, []);
 
-  const segments: SpinSegment[] =
-    status?.segments && status.segments.length > 0 ? status.segments : DEFAULT_SEGMENTS;
-
   async function handleSpin() {
     if (!status?.can_spin || spinning) return;
     playClickSound();
@@ -44,20 +33,20 @@ export default function LuckyWheel() {
 
     try {
       const res = await api.spin();
-      const numSegs = segments.length;
-      const sliceAngle = 360 / numSegs;
       const targetIndex =
-        res.segmentIndex >= 0 && res.segmentIndex < numSegs ? res.segmentIndex : 0;
-      const centerAngle = targetIndex * sliceAngle + sliceAngle / 2;
+        res.segmentIndex >= 0 && res.segmentIndex < W.length ? res.segmentIndex : 0;
 
-      // Calculate destination angle to align slice with top pointer pin
+      // Exact rotation math from VND-Dashboard.html:
+      // const c = i * 45 + 22.5, cur = (S.rot || 0) % 360, dl = ((360 - c) - cur + 720) % 360;
+      // S.rot = (S.rot || 0) + 1800 + dl;
+      const c = targetIndex * 45 + 22.5;
       const cur = rotation % 360;
-      const delta = ((360 - centerAngle - cur) % 360 + 360) % 360;
-      const newRotation = rotation + 1800 + delta;
+      const dl = ((360 - c) - cur + 720) % 360;
+      const newRotation = rotation + 1800 + dl;
 
       setRotation(newRotation);
 
-      // Play tick audio effects during spin
+      // Audio ticks
       let ticks = 0;
       tickIntervalRef.current = window.setInterval(() => {
         playWheelTick();
@@ -68,7 +57,7 @@ export default function LuckyWheel() {
         }
       }, 130);
 
-      // Spin duration is 3.5s based on CSS cubic-bezier
+      // Spin completes after 3.5s transition
       setTimeout(() => {
         setSpinning(false);
         setStatus((prev) => (prev ? { ...prev, can_spin: false } : prev));
@@ -118,20 +107,16 @@ export default function LuckyWheel() {
               transform: `rotate(${rotation}deg)`,
             }}
           >
-            {segments.map((seg, i) => {
-              const sliceAngle = 360 / segments.length;
-              const centerAngle = i * sliceAngle + sliceAngle / 2;
-              return (
-                <span
-                  key={i}
-                  style={{
-                    transform: `translate(-50%, -50%) rotate(${centerAngle}deg) translateY(-84px)`,
-                  }}
-                >
-                  {seg.reward}
-                </span>
-              );
-            })}
+            {W.map((v, i) => (
+              <span
+                key={i}
+                style={{
+                  transform: `translate(-50%, -50%) rotate(${i * 45 + 22.5}deg) translateY(-84px)`,
+                }}
+              >
+                {v}
+              </span>
+            ))}
           </div>
           <i className="pt" />
         </div>

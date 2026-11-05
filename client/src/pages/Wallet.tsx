@@ -625,7 +625,7 @@ export default function Wallet() {
 
       <div className="grid md:grid-cols-5 gap-6 items-start">
         <div className="md:col-span-2 space-y-4">
-          <div className="w-full">
+          <div className="w-full" style={{ maxWidth: '380px', margin: '0 auto' }}>
             <BalanceCard
               novaAmount={wallet?.balance_nova}
               vndAmount={wallet?.balance_vnd}

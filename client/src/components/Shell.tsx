@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext.js';
 import { useLanguage } from '../context/LanguageContext.js';
 import { useTheme } from '../context/ThemeContext.js';
 import Footer from './Footer.js';
+import NotificationBell from './NotificationBell.js';
 import { playClickSound, isSoundEnabled, toggleSound } from '../utils/sound.js';
 
 const NAV: [string, [string, string, string, string?][]][] = [
@@ -187,22 +188,42 @@ export default function Shell() {
               </Link>
             </div>
 
-            <div className="m3">
-              <button className="tgl" id="theme" aria-label="Sáng/Tối" onClick={() => { playClickSound(); toggleTheme(); }}>
+            <div className="m4">
+              <button
+                className="tgl"
+                id="theme"
+                aria-label="Giao diện"
+                title={`Giao diện: ${theme === 'dark' ? 'Tối' : 'Sáng'}`}
+                onClick={() => { playClickSound(); toggleTheme(); }}
+              >
                 <svg className="i"><use href={theme === 'dark' ? '#sun' : '#moon'} /></svg>
               </button>
-              <button id="snd" aria-label="Âm thanh" onClick={handleSound}>
+              <button
+                id="snd"
+                aria-label="Âm thanh"
+                title={`Âm thanh: ${soundOn ? 'Bật' : 'Tắt'}`}
+                onClick={handleSound}
+              >
                 <svg className="i"><use href={soundOn ? '#vol' : '#muted'} /></svg>
               </button>
-              <button id="lang" aria-label="Ngôn ngữ" onClick={() => { playClickSound(); toggleLanguage(); }}>
+              <button
+                id="lang"
+                aria-label="Ngôn ngữ"
+                title={`Ngôn ngữ: ${lang === 'vi' ? 'Tiếng Việt' : 'English'}`}
+                onClick={() => { playClickSound(); toggleLanguage(); }}
+              >
                 <svg className="i"><use href="#lang" /></svg>
               </button>
+              <button
+                id="out"
+                className="out-btn"
+                aria-label="Đăng xuất"
+                title="Đăng xuất"
+                onClick={handleLogout}
+              >
+                <svg className="i"><use href="#out" /></svg>
+              </button>
             </div>
-
-            <button className="out" onClick={handleLogout}>
-              <svg className="i"><use href="#out" /></svg>
-              <span>Đăng xuất</span>
-            </button>
           </div>
         </aside>
 
@@ -225,10 +246,16 @@ export default function Shell() {
             <button className="ic tgl" id="theme2" aria-label="Sáng/Tối" onClick={() => { playClickSound(); toggleTheme(); }}>
               <svg className="i"><use href={theme === 'dark' ? '#sun' : '#moon'} /></svg>
             </button>
-            <button className="ic" id="bell" aria-label="Thông báo" onClick={() => playClickSound()}>
-              <svg className="i"><use href="#bell" /></svg>
-              <i className="dot" id="dot" />
+            <button
+              className="ic"
+              id="langTop"
+              aria-label="Ngôn ngữ"
+              title={`Ngôn ngữ: ${lang === 'vi' ? 'Tiếng Việt' : 'English'}`}
+              onClick={() => { playClickSound(); toggleLanguage(); }}
+            >
+              <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--ink)' }}>{lang.toUpperCase()}</span>
             </button>
+            <NotificationBell />
             <div className="usr" ref={userRef}>
               <button
                 className="ub"

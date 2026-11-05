@@ -152,8 +152,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Right column: Virtual Card matching vnccard.html / BalanceCard */}
-        <div style={{ width: '100%', maxWidth: '320px', margin: '0 auto' }}>
+        {/* Right column: Virtual Card matching vnccard.html / BalanceCard (PC only) */}
+        <div className="pc-only hidden md:block" style={{ width: '100%', maxWidth: '320px', margin: '0 auto' }}>
           <BalanceCard
             novaAmount={wallet?.balance_nova}
             vndAmount={wallet?.balance_vnd}

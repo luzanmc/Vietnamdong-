@@ -18,6 +18,7 @@ export default function NotificationBell() {
       setItems(data.items);
       setUnreadCount(data.unreadCount);
     } catch {
+      // Ignore network errors on background poll
     }
   }
 
@@ -29,7 +30,9 @@ export default function NotificationBell() {
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false);
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
     }
     document.addEventListener('mousedown', onClickOutside);
     return () => document.removeEventListener('mousedown', onClickOutside);
@@ -50,40 +53,74 @@ export default function NotificationBell() {
   }
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} style={{ position: 'relative' }}>
       <button
         onClick={handleOpen}
         aria-label="Thông báo"
-        className="relative w-8 h-8 flex items-center justify-center rounded-lg text-muted hover:text-ink hover:bg-surface2 transition btn-press shrink-0"
+        className="ic"
+        id="bell"
+        style={{ cursor: 'pointer', border: 'none' }}
       >
-        <i className="bi bi-bell text-base" />
-        {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose animate-pulse" />
-        )}
+        <svg className="i"><use href="#bell" /></svg>
+        {unreadCount > 0 && <i className="dot" id="dot" />}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-72 max-w-[calc(100vw-2rem)] max-h-96 overflow-y-auto bg-surface border border-line rounded-2xl shadow-2xl z-50 animate-slide-in min-w-0">
-          <div className="px-3 py-2 border-b border-line text-xs font-semibold text-muted">Thông báo</div>
+        <div
+          className="menu open"
+          style={{
+            position: 'absolute',
+            right: 0,
+            top: '46px',
+            width: '300px',
+            maxWidth: 'calc(100vw - 32px)',
+            maxHeight: '380px',
+            overflowY: 'auto',
+            background: 'var(--card)',
+            border: '1px solid var(--line)',
+            borderRadius: 'var(--r)',
+            boxShadow: '0 16px 40px rgba(15,27,51,.18)',
+            padding: '8px',
+            zIndex: 60,
+            display: 'block',
+          }}
+        >
+          <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--line)', fontSize: '13px', fontWeight: 700, color: 'var(--ink)' }}>
+            Thông báo
+          </div>
           {items.length === 0 ? (
-            <div className="px-3 py-6 text-center text-xs text-muted">Chưa có thông báo nào.</div>
+            <div style={{ padding: '24px 12px', textAlign: 'center', fontSize: '12px', color: 'var(--mute)' }}>
+              Chưa có thông báo mới nào.
+            </div>
           ) : (
             items.map((n) => (
               <button
                 key={n.id}
                 type="button"
                 onClick={() => handleClickItem(n)}
-                className="w-full text-left px-3 py-2.5 border-b border-line last:border-0 hover:bg-surface2 transition min-w-0 overflow-hidden block"
+                style={{
+                  width: '100%',
+                  textAlign: 'left',
+                  padding: '10px 12px',
+                  borderRadius: '10px',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: '1px solid var(--line)',
+                  cursor: 'pointer',
+                  display: 'block',
+                }}
               >
                 {(n as any).title && (
-                  <p className="text-xs font-semibold text-ink line-clamp-3 break-words [overflow-wrap:anywhere] mb-1">
+                  <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ink)', marginBottom: '2px' }}>
                     {(n as any).title}
                   </p>
                 )}
-                <p className="text-xs text-ink leading-relaxed line-clamp-3 break-words [overflow-wrap:anywhere]">
+                <p style={{ fontSize: '12px', color: 'var(--ink)', lineHeight: 1.4, margin: 0 }}>
                   {n.message}
                 </p>
-                <p className="text-[10px] text-muted mt-1 truncate">{new Date(n.created_at).toLocaleString('vi-VN')}</p>
+                <small style={{ fontSize: '10px', color: 'var(--mute)', marginTop: '4px', display: 'block' }}>
+                  {new Date(n.created_at).toLocaleString('vi-VN')}
+                </small>
               </button>
             ))
           )}
